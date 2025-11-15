@@ -3,11 +3,10 @@ package com.resumeshortlist.resume_shortlist_backend.controller;
 import com.resumeshortlist.resume_shortlist_backend.dto.LoginRequest;
 import com.resumeshortlist.resume_shortlist_backend.dto.RegisterRequest;
 import com.resumeshortlist.resume_shortlist_backend.service.AuthService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -34,10 +33,7 @@ public class AuthController {
         }
     }
 }
+
 // Response DTO
 record AuthResponse(String token) {}
-@GetMapping("/hello")
-public String sayHello() {
-    return "Hello World from Spring Boot!";
-}
 
