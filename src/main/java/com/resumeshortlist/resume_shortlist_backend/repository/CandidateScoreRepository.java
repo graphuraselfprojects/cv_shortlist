@@ -18,4 +18,5 @@ public interface CandidateScoreRepository extends JpaRepository<CandidateScore, 
 
     @Query("SELECT cs FROM CandidateScore cs WHERE cs.jobPosting.id = :jobId AND cs.totalScore >= :minScore")
     List<CandidateScore> findShortlistedByJobIdAndMinScore(Long jobId, Float minScore);
+
 }
