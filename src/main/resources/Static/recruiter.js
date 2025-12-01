@@ -5,7 +5,7 @@ const fileList = document.getElementById('fileList');
 const clearFilesBtn = document.getElementById('clearFiles');
 const processFilesBtn = document.getElementById('processFiles');
 const resultsSection = document.getElementById('resultsSection');
-const resultsTableBody = document.getElementById('resultsTableBody');
+const candidateCardsContainer = document.getElementById('candidateCardsContainer');
 const exportCsvBtn = document.getElementById('exportCsv');
 const shortlistBtn = document.getElementById('shortlistCandidates');
 const logoutBtn = document.getElementById('logoutBtn');
@@ -13,7 +13,15 @@ const logoutBtn = document.getElementById('logoutBtn');
 // State
 let uploadedFiles = [];
 let processedCandidates = [];
-let selectedSkills = new Set();
+let selectedSkills = [];
+let allSkills = [];
+let currentJobRole = '';
+let candidates = [];
+let filteredCandidates = [];
+let currentPage = 1;
+const itemsPerPage = 8;
+let processingTimeout = null;
+let isProcessing = false;
 
 // Available skills for the skills selector
 const availableSkills = [
@@ -39,21 +47,76 @@ const jobPositions = [
 ];
 
 // Event Listeners
-document.addEventListener('DOMContentLoaded', () => {
-    // Set up event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize the application
+    init();
+});
+
+// Initialize the application
+function init() {
     setupEventListeners();
     
-    // Check for any previously uploaded files (in a real app, this would come from a backend)
-    const savedFiles = JSON.parse(localStorage.getItem('uploadedFiles')) || [];
-    if (savedFiles.length > 0) {
-        uploadedFiles = savedFiles;
+    // Initialize the results section
+    const resultsSection = document.getElementById('resultsSection');
+    if (resultsSection) {
+        resultsSection.style.display = 'none';
+    }
+    
+    // Load any previously uploaded files
+    const savedFiles = localStorage.getItem('uploadedFiles');
+    if (savedFiles) {
+        uploadedFiles = JSON.parse(savedFiles);
         updateFileList();
     }
-});
+    
+    // Initialize candidate data
+    initializeCandidateData();
+    
+    // Initialize skills functionality
+    initializeSkills();
+    
+    // Add event listeners for filters
+    const searchInput = document.getElementById('candidateSearch');
+    const matchScoreFilter = document.getElementById('matchScoreFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    
+    if (searchInput) {
+        searchInput.addEventListener('input', filterCandidates);
+    }
+    
+    if (matchScoreFilter) {
+        matchScoreFilter.addEventListener('change', filterCandidates);
+    }
+    
+    if (statusFilter) {
+        statusFilter.addEventListener('change', filterCandidates);
+    }
+    
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                updatePagination();
+            }
+        });
+    }
+    
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => {
+            const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
+            if (currentPage < totalPages) {
+                currentPage++;
+                updatePagination();
+            }
+        });
+    }
+}
 
 // Set up event listeners
 function setupEventListeners() {
-    // Drag and drop events
+    // File upload
     if (dropZone) {
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             dropZone.addEventListener(eventName, preventDefaults, false);
@@ -68,6 +131,7 @@ function setupEventListeners() {
         });
 
         dropZone.addEventListener('drop', handleDrop, false);
+        dropZone.addEventListener('click', () => fileInput.click());
     }
     
     // File input change
@@ -75,211 +139,213 @@ function setupEventListeners() {
         fileInput.addEventListener('change', handleFileSelect, false);
     }
     
+    // Process files button
+    if (processFilesBtn) {
+        processFilesBtn.addEventListener('click', processFiles);
+    }
+    
+    // Export to CSV button
+    if (exportCsvBtn) {
+        exportCsvBtn.addEventListener('click', exportToCsv);
+    }
+    
+    // Shortlist button
+    if (shortlistBtn) {
+        shortlistBtn.addEventListener('click', shortlistCandidates);
+    }
+    
+    // Logout button
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', handleLogout);
+    }
+    
     // Button clicks
     if (clearFilesBtn) clearFilesBtn.addEventListener('click', clearFiles);
-    if (processFilesBtn) processFilesBtn.addEventListener('click', processFiles);
     if (exportCsvBtn) exportCsvBtn.addEventListener('click', exportToCsv);
     if (shortlistBtn) shortlistBtn.addEventListener('click', shortlistCandidates);
     if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
-    
-    // Initialize job role and skills components
-    initJobRoleSelector();
-    initSkillsManager();
 }
 
-// Initialize job role selector
-function initJobRoleSelector() {
-    const jobRoleSelect = document.getElementById('jobRole');
+// Initialize candidate data (mock data for now, replace with actual data from backend)
+function initializeCandidateData() {
+    // This would typically come from your backend
+    candidates = [
+        { name: 'John Doe', matchScore: 92, role: 'Senior Frontend Developer', experience: '5 years', location: 'New York', skills: ['React', 'TypeScript', 'Node.js', 'Redux'] },
+        { name: 'Jane Smith', matchScore: 85, role: 'UX/UI Designer', experience: '4 years', location: 'San Francisco', skills: ['Figma', 'Sketch', 'Adobe XD', 'User Research'] },
+        { name: 'Michael Johnson', matchScore: 78, role: 'Backend Developer', experience: '6 years', location: 'Chicago', skills: ['Python', 'Django', 'PostgreSQL', 'AWS'] },
+        { name: 'Emily Davis', matchScore: 65, role: 'Full Stack Developer', experience: '3 years', location: 'Austin', skills: ['JavaScript', 'React', 'Node.js', 'MongoDB'] },
+        { name: 'Robert Wilson', matchScore: 58, role: 'DevOps Engineer', experience: '5 years', location: 'Seattle', skills: ['Docker', 'Kubernetes', 'AWS', 'CI/CD'] },
+        { name: 'Sarah Brown', matchScore: 45, role: 'Product Manager', experience: '7 years', location: 'Boston', skills: ['Agile', 'Scrum', 'Product Strategy', 'JIRA'] },
+        { name: 'David Lee', matchScore: 82, role: 'Data Scientist', experience: '4 years', location: 'Remote', skills: ['Python', 'Machine Learning', 'Pandas', 'TensorFlow'] },
+        { name: 'Amanda Clark', matchScore: 91, role: 'Frontend Engineer', experience: '3 years', location: 'Denver', skills: ['React', 'Vue.js', 'JavaScript', 'CSS3'] },
+        { name: 'James Rodriguez', matchScore: 72, role: 'Backend Developer', experience: '5 years', location: 'Miami', skills: ['Java', 'Spring Boot', 'Microservices', 'Docker'] },
+        { name: 'Jennifer Kim', matchScore: 88, role: 'UX Designer', experience: '4 years', location: 'Portland', skills: ['UI/UX', 'Prototyping', 'User Research', 'Figma'] },
+        { name: 'Thomas Anderson', matchScore: 53, role: 'Full Stack Developer', experience: '2 years', location: 'Remote', skills: ['JavaScript', 'React', 'Node.js', 'MongoDB'] },
+        { name: 'Lisa Wong', matchScore: 79, role: 'Product Designer', experience: '5 years', location: 'Los Angeles', skills: ['UI/UX', 'User Research', 'Figma', 'Sketch'] }
+    ];
     
-    // Set up job role change event
-    jobRoleSelect.addEventListener('change', function() {
-        const selectedRole = this.value;
-        // Here you can add logic to update skills based on job role if needed
-        console.log('Selected job role:', selectedRole);
-        
-        // Example: Auto-populate skills based on job role
-        // This is just an example - you can customize the skills for each role
-        if (selectedRole === 'frontend') {
-            const frontendSkills = ['JavaScript', 'React', 'HTML', 'CSS', 'Responsive Design'];
-            updateSelectedSkills(new Set(frontendSkills));
-        } else if (selectedRole === 'backend') {
-            const backendSkills = ['Node.js', 'Python', 'Java', 'SQL', 'REST API'];
-            updateSelectedSkills(new Set(backendSkills));
-        } else if (selectedRole === 'fullstack') {
-            const fullstackSkills = ['JavaScript', 'Node.js', 'React', 'Express', 'MongoDB'];
-            updateSelectedSkills(new Set(fullstackSkills));
-        } else if (selectedRole === 'data_scientist') {
-            const dataScienceSkills = ['Python', 'Machine Learning', 'Data Analysis', 'SQL', 'TensorFlow'];
-            updateSelectedSkills(new Set(dataScienceSkills));
-        }
-    });
+    filteredCandidates = [...candidates];
+    updatePagination();
 }
 
-// Initialize skills manager
-function initSkillsManager() {
-    const addSkillBtn = document.getElementById('addSkillBtn');
-    const skillsDropdown = document.getElementById('skillsDropdown');
-    const skillsList = document.getElementById('skillsList');
-    const skillSearch = document.getElementById('skillSearch');
-    const selectedSkillsContainer = document.getElementById('selectedSkills');
-    const skillCounter = document.getElementById('skillCounter');
-    
-    // Populate skills list
-    function populateSkillsList(filter = '') {
-        skillsList.innerHTML = '';
-        const filteredSkills = availableSkills.filter(skill => 
-            skill.toLowerCase().includes(filter.toLowerCase())
-        );
+// Function to generate a random color based on name
+function getInitialsColor(name) {
+    const colors = [
+        '#4e73df', '#1cc88a', '#36b9cc', '#f6c23e', 
+        '#e74a3b', '#6f42c1', '#fd7e14', '#20c9a6'
+    ];
+    const index = name.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return colors[index % colors.length];
+}
+
+// Function to get initials from name
+function getInitials(name) {
+    return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+}
+
+// Function to determine status category based on score
+function getStatusCategory(score) {
+    if (score >= 80) return 'shortlisted';
+    if (score >= 50) return 'consider';
+    return 'rejected';
+}
+
+// Function to format match score
+function formatMatchScore(score) {
+    return Math.round(score);
+}
+
+// Function to render candidate cards
+function renderCandidateCards(candidatesToRender) {
+    const container = document.getElementById('candidateCardsContainer');
+    if (!container) return;
+
+    if (candidatesToRender.length === 0) {
+        container.innerHTML = `
+            <div class="no-results">
+                <i class="fas fa-search fa-3x mb-3"></i>
+                <h3>No candidates found</h3>
+                <p>Try adjusting your search or filters</p>
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = candidatesToRender.map(candidate => {
+        const initials = getInitials(candidate.name);
+        const statusCategory = getStatusCategory(candidate.matchScore);
+        const formattedScore = formatMatchScore(candidate.matchScore);
         
-        filteredSkills.forEach(skill => {
-            const skillItem = document.createElement('div');
-            skillItem.className = `skill-item ${selectedSkills.has(skill) ? 'selected' : ''}`;
-            skillItem.innerHTML = `
-                <i class="fas fa-check check-icon"></i>
-                <span>${skill}</span>
-            `;
+        return `
+            <div class="candidate-card">
+                <div class="candidate-card-header">
+                    <div class="candidate-info">
+                        <div class="candidate-avatar" style="background-color: ${getInitialsColor(candidate.name)}20; color: ${getInitialsColor(candidate.name)};">
+                            ${initials}
+                        </div>
+                        <div>
+                            <div class="candidate-name">${candidate.name}</div>
+                            <div class="candidate-role">${candidate.role || 'Software Engineer'}</div>
+                        </div>
+                    </div>
+                    <div class="match-badge">
+                        ${formattedScore}%
+                        <span>Match</span>
+                    </div>
+                </div>
+                
+                <div class="candidate-meta">
+                    <div><strong>Experience:</strong> ${candidate.experience || 'N/A'}</div>
+                    <div><strong>Location:</strong> ${candidate.location || 'Remote'}</div>
+                    <div><strong>Skills:</strong> ${candidate.skills?.slice(0, 3).join(', ') || 'N/A'}</div>
+                </div>
+                
+                <div class="candidate-card-footer">
+                    <span class="status-pill status-${statusCategory}">
+                        ${statusCategory.charAt(0).toUpperCase() + statusCategory.slice(1)}
+                    </span>
+                    <div class="card-actions">
+                        <i class="far fa-eye" title="View Resume"></i>
+                        <i class="far fa-download" title="Download"></i>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Function to filter candidates based on search and filters
+function filterCandidates() {
+    const searchTerm = document.getElementById('candidateSearch').value.toLowerCase();
+    const matchScoreFilter = document.getElementById('matchScoreFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+
+    filteredCandidates = candidates.filter(candidate => {
+        // Search filter
+        const matchesSearch = !searchTerm || 
+            candidate.name.toLowerCase().includes(searchTerm) ||
+            (candidate.role && candidate.role.toLowerCase().includes(searchTerm)) ||
+            (candidate.skills && candidate.skills.some(skill => 
+                skill.toLowerCase().includes(searchTerm)
+            ));
+
+        // Match score filter
+        let matchesScore = true;
+        if (matchScoreFilter !== 'all') {
+            const [min, max] = matchScoreFilter === 'below-60' 
+                ? [0, 60] 
+                : matchScoreFilter.split('-').map(Number);
             
-            skillItem.addEventListener('click', () => {
-                toggleSkill(skill);
-                renderSelectedSkills();
-                renderSkillsList();
-                closeSkillsDropdown();
-            });
-            
-            skillsList.appendChild(skillItem);
-        });
-    }
-    
-    // Toggle skill selection
-    function toggleSkill(skill) {
-        if (selectedSkills.has(skill)) {
-            selectedSkills.delete(skill);
-        } else if (selectedSkills.size < 10) {
-            selectedSkills.add(skill);
+            const score = formatMatchScore(candidate.matchScore);
+            matchesScore = score >= min && score <= (max || 100);
         }
-        updateSkillCounter();
-    }
-    
-    // Update skill counter
-    function updateSkillCounter() {
-        skillCounter.textContent = selectedSkills.size;
-        if (selectedSkills.size >= 10) {
-            skillCounter.parentElement.classList.add('limit-reached');
-        } else {
-            skillCounter.parentElement.classList.remove('limit-reached');
-        }
-    }
-    
-    // Render selected skills as tags
-    function renderSelectedSkills() {
-        selectedSkillsContainer.innerHTML = '';
-        selectedSkills.forEach(skill => {
-            const tag = document.createElement('div');
-            tag.className = 'skill-tag';
-            tag.innerHTML = `
-                ${skill}
-                <span class="remove-skill" data-skill="${skill}">&times;</span>
-            `;
-            selectedSkillsContainer.appendChild(tag);
-        });
-        
-        // Add event listeners to remove buttons
-        document.querySelectorAll('.remove-skill').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const skill = btn.getAttribute('data-skill');
-                selectedSkills.delete(skill);
-                renderSelectedSkills();
-                renderSkillsList();
-                updateSkillCounter();
-            });
-        });
-    }
-    
-    // Render skills list with current search filter
-    function renderSkillsList() {
-        const filter = skillSearch.value;
-        populateSkillsList(filter);
-    }
-    
-    // Toggle skills dropdown
-    function toggleSkillsDropdown() {
-        const willShow = !skillsDropdown.classList.contains('show');
-        skillsDropdown.classList.toggle('show');
-        skillsDropdown.style.display = willShow ? 'block' : 'none';
-        if (willShow) {
-            if (skillSearch) skillSearch.focus();
-            renderSkillsList();
-        }
-    }
 
-    // Helper: close dropdown
-    function closeSkillsDropdown(clearSearch = true) {
-        skillsDropdown.classList.remove('show');
-        skillsDropdown.style.display = 'none';
-        if (clearSearch) {
-            skillSearch.value = '';
+        // Status filter
+        let matchesStatus = true;
+        if (statusFilter !== 'all') {
+            const statusCategory = getStatusCategory(candidate.matchScore);
+            matchesStatus = statusCategory === statusFilter;
         }
-    }
-    
-    // Close dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.skills-input-container')) {
-            closeSkillsDropdown();
-        }
+
+        return matchesSearch && matchesScore && matchesStatus;
     });
-    
-    // Event listeners
-    addSkillBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        toggleSkillsDropdown();
-    });
-    
-    selectedSkillsContainer.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (!skillsDropdown.classList.contains('show')) {
-            toggleSkillsDropdown();
-        }
-    });
-    
-    skillSearch.addEventListener('input', () => {
-        renderSkillsList();
-    });
-    
-    skillSearch.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            const query = skillSearch.value.trim().toLowerCase();
-            const exact = availableSkills.find(s => s.toLowerCase() === query);
-            const filtered = availableSkills.filter(s => s.toLowerCase().includes(query));
-            const toAdd = exact || filtered[0];
-            if (toAdd) {
-                if (!selectedSkills.has(toAdd) && selectedSkills.size < 10) {
-                    selectedSkills.add(toAdd);
-                    updateSkillCounter();
-                }
-                renderSelectedSkills();
-                renderSkillsList();
-                closeSkillsDropdown();
-            }
-        }
-    });
-    
-    // Initialize
-    updateSkillCounter();
-    renderSelectedSkills();
+
+    // Reset to first page when filters change
+    currentPage = 1;
+    updatePagination();
+    renderPagination();
 }
 
-// Update selected skills
-function updateSelectedSkills(skills) {
-    selectedSkills = new Set([...skills]);
+// Function to update pagination
+function updatePagination() {
+    const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
+    const startIdx = (currentPage - 1) * itemsPerPage;
+    const endIdx = startIdx + itemsPerPage;
+    const paginatedCandidates = filteredCandidates.slice(startIdx, endIdx);
     
-    // Update UI
-    const selectedSkillsContainer = document.getElementById('selectedSkills');
-    if (selectedSkillsContainer) {
-        renderSelectedSkills();
-        updateSkillCounter();
-    }
+    renderCandidateCards(paginatedCandidates);
+    
+    // Update pagination buttons
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+}
+
+// Function to render pagination
+function renderPagination() {
+    const totalPages = Math.ceil(filteredCandidates.length / itemsPerPage);
+    const paginationBar = document.querySelector('.pagination-bar');
+    
+    if (!paginationBar) return;
+    
+    // Previous button is already in HTML, just update its disabled state
+    const prevBtn = document.getElementById('prevPage');
+    const nextBtn = document.getElementById('nextPage');
+    
+    if (prevBtn) prevBtn.disabled = currentPage === 1;
+    if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
 }
 
 // Prevent default drag and drop behavior
@@ -392,12 +458,31 @@ function removeFile(index) {
     saveFiles();
 }
 
-// Clear all files
+// Clear all files and stop any ongoing processing
 function clearFiles() {
-    if (confirm('Are you sure you want to remove all files?')) {
+    if (confirm('Are you sure you want to remove all files? This will stop any ongoing processing.')) {
+        // Clear any ongoing processing
+        if (isProcessing && processingTimeout) {
+            clearTimeout(processingTimeout);
+            isProcessing = false;
+            
+            // Reset process button state
+            if (processFilesBtn) {
+                processFilesBtn.disabled = false;
+                processFilesBtn.textContent = 'Process Resumes';
+            }
+        }
+        
+        // Clear files and update UI
         uploadedFiles = [];
+        processedCandidates = [];
         updateFileList();
         saveFiles();
+        
+        // Hide results section if visible
+        if (resultsSection) {
+            resultsSection.style.display = 'none';
+        }
     }
 }
 
@@ -416,28 +501,56 @@ function processFiles() {
     }
     
     // Show loading state
+    isProcessing = true;
     processFilesBtn.disabled = true;
-    processFilesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+    processFilesBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Resumes...';
     
     // Simulate API call with timeout (in a real app, this would be an actual API call)
-    setTimeout(() => {
+    processingTimeout = setTimeout(() => {
+        if (!isProcessing) return; // Don't proceed if processing was cancelled
+        
+        // Common job positions for variety
+        const jobPositions = [
+            'Frontend Developer', 
+            'Backend Developer', 
+            'Full Stack Developer',
+            'DevOps Engineer',
+            'UI/UX Designer',
+            'Data Scientist',
+            'Machine Learning Engineer',
+            'Mobile App Developer',
+            'QA Engineer',
+            'Product Manager'
+        ];
+        
         // Generate mock processed data
         processedCandidates = uploadedFiles.map((file, index) => {
-            const name = file.name.split('.')[0].replace(/[_-]/g, ' ');
-            const email = `${name.toLowerCase().replace(/\s+/g, '.')}@example.com`;
-            const job = jobPositions[Math.floor(Math.random() * jobPositions.length)];
-            const score = Math.floor(60 + Math.random() * 40); // Random score between 60-100
-            const status = score >= 70 ? 'Eligible' : 'Not Eligible';
+            // Generate a random score between 40 and 100 for variety
+            const score = Math.floor(40 + Math.random() * 61);
+            
+            // Determine status based on score
+            let status;
+            if (score >= 80) status = 'Eligible';
+            else if (score >= 60) status = 'Consider';
+            else status = 'Not Eligible';
+            
+            // Generate a more realistic name and email
+            const nameParts = file.name.split('.').shift().split(/[-_\s]+/);
+            const formattedName = nameParts.map(part => 
+                part.charAt(0).toUpperCase() + part.slice(1).toLowerCase()
+            ).join(' ');
+            
+            const firstName = nameParts[0].toLowerCase();
+            const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1].toLowerCase() : 'user';
+            const email = `${firstName}.${lastName}@example.com`;
             
             return {
                 id: `candidate-${Date.now()}-${index}`,
-                name: name.charAt(0).toUpperCase() + name.slice(1),
-                email,
-                position: job.name,
-                positionId: job.id,
-                skills: job.skills.slice(0, 2 + Math.floor(Math.random() * 2)).join(', '),
-                score,
-                status,
+                name: formattedName,
+                email: email,
+                position: jobPositions[Math.floor(Math.random() * jobPositions.length)],
+                score: score,
+                status: status,
                 file: file
             };
         });
@@ -455,43 +568,66 @@ function processFiles() {
         resultsSection.scrollIntoView({ behavior: 'smooth' });
         
         // Reset button state
+        isProcessing = false;
         processFilesBtn.disabled = false;
         processFilesBtn.textContent = 'Process Resumes';
     }, 2000);
 }
 
-// Update the results table
+// Update the results table with candidate data
 function updateResultsTable() {
+    const resultsTableBody = document.getElementById('resultsTableBody');
     resultsTableBody.innerHTML = '';
     
     if (processedCandidates.length === 0) {
         const row = document.createElement('tr');
-        row.innerHTML = '<td colspan="7" style="text-align: center;">No candidates to display.</td>';
+        row.innerHTML = '<td colspan="7" style="text-align: center; padding: 30px; color: #6b7280;">No candidates to display. Please upload and process some resumes.</td>';
         resultsTableBody.appendChild(row);
         return;
     }
     
     processedCandidates.forEach((candidate, index) => {
         const row = document.createElement('tr');
-        row.setAttribute('data-status', candidate.status.toLowerCase().replace(' ', '-'));
-        row.setAttribute('data-position', candidate.positionId);
+        const statusClass = candidate.status.toLowerCase().replace(' ', '-');
         
         row.innerHTML = `
-            <td>${index + 1}</td>
-            <td>${candidate.name}</td>
-            <td>${candidate.email}</td>
-            <td>${candidate.position}</td>
-            <td>${candidate.score}%</td>
+            <td style="font-weight: 500; color: #4b5563;">${index + 1}</td>
             <td>
-                <span class="status-badge status-${candidate.status.toLowerCase().replace(' ', '-')}">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0e7ff; color: #4a6cf7; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 14px;">
+                        ${candidate.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)}
+                    </div>
+                    <div>
+                        <div style="font-weight: 500; color: #111827;">${candidate.name}</div>
+                        <div style="font-size: 13px; color: #6b7280; margin-top: 2px;">${candidate.email}</div>
+                    </div>
+                </div>
+            </td>
+            <td style="color: #4b5563;">${candidate.email}</td>
+            <td style="color: #4b5563;">${candidate.position}</td>
+            <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <div style="flex: 1; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden;">
+                        <div style="width: ${candidate.score}%; height: 100%; background: #4a6cf7; border-radius: 3px;"></div>
+                    </div>
+                    <span style="font-weight: 600; color: #111827; min-width: 40px; text-align: right;">${candidate.score}%</span>
+                </div>
+            </td>
+            <td>
+                <span class="status-badge status-${statusClass}">
                     ${candidate.status}
                 </span>
             </td>
             <td>
-                <button class="btn btn-outline btn-sm view-resume" data-id="${candidate.id}">
-                    <i class="fas fa-eye"></i> View
-                </button>
-                <input type="checkbox" class="candidate-checkbox" data-id="${candidate.id}">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <button class="btn-view" data-id="${candidate.id}">
+                        <i class="fas fa-eye"></i> View
+                    </button>
+                    <div class="checkbox-container">
+                        <input type="checkbox" class="candidate-checkbox" id="select-${candidate.id}" data-id="${candidate.id}">
+                        <label for="select-${candidate.id}" style="cursor: pointer;"></label>
+                    </div>
+                </div>
             </td>
         `;
         
@@ -603,6 +739,140 @@ function handleLogout() {
         
         // Redirect to login page (in a real app)
         window.location.href = 'index.html';
+    }
+}
+
+// Initialize skills functionality
+function initializeSkills() {
+    const addSkillBtn = document.getElementById('addSkillBtn');
+    const skillsDropdown = document.getElementById('skillsDropdown');
+    const skillSearch = document.getElementById('skillSearch');
+    const skillsList = document.getElementById('skillsList');
+    const selectedSkillsContainer = document.getElementById('selectedSkills');
+    const skillCounter = document.getElementById('skillCounter');
+    const jobRoleSelect = document.getElementById('jobRole');
+
+    // Toggle skills dropdown
+    if (addSkillBtn) {
+        addSkillBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Toggle dropdown visibility
+            const isShowing = skillsDropdown.classList.toggle('show');
+            
+            // If dropdown is now visible, focus the search input
+            if (isShowing && skillSearch) {
+                // Small timeout to ensure the dropdown is visible before focusing
+                setTimeout(() => {
+                    skillSearch.focus();
+                    // Clear any previous search
+                    skillSearch.value = '';
+                    renderSkillsList();
+                }, 10);
+            }
+        });
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.skills-container')) {
+            skillsDropdown.classList.remove('show');
+        }
+    });
+
+    // Filter skills based on search input
+    if (skillSearch) {
+        skillSearch.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredSkills = availableSkills.filter(skill => 
+                skill.toLowerCase().includes(searchTerm)
+            );
+            renderSkillsList(filteredSkills);
+        });
+    }
+
+    // Render skills list
+    function renderSkillsList(skills = availableSkills) {
+        if (!skillsList) return;
+        
+        skillsList.innerHTML = skills.map(skill => {
+            const isSelected = selectedSkills.includes(skill);
+            return `
+                <div class="skill-item ${isSelected ? 'selected' : ''}" data-skill="${skill}">
+                    ${skill}
+                    ${isSelected ? '<i class="fas fa-check"></i>' : ''}
+                </div>
+            `;
+        }).join('');
+
+        // Add event listeners to skill items
+        document.querySelectorAll('.skill-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const skill = item.getAttribute('data-skill');
+                toggleSkill(skill);
+            });
+        });
+    }
+
+    // Toggle skill selection
+    function toggleSkill(skill) {
+        const index = selectedSkills.indexOf(skill);
+        if (index === -1) {
+            if (selectedSkills.length < 10) {
+                selectedSkills.push(skill);
+            }
+        } else {
+            selectedSkills.splice(index, 1);
+        }
+        updateSelectedSkills();
+        renderSkillsList();
+    }
+
+    // Update selected skills display
+    function updateSelectedSkills() {
+        if (!selectedSkillsContainer) return;
+        
+        selectedSkillsContainer.innerHTML = selectedSkills.map(skill => `
+            <div class="skill-tag">
+                ${skill}
+                <span class="remove-skill" data-skill="${skill}">&times;</span>
+            </div>
+        `).join('');
+
+        // Update skill counter
+        if (skillCounter) {
+            skillCounter.textContent = selectedSkills.length;
+        }
+
+        // Add event listeners to remove buttons
+        document.querySelectorAll('.remove-skill').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const skill = btn.getAttribute('data-skill');
+                const index = selectedSkills.indexOf(skill);
+                if (index !== -1) {
+                    selectedSkills.splice(index, 1);
+                    updateSelectedSkills();
+                    renderSkillsList();
+                }
+            });
+        });
+    }
+
+    // Initialize skills list
+    renderSkillsList();
+
+    // Handle job role change
+    if (jobRoleSelect) {
+        jobRoleSelect.addEventListener('change', (e) => {
+            const selectedRole = jobPositions.find(role => role.id === e.target.value);
+            if (selectedRole) {
+                selectedSkills = [...new Set([...selectedSkills, ...selectedRole.skills])].slice(0, 10);
+                updateSelectedSkills();
+                renderSkillsList();
+            }
+        });
     }
 }
 

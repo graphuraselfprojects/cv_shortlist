@@ -24,8 +24,8 @@ html {
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     line-height: 1.6;
-    color: #333;
-    background: #f8f9fa;
+    color: #ffffff;
+    background: #0f0f1a;
     overflow-x: hidden;
 }
 
@@ -71,7 +71,7 @@ ul {
     text-align: center;
     margin-bottom: 50px;
     font-size: 2.5rem;
-    color: var(--dark-color);
+    color: #ffffff;
     position: relative;
     padding-bottom: 15px;
 }
@@ -94,7 +94,7 @@ ul {
     top: 0;
     left: 0;
     width: 100%;
-    background: white;
+    background: rgb(85, 76, 76);
     box-shadow: 2px 11px 10px 4px rgba(0, 0, 0, 0.1);
     z-index: 1000;
     padding: 8px 0;
@@ -135,7 +135,7 @@ ul {
 }
 
 .nav-links a {
-    color: var(--dark-color);
+    color: #ffffff;
     font-weight: 500;
     position: relative;
 }
@@ -147,7 +147,7 @@ ul {
     left: 0;
     width: 0;
     height: 2px;
-    background: var(--primary-color);
+    background: #ffffff;
     transition: var(--transition);
 }
 
@@ -165,14 +165,15 @@ ul {
     min-height: 100vh;
     display: flex;
     align-items: center;
-    background: linear-gradient(90deg, #e3f2fd 0%, #fce4ec 100%);
+    background: #0f0f1a;
+    /* linear-gradient(rgba(0, 245, 255, 0.15)); */
     color: white;
     text-align: center;
     padding: 100px 0 50px;
 }
 
 .hero-content {
-    color: #000000; /* Black text color */
+    color: #ffffff; /* Black text color */
 }
 
 .hero .container {
@@ -246,7 +247,7 @@ ul {
 
 /* Features Section */
 .features {
-    background: white;
+    background: #0f0f1a;
 }
 
 .features-grid {
@@ -263,6 +264,7 @@ ul {
     box-shadow: var(--box-shadow);
     text-align: center;
     transition: var(--transition);
+    color: #000000;
 }
 
 .feature-card:hover {
@@ -277,7 +279,7 @@ ul {
 
 /* Contact Section */
 .contact {
-    background: #f8f9fa;
+    background: #0f0f1a;
     position: relative;
     overflow: hidden;
     padding: 80px 0;
@@ -448,12 +450,12 @@ ul {
     color: white;
 }
 
-.contact-details h3 {
+/* .contact-details h3 {
     font-size: 18px;
     margin-bottom: 8px;
     font-weight: 600;
     color: white;
-}
+} */
 
 .contact-details p {
     margin: 5px 0;
@@ -742,7 +744,7 @@ ul {
     padding-bottom: 10px;
 }
 
-.footer-column h3::after {
+/* .footer-column h3::after {
     content: '';
     position: absolute;
     bottom: 0;
@@ -750,7 +752,7 @@ ul {
     width: 50px;
     height: 2px;
     background: var(--primary-color);
-}
+} */
 
 .footer-links li {
     margin-bottom: 10px;
@@ -864,7 +866,7 @@ ul {
 /* About Section */
 .about {
     padding: 80px 0;
-    background-color: #f9f9f9;
+    background-color: #0f0f1a;
 }
 
 .section-header {
@@ -874,13 +876,13 @@ ul {
 
 .section-header h2 {
     font-size: 36px;
-    color: #1e1e1e;
+    color: #ffffff;
     margin-bottom: 15px;
     font-weight: 700;
 }
 
 .section-header p {
-    color: #666;
+    color: #d6cdcd;
     font-size: 18px;
     max-width: 700px;
     margin: 0 auto;
@@ -900,7 +902,7 @@ ul {
     padding: 40px 30px;
     text-align: center;
     transition: all 0.3s ease;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 10px 30px rgba(255, 254, 254, 0.05);
     position: relative;
     overflow: hidden;
     z-index: 1;
@@ -1007,7 +1009,7 @@ ul {
 /* //--------------------------------------// */
 /* Job Role and Skills Section */
 .job-role-section {
-    background: white;
+    background: #493f3f;
     padding: 25px;
     border-radius: 10px;
     box-shadow: var(--box-shadow);
@@ -1022,7 +1024,7 @@ ul {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
-    color: var(--dark-color);
+    color: #ffffff;
 }
 
 /* Custom Select Styling */
@@ -1060,6 +1062,137 @@ ul {
     color: #666;
 }
 
+/* Add Skill Button */
+.add-skill-btn {
+    background: transparent;
+    border: 1px dashed #adb5bd;
+    color: #6c757d;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.2s ease;
+}
+
+.add-skill-btn:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+    background: rgba(74, 108, 247, 0.05);
+}
+
+/* Skills Dropdown */
+.skills-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    margin-top: 5px;
+    z-index: 1000;
+    display: none;
+    max-height: 300px;
+    overflow-y: auto;
+    color: black;
+}
+
+.skills-dropdown.show {
+    display: block;
+}
+
+/* Search Container */
+.search-container {
+    position: relative;
+    padding: 10px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.search-input {
+    width: 100%;
+    padding: 8px 15px 8px 35px;
+    border: 1px solid #dee2e6;
+    border-radius: 20px;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.search-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.1);
+    outline: none;
+}
+
+.search-icon {
+    position: absolute;
+    left: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #adb5bd;
+    font-size: 14px;
+}
+
+/* Skills List */
+.skills-list {
+    padding: 5px 0;
+}
+
+.skill-item {
+    padding: 8px 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: all 0.2s ease;
+}
+
+.skill-item:hover {
+    background-color: #f8f9fa;
+}
+
+.skill-item.selected {
+    background-color: #f0f4ff;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+.skill-item .fa-check {
+    color: var(--primary-color);
+    font-size: 12px;
+}
+
+/* Remove Skill Button */
+.remove-skill {
+    margin-left: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    padding: 0 2px;
+    color: #6c757d;
+    transition: color 0.2s ease;
+}
+
+.remove-skill:hover {
+    color: #dc3545;
+}
+
+/* Skill Counter */
+.skill-count {
+    font-size: 12px;
+    color: #6c757d;
+    text-align: right;
+    margin-top: 5px;
+}
+
+.skill-count span {
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
 /* Skills Container */
 .skills-container {
     border: 1px solid #ddd;
@@ -1085,6 +1218,7 @@ ul {
     gap: 8px;
     margin-bottom: 10px;
     min-height: 20px;
+    padding: 5px 0;
 }
 
 .skill-tag {
@@ -1096,6 +1230,9 @@ ul {
     border-radius: 20px;
     font-size: 13px;
     font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    border: 1px solid #dee2e6;
     transition: var(--transition);
 }
 
@@ -1234,3 +1371,444 @@ ul {
     color: #dc3545;
 }
 
+/* ================= Recruiter Results – Cards Dashboard ================ */
+
+.results-section {
+    margin-top: 25px;
+    background: transparent;
+}
+
+.results-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.results-title {
+    font-size: 1.6rem;
+    font-weight: 600;
+    color: #1e1e1e;
+}
+
+.results-subtitle {
+    font-size: 0.95rem;
+    color: #6c757d;
+}
+
+/* Filters row (search + dropdowns) */
+.results-filters {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: #ffffff;
+    padding: 15px 50px;
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+    margin: 20px 0; 
+    margin-left: 180px;
+    margin-right: 180px;
+}
+ 
+.results-filters .search-box {
+    flex: 1;
+    min-width: 200px;
+    max-width: 400px;
+    position: relative;
+}
+
+.results-filters .search-input {
+    width: 100%;
+    padding: 10px 12px 10px 35px;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    transition: var(--transition);
+}
+
+.results-filters .search-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(74, 108, 247, 0.12);
+    background: #ffffff;
+}
+
+.results-filters .search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8a8f9c;
+    font-size: 14px;
+}
+
+.filters-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-shrink: 0;
+}
+
+.filter-select {
+    min-width: 160px;
+}
+
+.filter-select label {
+    display: block;
+    font-size: 12px;
+    margin-bottom: 4px;
+    font-weight: 500;
+    color: #666;
+}
+
+.filter-select select {
+    font-size: 14px;
+}
+
+/* Cards grid */
+.candidate-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 18px;
+    margin-left: 180px;
+    margin-right: 180px;
+}
+
+/* Candidate card */
+.candidate-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 18px 14px;
+    box-shadow: var(--box-shadow);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.candidate-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.candidate-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.candidate-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.candidate-name {
+    font-weight: 600;
+    font-size: 15px;
+    color: #212529;
+}
+
+.candidate-role {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.match-badge {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: #e9f7ef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    font-size: 13px;
+    color: #28a745;
+    font-weight: 600;
+}
+
+.match-badge span {
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Body info */
+.candidate-meta {
+    font-size: 13px;
+    color: #6c757d;
+}
+
+.candidate-meta strong {
+    color: #343a40;
+}
+
+/* Footer actions / status */
+.candidate-card-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 6px;
+}
+
+.status-pill {
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-shortlisted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-consider {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.card-actions {
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+    color: #adb5bd;
+}
+
+/* Results Table Styles */
+.results-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.results-table thead th {
+    background-color: #4a6cf7;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 16px 20px;
+    text-align: left;
+    border: none;
+}
+
+.results-table thead th:first-child {
+    border-top-left-radius: 12px;
+}
+
+.results-table thead th:last-child {
+    border-top-right-radius: 12px;
+}
+
+.results-table tbody tr {
+    background-color: white;
+    transition: all 0.2s ease;
+    border-radius: 8px;
+}
+
+.results-table tbody tr:not(:last-child) {
+    margin-bottom: 10px;
+}
+
+.results-table tbody td {
+    padding: 20px;
+    color: #4a5568;
+    font-size: 14px;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: middle;
+}
+
+.results-table tbody tr:first-child td:first-child {
+    border-top-left-radius: 8px;
+}
+
+.results-table tbody tr:first-child td:last-child {
+    border-top-right-radius: 8px;
+}
+
+.results-table tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 8px;
+}
+
+.results-table tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 8px;
+}
+
+.results-table tbody tr:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 100px;
+    text-align: center;
+    text-transform: capitalize;
+}
+
+.status-eligible {
+    background-color: #e6f7ee;
+    color: #10b981;
+}
+
+.status-not-eligible {
+    background-color: #fee2e2;
+    color: #ef4444;
+}
+
+.status-consider {
+    background-color: #fef3c7;
+    color: #f59e0b;
+}
+
+/* View Button */
+.btn-view {
+    background: transparent;
+    border: 1.5px solid #4a6cf7;
+    color: #4a6cf7;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+}
+
+.btn-view:hover {
+    background-color: rgba(74, 108, 247, 0.1);
+    transform: translateY(-1px);
+}
+
+.btn-view i {
+    font-size: 12px;
+}
+
+/* Checkbox */
+.checkbox-container {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 15px;
+}
+
+.checkbox-container input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #cbd5e0;
+    border-radius: 4px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.checkbox-container input[type="checkbox"]:checked {
+    background-color: #4a6cf7;
+    border-color: #4a6cf7;
+}
+
+/* Responsive Table */
+@media (max-width: 1024px) {
+    .table-responsive {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .results-table {
+        min-width: 900px;
+    }
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+/* Score Display */
+.score-display {
+    font-weight: 600;
+    color: #2d3748;
+}
+
+/* Pagination */
+.pagination-bar {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 18px;
+}
+
+.pagination-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Responsive layout */
+@media (max-width: 1024px) {
+    .candidate-cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 768px) {
+    .results-filters {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .results-filters .search-box {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    
+    .filters-right {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .filter-select {
+        width: 48%;
+    }
+
+    .candidate-cards-grid {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+    }
+
+    .pagination-bar {
+        justify-content: space-between;
+    }
+}

@@ -10,7 +10,7 @@
     <style>
         /* Recruiter Specific Styles */
         .upload-section {
-            background: white;
+            background: #493f3f;
             padding: 30px;
             border-radius: 10px;
             box-shadow: var(--box-shadow);
@@ -47,7 +47,7 @@
             justify-content: space-between;
             align-items: center;
             padding: 10px 15px;
-            background: #f8f9fa;
+            background: #000000;
             border-radius: 5px;
             margin-bottom: 10px;
         }
@@ -132,21 +132,20 @@
     </style>
 </head>
 <body>
-    <!-- Navbar -->
+    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="container">
-            <a href="index.html" class="logo">
+            <a href="#" class="logo">
                 <img src="image/graphuralogo.png" alt="Graphura Logo" class="logo-img">
             </a>
             
             <!-- Desktop Navigation -->
             <ul class="nav-links">
-                <li><a href="index.html#home" class="nav-link">Home</a></li>
-                <li><a href="index.html#about" class="nav-link">About Us</a></li>
-                <li><a href="index.html#features" class="nav-link">Features</a></li>
-                <li><a href="index.html#contact" class="nav-link">Contact</a></li>
-                <li><a href="#" class="nav-link btn-login" onclick="openLogin(); return false;">Login/Sign up</a></li>
-                <li><a href="recruiter.html" class="nav-link btn-recruiter active">Recruiter</a></li>
+                <li><a href="index.html#home" class="nav-link text-decoration-none" style="text-decoration: none;">Home</a></li>
+                <li><a href="index.html#about" class="nav-link text-decoration-none" style="text-decoration: none;">About Us</a></li>
+                <li><a href="index.html#contact" class="nav-link text-decoration-none" style="text-decoration: none;">Contact</a></li>
+                <li><a href="#" class="nav-link btn-login text-decoration-none" style="text-decoration: none;" onclick="openLogin(); return false;">Login/Sign up</a></li>
+                <li><a href="#" class="nav-link btn-recruiter active text-decoration-none" style="text-decoration: none;">Recruiter</a></li>
             </ul>
 
             <!-- Mobile Menu Button -->
@@ -180,7 +179,7 @@
             
             <div class="action-buttons">
                 <button class="btn btn-outline" id="clearFiles">Clear All</button>
-                <button class="btn" id="processFiles">Process Resumes</button>
+                <button class="btn" id="processFiles">Analyze Resumes</button>
             </div>
         </section>
         
@@ -246,31 +245,38 @@
         </section>
 
         <!-- Results Section -->
-        <section class="results-section" id="resultsSection" style="display: none;">
-        
-            
-            <div class="table-responsive">
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Candidate Name</th>
-                            <th>Email</th>
-                            <th>Position</th>
-                            <th>Score</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="resultsTableBody">
-                        <!-- Results will be populated by JavaScript -->
-                    </tbody>
-                </table>
-            </div>
-            
-            <div class="action-buttons" style="margin-top: 30px;">
-                <button class="btn btn-outline" id="exportCsv">Export to CSV</button>
-                <button class="btn" id="shortlistCandidates">Shortlist Selected</button>
+        <section id="resultsSection" class="section" style="display: none;">
+            <div class="container">
+                <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                    <h2 style="color: #2c3e50; font-size: 24px; font-weight: 600;">Resume Analysis Results</h2>
+                    <div class="action-buttons" style="display: flex; gap: 10px;">
+                        <button id="exportCsvBtn" class="btn btn-outline" style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-file-export"></i> Export to CSV
+                        </button>
+                        <button id="shortlistBtn" class="btn" style="display: flex; align-items: center; gap: 8px;">
+                            <i class="fas fa-clipboard-check"></i> Shortlist Selected
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="table-responsive" style="background: #f8fafc; border-radius: 12px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                    <table class="results-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Candidate Name</th>
+                                <th>Email</th>
+                                <th>Position</th>
+                                <th>Score</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsTableBody">
+                            <!-- Results will be populated by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </section>
     </div>
