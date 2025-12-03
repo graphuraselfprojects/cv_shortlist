@@ -3,367 +3,147 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ResumeAI - AI-Powered Resume Shortlisting</title>
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Custom CSS -->
+    <title>ResumeGenius AI - Smart Hiring Companion</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="login.css">
-    <link rel="stylesheet" href="auth.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar">
-        <div class="container">
-            <a href="#" class="logo">
-                <img src="image/graphuralogo.png" alt="Graphura Logo" class="logo-img">
-            </a>
-            
-            <!-- Desktop Navigation -->
-            <ul class="nav-links">
-                <li><a href="#home" class="nav-link active text-decoration-none" style="text-decoration: none;">Home</a></li>
-                <li><a href="#about" class="nav-link text-decoration-none" style="text-decoration: none;">About Us</a></li>
-                <li><a href="#contact" class="nav-link text-decoration-none" style="text-decoration: none;">Contact</a></li>
-                <li><a href="#" class="nav-link btn-login text-decoration-none" style="text-decoration: none;" onclick="openLogin(); return false;">Login/Sign up</a></li>
-                <li><a href="recruiter.html" class="nav-link btn-recruiter text-decoration-none" style="text-decoration: none;">Recruiter</a></li>
-                
-            </ul>
-
-            <!-- Mobile Menu Button -->
-            <div class="mobile-menu-btn">
-                <i class="fas fa-bars"></i>
-            </div>
-        </div>
-    </nav>
-
+<body class="font-inter bg-white text-gray-800">
+    <custom-navbar></custom-navbar>
+    
     <!-- Hero Section -->
-    <section id="home" class="hero">
-        <div class="container">
-            <div class="hero-content">
-                <h1>AI Resume Checker: Get your resume score now.</h1>
-                <p>Streamline your hiring process with our advanced AI technology that analyzes and ranks resumes in seconds.</p>
-                <div class="cta-buttons">
-                    <a href="#features" class="btn btn-primary">Learn More</a>
-                    <a href="#contact" class="btn btn-outline">Get Started</a>
-                </div>
-            </div>
-            <div class="hero-image">
-                <img src="image/Aiimage1.png" alt="AI Resume Analysis">
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section -->
-    <section id="about" class="section about">
-        <div class="container">
-            <div class="section-header">
-                <h2>About Us</h2>
-                <p>Revolutionizing the recruitment process with cutting-edge AI technology.</p>
-            </div>
-            <div class="about-cards">
-                <div class="about-card">
-                    <div class="card-icon">
-                        <i class="fas fa-bullseye"></i>
+    <section class="relative bg-gradient-to-r from-blue-50 to-indigo-50 py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 font-poppins">
+                        AI-Powered <span class="text-blue-600">Resume Analyzer</span>
+                    </h1>
+                    <p class="text-lg md:text-xl text-gray-600">
+                        Revolutionize your hiring process with intelligent resume parsing, skill matching, and candidate scoring.
+                    </p>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <a href="upload.html" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium text-center transition-all shadow-md hover:shadow-lg">
+                            Upload Resume
+                        </a>
+                        <a href="job-requirement.html" class="bg-white hover:bg-gray-50 text-blue-600 px-6 py-3 rounded-lg font-medium text-center transition-all shadow-md hover:shadow-lg border border-gray-200">
+                            Create Job Requirement
+                        </a>
                     </div>
-                    <h3>Our Mission</h3>
-                    <p>To provide innovative AI solutions that transform the recruitment process and help companies find the best talent efficiently.</p>
                 </div>
-                <div class="about-card">
-                    <div class="card-icon">
-                        <i class="fas fa-eye"></i>
+                <div class="relative">
+                    <div class="bg-white p-6 rounded-2xl shadow-xl transform rotate-1">
+                        <div class="bg-gray-100 rounded-lg p-4">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="h-3 w-3 rounded-full bg-red-500"></div>
+                                <div class="h-3 w-3 rounded-full bg-yellow-500"></div>
+                                <div class="h-3 w-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="h-4 bg-blue-200 rounded-full w-3/4"></div>
+                                <div class="h-4 bg-blue-100 rounded-full"></div>
+                                <div class="h-4 bg-blue-100 rounded-full w-5/6"></div>
+                                <div class="h-4 bg-blue-200 rounded-full w-2/3"></div>
+                                <div class="h-4 bg-blue-100 rounded-full w-4/5"></div>
+                            </div>
+                            <div class="mt-6 flex justify-between">
+                                <div class="h-8 w-8 rounded-full bg-blue-500 flex items-center justify-center">
+                                    <i data-feather="cpu" class="text-white w-4 h-4"></i>
+                                </div>
+                                <div class="text-xs text-gray-500 font-medium">
+                                    Analyzing...
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <h3>Our Vision</h3>
-                    <p>To become the global leader in AI-powered recruitment solutions, making hiring faster, fairer, and more effective.</p>
-                </div>
-                <div class="about-card">
-                    <div class="card-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Our Approach</h3>
-                    <p>We combine cutting-edge AI technology with deep industry expertise to deliver exceptional recruitment solutions.</p>
+                    <div class="absolute -bottom-6 -left-6 bg-blue-500 h-24 w-24 rounded-full opacity-10"></div>
+                    <div class="absolute -top-6 -right-6 bg-indigo-500 h-32 w-32 rounded-full opacity-10"></div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="section features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Our Features</h2>
-                <p>Powerful tools to streamline your hiring process</p>
+    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-gray-900 font-poppins">Smart Hiring Features</h2>
+                <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
+                    Our AI-powered platform helps you find the perfect candidates faster and more efficiently.
+                </p>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-bolt"></i>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                    <div class="bg-blue-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i data-feather="file-text" class="text-blue-600 w-6 h-6"></i>
                     </div>
-                    <h3>Fast Processing</h3>
-                    <p>Process hundreds of resumes in seconds with our AI-powered system.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Resume Parsing</h3>
+                    <p class="text-gray-600">
+                        Extract key information from resumes with 99% accuracy, regardless of format.
+                    </p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
+                
+                <!-- Feature 2 -->
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                    <div class="bg-indigo-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i data-feather="git-merge" class="text-indigo-600 w-6 h-6"></i>
                     </div>
-                    <h3>Smart Ranking</h3>
-                    <p>Get candidates ranked based on job requirements and skills match.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Skill Matching</h3>
+                    <p class="text-gray-600">
+                        Intelligent matching of candidate skills with your job requirements.
+                    </p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-shield-alt"></i>
+                
+                <!-- Feature 3 -->
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                    <div class="bg-purple-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i data-feather="bar-chart-2" class="text-purple-600 w-6 h-6"></i>
                     </div>
-                    <h3>Secure & Private</h3>
-                    <p>Your data is encrypted and protected with enterprise-grade security.</p>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Scoring Dashboard</h3>
+                    <p class="text-gray-600">
+                        Visual scoring system to quickly identify top candidates.
+                    </p>
                 </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-search"></i>
+                
+                <!-- Feature 4 -->
+                <div class="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-all border border-gray-100">
+                    <div class="bg-green-100 w-12 h-12 rounded-lg flex items-center justify-center mb-4">
+                        <i data-feather="download" class="text-green-600 w-6 h-6"></i>
                     </div>
-                    <h3>Advanced Search</h3>
-                    <p>Find the perfect candidate with our powerful search filters.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-bell"></i>
-                    </div>
-                    <h3>Real-time Notifications</h3>
-                    <p>Get instant updates on candidate applications and status changes.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-pie"></i>
-                    </div>
-                    <h3>Analytics Dashboard</h3>
-                    <p>Track your hiring metrics and make data-driven decisions.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="section contact">
-        <div class="container">
-            <div class="contact-container">
-                <!-- Left Side - Contact Information -->
-                <div class="contact-info">
-                    <div class="contact-card">
-                        <div class="contact-icon">
-                            <i class="fas fa-map-marker-alt"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Our Location</h3>
-                            <p>Plot No 35, 2nd Floor,<br>Vishal Nagar, Sector 3,<br>Gurugram, Haryana 122001</p>
-                        </div>
-                    </div>
-
-                    <div class="contact-card">
-                        <div class="contact-icon">
-                            <i class="fas fa-phone-alt"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Phone Number</h3>
-                            <p>+91 9999 000 999<br>+91 9999 000 888</p>
-                        </div>
-                    </div>
-
-                    <div class="contact-card">
-                        <div class="contact-icon">
-                            <i class="fas fa-envelope"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Email Address</h3>
-                            <p>info@graphura.com<br>support@graphura.com</p>
-                        </div>
-                    </div>
-
-                    <div class="contact-card">
-                        <div class="contact-icon">
-                            <i class="fas fa-question-circle"></i>
-                        </div>
-                        <div class="contact-details">
-                            <h3>Have Questions?</h3>
-                            <p>We're here to help and answer any question you might have. We look forward to hearing from you.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Side - Map -->
-                <div class="map-container">
-                    <iframe 
-                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3507.450803648842!2d77.0726!3d28.4726!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x390d192e8a8a1c1f%3A0x9b9b9b9b9b9b9b9b9!2sGraphura%20India%20Private%20Limited!5e0!3m2!1sen!2sin!4v1620000000000!5m2!1sen!2sin" 
-                        width="100%" 
-                        height="100%" 
-                        style="border:0;" 
-                        allowfullscreen="" 
-                        loading="lazy">
-                    </iframe>
+                    <h3 class="text-xl font-semibold text-gray-900 mb-2">Export Options</h3>
+                    <p class="text-gray-600">
+                        Export candidate reports in PDF, CSV, or integrate with your ATS.
+                    </p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-about">
-                    <h3>ResumeAI</h3>
-                    <p>Transforming the recruitment process with AI-powered resume shortlisting and candidate matching.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#"><i class="fab fa-instagram"></i></a>
-                    </div>
-                </div>
-                <div class="footer-links">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#home">Home</a></li>
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#jobs">Recent Jobs</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h4>Company</h4>
-                    <ul>
-                        <li><a href="#">Careers</a></li>
-                        <li><a href="#">Blog</a></li>
-                        <li><a href="#">Pricing</a></li>
-                        <li><a href="#">Testimonials</a></li>
-                        <li><a href="#">FAQ</a></li>
-                    </ul>
-                </div>
-                <div class="footer-newsletter">
-                    <h4>Newsletter</h4>
-                    <p>Subscribe to our newsletter for the latest updates.</p>
-                    <form class="newsletter-form">
-                        <input type="email" placeholder="Your Email" required>
-                        <button type="submit"><i class="fas fa-paper-plane"></i></button>
-                    </form>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2023 ResumeAI. All rights reserved.</p>
-                <div class="footer-legal">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Cookie Policy</a>
-                </div>
-            </div>
+    <!-- CTA Section -->
+    <section class="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-gray-900 font-poppins mb-6">Ready to Transform Your Hiring Process?</h2>
+            <p class="text-lg text-gray-600 mb-8">
+                Join thousands of recruiters who save hours every week with our AI-powered resume analysis.
+            </p>
+            <a href="upload.html" class="inline-flex items-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-lg font-medium rounded-lg shadow-md hover:shadow-lg transition-all">
+                Get Started Now
+                <i data-feather="arrow-right" class="ml-2 w-5 h-5"></i>
+            </a>
         </div>
-    </footer>
+    </section>
 
-    <!-- Back to Top Button -->
-    <button id="backToTop" class="back-to-top" aria-label="Back to top">
-        <i class="fas fa-arrow-up"></i>
-    </button>
-
-    <!-- Scripts -->
+    <custom-footer></custom-footer>
+    
+    <script src="components/navbar.js"></script>
+    <script src="components/footer.js"></script>
     <script src="script.js"></script>
-
-    <!-- Login/Signup Popup HTML -->
-    <div id="overlay" class="overlay" onclick="closePopup()"></div>
-
-    <!-- LOGIN POPUP -->
-    <div id="loginPopup" class="popup">
-        <span class="close" onclick="closePopup()">×</span>
-        <h2>Login</h2>
-        <h6>WELCOME BACK</h6>
-        <input type="email" style="color:white;" id="loginEmail" placeholder="Email" required>
-        <input type="password" style="color:white;" id="loginPassword" placeholder="Password" required>
-        <p id="loginMsg" class="message"></p>
-        <button class="btn" onclick="login()">Login</button>
-
-        <p>Don't have an account?  
-            <a href="#" class="switch-link" data-target="signupPopup">Signup</a>
-        </p>
-    </div>
-
-    <!-- SIGNUP POPUP -->
-    <div id="signupPopup" class="popup">
-        <span class="close" onclick="closePopup()">×</span>
-        <h2>Create Account</h2>
-        <p class="sub-title">Join our community and start using ResumeAI!</p>
-
-        <input type="text" style="color:white;" id="signupName" placeholder="Full Name" required>
-        <input type="email" style="color:white;" id="signupEmail" placeholder="Email" required>
-        <input type="password"style="color:white;" id="signupPassword" placeholder="Password" required>
-        <input type="password" style="color:white;" id="confirmPassword" placeholder="Confirm Password" required>
-        <p id="signupMsg" class="message"></p>
-        <button class="btn" onclick="register()">Signup</button>
-
-        <p>Already have an account?  
-            <a href="#" class="switch-link" data-target="loginPopup">Login</a>
-        </p>
-    </div>
-
-    <script>
-        // Function to open login popup
-        function openLogin() {
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('loginPopup').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Function to open signup popup
-        function openSignup() {
-            document.getElementById('overlay').style.display = 'block';
-            document.getElementById('signupPopup').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // Function to close popup
-        function closePopup() {
-            document.querySelectorAll('.popup').forEach(popup => {
-                popup.style.display = 'none';
-            });
-            
-            const overlay = document.querySelector('.overlay');
-            if (overlay) {
-                overlay.style.display = 'none';
-            }
-            
-            document.body.style.overflow = 'auto';
-        }
-
-        // Show signup popup when page loads
-        document.addEventListener('DOMContentLoaded', function() {
-            // Show signup popup on page load
-            openSignup();
-            
-            // Handle switch between login and signup
-            const switchLinks = document.querySelectorAll('.switch-link');
-            
-            switchLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const targetPopup = this.getAttribute('data-target');
-                    
-                    // Hide all popups
-                    document.querySelectorAll('.popup').forEach(popup => {
-                        popup.style.display = 'none';
-                    });
-                    
-                    // Show the target popup
-                    const popup = document.getElementById(targetPopup);
-                    if (popup) {
-                        popup.style.display = 'block';
-                    }
-                });
-            });
-
-            // Close popup with Escape key
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'Escape') {
-                    closePopup();
-                }
-            });
-        });
-    </script>
+    <script>feather.replace();</script>
 </body>
 </html>

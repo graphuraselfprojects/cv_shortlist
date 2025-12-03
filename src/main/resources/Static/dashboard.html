@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Dashboard | ResumeGenius AI</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="font-inter bg-gray-50 text-gray-800">
+    <custom-navbar></custom-navbar>
+    
+    <main class="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div>
+                <h1 class="text-2xl md:text-3xl font-bold text-gray-900 font-poppins">Candidate Dashboard</h1>
+                <p class="text-gray-600 mt-1">Showing results for "Senior Frontend Developer" position</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                <button class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium border border-gray-300 flex items-center justify-center">
+                    <i data-feather="filter" class="w-4 h-4 mr-2"></i>
+                    Filters
+                </button>
+                <button class="bg-white hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg font-medium border border-gray-300 flex items-center justify-center">
+                    <i data-feather="download" class="w-4 h-4 mr-2"></i>
+                    Export
+                </button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center justify-center">
+                    <i data-feather="plus" class="w-4 h-4 mr-2"></i>
+                    Add Candidates
+                </button>
+            </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="bg-white rounded-2xl shadow-md p-6 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Search -->
+                <div class="md:col-span-2">
+                    <label for="search" class="sr-only">Search</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i data-feather="search" class="text-gray-400 w-4 h-4"></i>
+                        </div>
+                        <input type="text" id="search" class="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500" placeholder="Search candidates...">
+                    </div>
+                </div>
+                
+                <!-- Score Range -->
+                <div>
+                    <label for="score-range" class="block text-sm font-medium text-gray-700 mb-1">Match Score</label>
+                    <select id="score-range" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Scores</option>
+                        <option value="90-100">90-100%</option>
+                        <option value="80-89">80-89%</option>
+                        <option value="70-79">70-79%</option>
+                        <option value="60-69">60-69%</option>
+                        <option value="0-59">Below 60%</option>
+                    </select>
+                </div>
+                
+                <!-- Status -->
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select id="status" class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">All Statuses</option>
+                        <option value="shortlisted">Shortlisted</option>
+                        <option value="consider">Consider</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- View Toggle -->
+        <div class="flex justify-end mb-4">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button type="button" class="px-4 py-2 text-sm font-medium rounded-l-lg bg-blue-600 text-white">
+                    <i data-feather="grid" class="w-4 h-4"></i>
+                </button>
+                <button type="button" class="px-4 py-2 text-sm font-medium rounded-r-lg bg-white text-gray-700 border border-gray-300 hover:bg-gray-50">
+                    <i data-feather="list" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Candidate Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Candidate 1 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/1" alt="Candidate photo">
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Sarah Johnson</h3>
+                                <p class="text-sm text-gray-500">Frontend Developer</p>
+                            </div>
+                        </div>
+                        <div class="score-circle bg-green-100 text-green-800">
+                            94%
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Experience</span>
+                            <span class="font-medium">5 years</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Education</span>
+                            <span class="font-medium">Master's Degree</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Skills Match</span>
+                            <span class="font-medium">28/30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i data-feather="check" class="w-3 h-3 mr-1"></i>
+                                Shortlisted
+                            </span>
+                            <div class="flex space-x-2">
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Candidate 2 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/2" alt="Candidate photo">
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Michael Chen</h3>
+                                <p class="text-sm text-gray-500">UI Engineer</p>
+                            </div>
+                        </div>
+                        <div class="score-circle bg-blue-100 text-blue-800">
+                            87%
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Experience</span>
+                            <span class="font-medium">4 years</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Education</span>
+                            <span class="font-medium">Bachelor's Degree</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Skills Match</span>
+                            <span class="font-medium">25/30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <i data-feather="clock" class="w-3 h-3 mr-1"></i>
+                                Consider
+                            </span>
+                            <div class="flex space-x-2">
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Candidate 3 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/3" alt="Candidate photo">
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">David Wilson</h3>
+                                <p class="text-sm text-gray-500">React Developer</p>
+                            </div>
+                        </div>
+                        <div class="score-circle bg-yellow-100 text-yellow-800">
+                            76%
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Experience</span>
+                            <span class="font-medium">3 years</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Education</span>
+                            <span class="font-medium">Bachelor's Degree</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Skills Match</span>
+                            <span class="font-medium">21/30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                <i data-feather="clock" class="w-3 h-3 mr-1"></i>
+                                Consider
+                            </span>
+                            <div class="flex space-x-2">
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Candidate 4 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/4" alt="Candidate photo">
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Emily Rodriguez</h3>
+                                <p class="text-sm text-gray-500">Frontend Engineer</p>
+                            </div>
+                        </div>
+                        <div class="score-circle bg-red-100 text-red-800">
+                            62%
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Experience</span>
+                            <span class="font-medium">2 years</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Education</span>
+                            <span class="font-medium">Associate Degree</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Skills Match</span>
+                            <span class="font-medium">18/30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                <i data-feather="x" class="w-3 h-3 mr-1"></i>
+                                Rejected
+                            </span>
+                            <div class="flex space-x-2">
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Candidate 5 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/5" alt="Candidate photo">
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Robert Kim</h3>
+                                <p class="text-sm text-gray-500">JavaScript Developer</p>
+                            </div>
+                        </div>
+                        <div class="score-circle bg-green-100 text-green-800">
+                            91%
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Experience</span>
+                            <span class="font-medium">6 years</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Education</span>
+                            <span class="font-medium">Bachelor's Degree</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Skills Match</span>
+                            <span class="font-medium">29/30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <i data-feather="check" class="w-3 h-3 mr-1"></i>
+                                Shortlisted
+                            </span>
+                            <div class="flex space-x-2">
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Candidate 6 -->
+            <div class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                <div class="p-6">
+                    <div class="flex items-start justify-between">
+                        <div class="flex items-center space-x-4">
+                            <div class="flex-shrink-0">
+                                <img class="h-12 w-12 rounded-full" src="http://static.photos/people/200x200/6" alt="Candidate photo">
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-medium text-gray-900">Lisa Thompson</h3>
+                                <p class="text-sm text-gray-500">UI/UX Developer</p>
+                            </div>
+                        </div>
+                        <div class="score-circle bg-blue-100 text-blue-800">
+                            84%
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Experience</span>
+                            <span class="font-medium">4 years</span>
+                        </div>
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">Education</span>
+                            <span class="font-medium">Master's Degree</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">Skills Match</span>
+                            <span class="font-medium">26/30</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 pt-4 border-t border-gray-100">
+                        <div class="flex justify-between items-center">
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                <i data-feather="clock" class="w-3 h-3 mr-1"></i>
+                                Consider
+                            </span>
+                            <div class="flex space-x-2">
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button class="text-gray-400 hover:text-gray-600">
+                                    <i data-feather="download" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="mt-8 flex items-center justify-between">
+            <div class="text-sm text-gray-500">
+                Showing <span class="font-medium">1</span> to <span class="font-medium">6</span> of <span class="font-medium">24</span> candidates
+            </div>
+            <div class="flex space-x-2">
+                <button class="px-3 py-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Previous
+                </button>
+                <button class="px-3 py-1 rounded-md border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+                    Next
+                </button>
+            </div>
+        </div>
+    </main>
+    
+    <custom-footer></custom-footer>
+    
+    <script src="components/navbar.js"></script>
+    <script src="components/footer.js"></script>
+    <script src="script.js"></script>
+    <script>feather.replace();</script>
+</body>
+</html>
