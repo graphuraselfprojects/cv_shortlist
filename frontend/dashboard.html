@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ResumeGenius AI — Recruiter Dashboard</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/feather-icons"></script>
+<style>
+  .shortlisted { border: 2px solid #16a34a; background: linear-gradient(90deg, rgba(16,185,129,0.06), rgba(16,185,129,0.03)); }
+  .card-ai-summary { font-size: 0.95rem; color: #374151; }
+  .score-pill { min-width:54px; text-align:center; border-radius:9999px; padding:6px 10px; font-weight:600; }
+  .chart-wrap { height: 140px; }
+</style>
+</head>
+<body class="bg-gray-50 font-sans text-gray-800">
+<header class="bg-white shadow-sm sticky top-0 z-30">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+    <div class="flex items-center space-x-4">
+      <div class="text-2xl font-bold text-indigo-600">ResumeGenius AI</div>
+      <div class="text-sm text-gray-500">Recruiter Portal</div>
+    </div>
+    <div class="flex items-center gap-3">
+      <button id="exportBtn" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-sm flex items-center gap-2">
+        <i data-feather="download"></i> Export Shortlisted
+      </button>
+      <button id="downloadSelected" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm flex items-center gap-2">
+        <i data-feather="download"></i> Download Selected
+      </button>
+      <button id="addCandidates" class="px-4 py-2 bg-white border rounded-md text-sm">Add Candidate</button>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto p-6">
+  <!-- Filters -->
+  <section class="bg-white rounded-xl shadow p-5 mb-6 flex flex-col lg:flex-row gap-4 items-center justify-between">
+    <div class="flex gap-3 flex-wrap">
+      <input id="searchInput" type="text" placeholder="Search name/skill/position..." class="border rounded-lg px-3 py-2 text-sm" />
+      <select id="positionFilter" class="border rounded-lg px-3 py-2 text-sm">
+        <option value="">All Positions</option>
+      </select>
+      <select id="scoreFilter" class="border rounded-lg px-3 py-2 text-sm">
+        <option value="">All Scores</option>
+        <option value="90-100">90-100</option>
+        <option value="80-89">80-89</option>
+        <option value="70-79">70-79</option>
+        <option value="0-69">Below 70</option>
+      </select>
+      <select id="statusFilter" class="border rounded-lg px-3 py-2 text-sm">
+        <option value="">All Status</option>
+        <option value="shortlisted">Shortlisted</option>
+        <option value="consider">Consider</option>
+        <option value="rejected">Rejected</option>
+      </select>
+    </div>
+    <div class="flex gap-4 items-center">
+      <div class="flex items-center gap-2">
+        <input id="selectAll" type="checkbox" class="h-4 w-4">
+        <label for="selectAll" class="text-sm text-gray-600">Select all on page</label>
+      </div>
+      <select id="sortSelect" class="border rounded-lg px-3 py-2 text-sm">
+        <option value="score_desc">Score (high → low)</option>
+        <option value="score_asc">Score (low → high)</option>
+        <option value="experience_desc">Experience (high → low)</option>
+        <option value="experience_asc">Experience (low → high)</option>
+      </select>
+    </div>
+  </section>
+
+  <!-- Shortlist & Pagination Info -->
+  <div class="flex justify-between items-center mb-4">
+    <div class="text-sm">Shortlisted: <span id="shortlistCount" class="font-bold text-indigo-600">0</span></div>
+    <div class="flex items-center gap-2">
+      <button id="prevPage" class="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
+      <span id="currentPage">1</span>/<span id="totalPages">1</span>
+      <button id="nextPage" class="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+    </div>
+  </div>
+
+  <!-- Candidate Grid -->
+  <section id="cardsArea" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></section>
+
+  <div class="mt-6 flex justify-between items-center">
+    <div class="text-sm text-gray-500">
+      Showing <span id="startIdx">0</span> - <span id="endIdx">0</span> of <span id="totalCount">0</span> candidates
+    </div>
+    <div class="flex gap-2">
+      <button id="prevPage2" class="px-3 py-1 border rounded disabled:opacity-50">Previous</button>
+      <button id="nextPage2" class="px-3 py-1 border rounded disabled:opacity-50">Next</button>
+    </div>
+  </div>
+</main>
+
+<!-- Candidate Detail Modal -->
+<div id="detailModal" class="fixed inset-0 hidden z-50 items-center justify-center bg-black bg-opacity-40 p-4">
+  <div class="bg-white rounded-lg max-w-3xl w-full shadow-lg overflow-hidden">
+    <div class="flex justify-between items-center p-4 border-b">
+      <div>
+        <h3 id="modalName" class="text-xl font-semibold"></h3>
+        <p id="modalPosition" class="text-sm text-gray-500"></p>
+      </div>
+      <div class="flex items-center gap-2">
+        <div id="modalScore" class="px-3 py-1 rounded score-pill bg-indigo-50 text-indigo-700 font-semibold"></div>
+        <button id="modalClose" class="text-gray-500 hover:text-gray-700"><i data-feather="x"></i></button>
+      </div>
+    </div>
+    <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="md:col-span-2 space-y-3">
+        <div class="text-sm text-gray-600">
+          <strong>AI Summary</strong>
+          <p id="modalSummary" class="mt-2 text-gray-700"></p>
+        </div>
+        <ul id="modalDetails" class="list-disc ml-5 mt-2 text-gray-700"></ul>
+        <div class="flex gap-3 mt-2">
+          <button id="modalDownload" class="px-4 py-2 bg-indigo-600 text-white rounded">Download Resume</button>
+          <button id="modalShortlistToggle" class="px-4 py-2 border rounded">Toggle Shortlist</button>
+        </div>
+      </div>
+      <div class="md:col-span-1">
+        <div class="text-sm text-gray-600 mb-2"><strong>ATS Comparison</strong></div>
+        <div class="chart-wrap bg-white rounded p-2">
+          <canvas id="atsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Card Template -->
+<template id="cardTemplate">
+  <div class="card bg-white rounded-xl shadow-md p-5 flex flex-col h-full">
+    <div class="flex items-start justify-between">
+      <div class="flex items-start gap-3">
+        <img class="w-12 h-12 rounded-full object-cover" />
+        <div>
+          <h4 class="name text-lg font-semibold"></h4>
+          <div class="text-sm text-gray-500 position"></div>
+        </div>
+      </div>
+      <div class="flex flex-col items-end gap-2">
+        <div class="score-pill text-sm"></div>
+        <div class="text-xs text-gray-400">ATS</div>
+      </div>
+    </div>
+    <div class="mt-4 flex-grow">
+      <div class="text-sm text-gray-600 mb-2"><strong>Experience:</strong> <span class="exp font-medium"></span></div>
+      <div class="text-sm text-gray-600 mb-2"><strong>Skills Match:</strong> <span class="skills font-medium"></span></div>
+      <div class="mt-3 card-ai-summary text-sm text-gray-700"></div>
+    </div>
+    <div class="mt-4 pt-4 border-t flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <input type="checkbox" class="shortlistCheckbox" />
+        <button class="viewDetail text-indigo-600 text-sm">View</button>
+      </div>
+      <div class="flex items-center gap-2">
+        <button class="downloadBtn px-3 py-1 border rounded text-sm">Download</button>
+      </div>
+    </div>
+  </div>
+</template>
+<script src="dashboard.js"></script>
+</body>
+</html>
