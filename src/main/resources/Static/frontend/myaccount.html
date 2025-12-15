@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Account - ResumeAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f0f1a',
+                            card: '#1a1f2d',
+                            primary: '#4a6cf7',
+                            accent: '#6dd3ff',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        /* Gradient Text */
+        .text-gradient {
+            background: linear-gradient(135deg, #4a6cf7 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Hover Underline Animation */
+        .hover-underline-animation {
+            display: inline-block;
+            position: relative;
+        }
+        .hover-underline-animation::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            transform: scaleX(0);
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: #4a6cf7;
+            transform-origin: bottom right;
+            transition: transform 0.25s ease-out;
+        }
+        .hover-underline-animation:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+    </style>
+</head>
+<body class="bg-brand-dark text-gray-200 font-sans overflow-x-hidden selection:bg-brand-primary selection:text-white">
+
+    <nav class="fixed w-full z-50 transition-all duration-300 glass-nav shadow-lg" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <a href="index.html" class="flex-shrink-0 flex items-center gap-2 group">
+                    <img src="images/graphuralogo.png" alt="Graphura Logo" class="h-16 w-auto transition-transform duration-300 group-hover:scale-105 group-hover:rotate-2">
+                </a>
+
+                <div class="hidden md:flex space-x-8 items-center">
+                    <a href="index.html#home" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Home</a>
+                    <a href="Recruiter.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Recruiter</a>
+                    <a href="dashboard.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Analytics</a>
+                    
+                    <a href="#" class="px-6 py-2.5 rounded-full bg-brand-primary text-white font-semibold shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95">
+                        <i class="fas fa-user-circle mr-2"></i> My Account
+                    </a>
+                </div>
+
+                <div class="md:hidden flex items-center">
+                    <button onclick="toggleMobileMenu()" class="text-gray-800 hover:text-brand-primary focus:outline-none p-2 transition-transform active:scale-90">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-md border-t absolute w-full left-0 shadow-xl transition-all duration-300 origin-top transform scale-y-100">
+            <div class="px-4 pt-2 pb-6 space-y-2">
+                <a href="index.html#home" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Home</a>
+                <a href="Recruiter.html" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Recruiter</a>
+                <a href="dashboard.html" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Analytics</a>
+                <a href="#" class="block px-4 py-3 text-brand-primary font-bold bg-brand-primary/5 hover:bg-brand-primary/10 rounded-lg transition-colors">
+                    <i class="fas fa-user-circle mr-2"></i> My Account
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pt-32 pb-16 bg-brand-dark">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-3 gap-8">
+                
+                <div class="lg:col-span-1 space-y-8">
+                    <div class="bg-brand-card p-6 rounded-2xl border border-gray-700 shadow-xl" data-aos="fade-up">
+                        <div class="flex flex-col items-center">
+                            <div class="w-32 h-32 rounded-full bg-brand-primary/20 flex items-center justify-center mb-4 border-4 border-brand-primary/50">
+                                <i class="fas fa-camera text-4xl text-brand-primary/80"></i>
+                            </div>
+                            <h1 class="text-2xl font-bold text-white">Jane Doe</h1>
+                            <p class="text-brand-accent font-medium">Senior Software Engineer</p>
+                            <p class="text-gray-400 text-sm mt-1">San Francisco Bay Area</p>
+                            <button class="mt-4 px-6 py-2 rounded-full bg-brand-primary text-white font-semibold hover:bg-blue-600 transition-colors text-sm">
+                                Edit Profile
+                            </button>
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-700 text-sm text-gray-400">
+                            <p class="flex justify-between items-center mb-2">Connections: <span class="text-white font-semibold">500+</span></p>
+                            <p class="flex justify-between items-center">Profile Views (last 90 days): <span class="text-white font-semibold">1,250</span></p>
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-card p-6 rounded-2xl border border-gray-700 shadow-xl" data-aos="fade-up" data-aos-delay="100">
+                        <h3 class="text-xl font-bold text-white mb-4">Quick Actions</h3>
+                        <ul class="space-y-3">
+                            <li><a href="#" class="flex items-center text-gray-400 hover:text-brand-primary transition-colors"><i class="fas fa-bookmark w-5 mr-3"></i> Saved Jobs</a></li>
+                            <li><a href="#" class="flex items-center text-gray-400 hover:text-brand-primary transition-colors"><i class="fas fa-file-alt w-5 mr-3"></i> My Resumes (Upload/Manage)</a></li>
+                            <li><a href="#" class="flex items-center text-gray-400 hover:text-brand-primary transition-colors"><i class="fas fa-chart-bar w-5 mr-3"></i> Career Insights</a></li>
+                            <li><a href="#" class="flex items-center text-gray-400 hover:text-brand-primary transition-colors"><i class="fas fa-cog w-5 mr-3"></i> Account Settings</a></li>
+                            <li><a href="#" class="flex items-center text-red-400 hover:text-red-500 transition-colors pt-3 border-t border-gray-700 mt-3"><i class="fas fa-sign-out-alt w-5 mr-3"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 space-y-8">
+                    
+                    <div class="bg-brand-card p-6 rounded-2xl border border-gray-700 shadow-xl" data-aos="fade-left">
+                        <h2 class="text-2xl font-bold text-white mb-4">About</h2>
+                        <p class="text-gray-400 leading-relaxed">Highly-motivated Senior Software Engineer with 8+ years of experience in developing and deploying large-scale web applications. Proficient in React, Node.js, and cloud platforms like AWS. Passionate about leveraging AI for process optimization. Seeking new opportunities to lead and mentor teams in a fast-paced environment.</p>
+                        <button class="text-brand-primary text-sm font-semibold mt-3 hover:underline">See more</button>
+                    </div>
+
+                    <div class="bg-brand-card p-6 rounded-2xl border border-gray-700 shadow-xl" data-aos="fade-left" data-aos-delay="100">
+                        <h2 class="text-2xl font-bold text-white mb-4">Experience</h2>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 bg-brand-primary/10 rounded-full flex-shrink-0 flex items-center justify-center mt-1 mr-4">
+                                    <i class="fas fa-briefcase text-brand-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">Senior Software Engineer</h3>
+                                    <p class="text-gray-400 text-sm">TechCorp Innovations | Jan 2020 – Present (5 years)</p>
+                                    <p class="text-gray-500 text-sm mt-1">Led a team of 5 engineers to re-architect the main customer dashboard using React and Redux, resulting in a 30% reduction in load time.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 bg-brand-primary/10 rounded-full flex-shrink-0 flex items-center justify-center mt-1 mr-4">
+                                    <i class="fas fa-code text-brand-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">Software Developer</h3>
+                                    <p class="text-gray-400 text-sm">WebSolutions Inc. | Jun 2016 – Dec 2019 (3 years 7 months)</p>
+                                    <p class="text-gray-500 text-sm mt-1">Developed and maintained RESTful APIs for mobile application integration using Spring Boot and PostgreSQL.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="text-brand-primary text-sm font-semibold mt-4 hover:underline">Add Experience</button>
+                    </div>
+
+                    <div class="bg-brand-card p-6 rounded-2xl border border-gray-700 shadow-xl" data-aos="fade-left" data-aos-delay="200">
+                        <h2 class="text-2xl font-bold text-white mb-4">Education</h2>
+                        <div class="space-y-6">
+                            <div class="flex items-start">
+                                <div class="w-10 h-10 bg-brand-primary/10 rounded-full flex-shrink-0 flex items-center justify-center mt-1 mr-4">
+                                    <i class="fas fa-graduation-cap text-brand-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-white">Master of Science in Computer Science</h3>
+                                    <p class="text-gray-400 text-sm">Stanford University | 2014 – 2016</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-brand-card p-6 rounded-2xl border border-gray-700 shadow-xl" data-aos="fade-left" data-aos-delay="300">
+                        <h2 class="text-2xl font-bold text-white mb-4">Skills & Endorsements</h2>
+                        <div class="flex flex-wrap gap-3">
+                            <span class="px-3 py-1 bg-brand-primary/20 text-brand-accent rounded-full text-sm font-medium">React <i class="fas fa-check-circle ml-1"></i></span>
+                            <span class="px-3 py-1 bg-brand-primary/20 text-brand-accent rounded-full text-sm font-medium">Node.js <i class="fas fa-check-circle ml-1"></i></span>
+                            <span class="px-3 py-1 bg-brand-primary/20 text-brand-accent rounded-full text-sm font-medium">AWS</span>
+                            <span class="px-3 py-1 bg-brand-primary/20 text-brand-accent rounded-full text-sm font-medium">Spring Boot</span>
+                            <span class="px-3 py-1 bg-brand-primary/20 text-brand-accent rounded-full text-sm font-medium">PostgreSQL</span>
+                            <span class="px-3 py-1 bg-brand-primary/20 text-brand-accent rounded-full text-sm font-medium">Agile Methodologies</span>
+                        </div>
+                        <button class="text-brand-primary text-sm font-semibold mt-4 hover:underline">Add Skill</button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="glass-nav border-t border-gray-200 pt-16 pb-8 relative shadow-inner">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div data-aos="fade-up" data-aos-delay="0">
+                 <img src="images/graphuralogo.png" alt="Graphura" class="h-16 mb-4 rounded p-1 transition-colors">
+                 <p class="text-gray-600 text-sm leading-relaxed">Helping you shortlist top talent using AI — fast, fair and focused.</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Quick Links</h3>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li><a href="index.html#home" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Home</a></li>
+                    <li><a href="Recruiter.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Recruiter Dashboard</a></li>
+                    <li><a href="dashboard.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Analytics</a></li>
+                </ul>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="200">
+                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Resources</h3>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li><a href="#" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Documentation</a></li>
+                    <li><a href="#" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Support</a></li>
+                    <li><a href="#" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="300">
+                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Contact</h3>
+                <p class="text-gray-600 text-sm mb-6">support@graphura.in<br>+91 73780 21327</p>
+                <div class="flex space-x-4">
+                    <a href="#" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-twitter group-hover:rotate-12 transition-transform"></i></a>
+                    <a href="#" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-linkedin-in group-hover:rotate-12 transition-transform"></i></a>
+                    <a href="#" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-facebook-f group-hover:rotate-12 transition-transform"></i></a>
+                </div>
+            </div>
+        </div>
+        
+    </footer>
+    <div class="text-center text-gray-500 text-sm border-t border-gray-200 p-8 pt-8 ">
+    © <span id="year"></span> Graphura India Private Limited — All rights reserved.
+    </div>
+
+    <button id="scrollTopBtn" onclick="scrollToTop()" class="fixed bottom-8 right-8 z-50 bg-brand-primary text-white p-4 rounded-full shadow-lg translate-y-24 opacity-0 transition-all duration-500 hover:bg-blue-600 hover:shadow-brand-primary/50 focus:outline-none transform hover:scale-110 hover:-translate-y-1">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="index.js"></script>
+</body>
+</html>

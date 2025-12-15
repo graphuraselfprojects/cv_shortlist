@@ -13,24 +13,34 @@
 <script src="config.js"></script>
 
 <script>
-    tailwind.config = {
-        theme: {
-            extend: {
-                colors: {
-                    brand: {
-                        dark: '#0f0f1a', // Dark background
-                        card: '#1a1f2d', // Card background
-                        primary: '#4a6cf7',
-                        accent: '#6dd3ff',
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            dark: '#0f0f1a',
+                            card: '#1a1f2d',
+                            primary: '#4a6cf7',
+                            accent: '#6dd3ff',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
                     }
-                },
-                fontFamily: {
-                    sans: ['Poppins', 'sans-serif'],
-                },
+                }
             }
         }
-    }
-</script>
+    </script>
 <style>
   /* Glass Nav Style from index.html */
   .glass-nav {
@@ -127,44 +137,8 @@
 </head>
 
 <body class="bg-brand-dark font-sans text-gray-200">
-
-    <nav class="fixed w-full z-50 transition-all duration-300 glass-nav shadow-lg" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="#" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="images/graphuralogo.png" alt="Graphura Logo" class="h-16 w-auto transition-transform duration-300 group-hover:scale-105 group-hover:rotate-2">
-                </a>
-
-                <div class="hidden md:flex space-x-8 items-center">
-                    <a href="index.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Home</a>
-                    <a href="Recruiter.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Recruiter</a>
-                    
-                    <a href="dashboard.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Analytics</a>
-                    <button onclick="openLogin()" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Login</button>
-                    <button onclick="openSignup()" class="px-6 py-2.5 rounded-full bg-brand-primary text-white font-semibold shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95">
-                        Sign Up
-                    </button>
-                </div>
-
-                <div class="md:hidden flex items-center">
-                    <button onclick="toggleMobileMenu()" class="text-gray-800 hover:text-brand-primary focus:outline-none p-2 transition-transform active:scale-90">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-md border-t absolute w-full left-0 shadow-xl transition-all duration-300 origin-top transform scale-y-100">
-            <div class="px-4 pt-2 pb-6 space-y-2">
-                <a href="#home" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Home</a>
-                <a href="Recruiter.html" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Recruiter</a>
-                
-                <a href="dashboard.html" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Analytics</a>
-                <a href="#" onclick="openLogin()" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Login</a>
-                <a href="#" onclick="openSignup()" class="block px-4 py-3 text-brand-primary font-bold bg-brand-primary/5 hover:bg-brand-primary/10 rounded-lg transition-colors">Sign Up</a>
-            </div>
-        </div>
-    </nav>
+<div id="nav-placeholder"></div>
+    
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 pt-32">
         <div class="text-center mb-12">
             <h1 class="text-5xl font-extrabold text-gradient tracking-tight">AI Candidate Analytics</h1>
@@ -282,7 +256,7 @@
         </div>
         </main>
 
-    <footer class="bg-white border-t border-gray-200 pt-16 pb-8 relative shadow-inner">
+    <footer class="glass-nav border-t border-gray-200 pt-16 pb-8 relative shadow-inner">
         <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             <div data-aos="fade-up" data-aos-delay="0">
                  <img src="images/graphuralogo.png" alt="Graphura" class="h-16 mb-4 rounded p-1 transition-colors">
@@ -293,8 +267,9 @@
                 <ul class="space-y-3 text-sm text-gray-600">
                     <li><a href="#home" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Home</a></li>
                     <li><a href="Recruiter.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Recruiter Dashboard</a></li>
+                    
                     <li><a href="dashboard.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Analytics</a></li>
-                </ul>
+                    </ul>
             </div>
             <div data-aos="fade-up" data-aos-delay="200">
                 <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Resources</h3>
@@ -314,12 +289,11 @@
                 </div>
             </div>
         </div>
-       
+        
     </footer>
-    
     <div class="text-center text-gray-500 text-sm border-t border-gray-200 p-8 pt-8 ">
-    © <span id="year"></span> Graphura India Private Limited — All rights reserved.
-</div>
+        © <span id="year"></span> Graphura India Private Limited — All rights reserved.
+    </div>
 
     <div id="detailModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center p-4">
         <div class="bg-brand-card rounded-xl shadow-2xl max-w-3xl w-full p-8 relative border border-gray-700/50">
@@ -436,6 +410,40 @@
         document.getElementById('mobile-menu').classList.toggle('hidden');
     }
 </script>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Function to load external HTML for dynamic components (Navbar)
+            async function includeHTML(url, elementId) {
+                const placeholder = document.getElementById(elementId);
+                if (!placeholder) return; 
+
+                try {
+                    const response = await fetch(url);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status} (${url})`);
+                    }
+                    const html = await response.text();
+                    placeholder.innerHTML = html;
+                    
+                } catch (error) {
+                    console.error(`Could not load component from ${url}. If you are opening index.html directly (file://), this is expected. You must use a local server.`, error);
+                }
+            }
+
+            // Load the NAV BAR component (Footer is now inlined)
+            includeHTML('nav-bar.html', 'nav-placeholder');
+            
+            // Set the current year for the inlined footer
+            const yearElement = document.getElementById('year');
+            if (yearElement) {
+                yearElement.textContent = new Date().getFullYear();
+            }
+
+            // Initialize AOS
+            AOS.init();
+        });
+    </script>
+    
 <script src="dashboard.js"></script>
 </body>
 </html>
