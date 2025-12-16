@@ -1,119 +1,93 @@
+// Recruiter page specific behaviour (upload UI + skills). Shared navbar/auth lives in nav.js.
 
-
-// Init AOS
-        AOS.init({
-            duration: 800,
-            easing: 'ease-in-out',
-            once: true,
-            offset: 100,
-            mirror: false
-        });
-
-document.getElementById('year').textContent = new Date().getFullYear();
-
-const loginPopup = document.getElementById('loginPopup');
-        const signupPopup = document.getElementById('signupPopup');
-        const overlay = document.getElementById('overlay');
-        const mobileMenu = document.getElementById('mobile-menu');
-
-        function toggleModal(modalId, show) {
-            const modal = document.getElementById(modalId);
-            if (show) {
-                overlay.classList.remove('hidden');
-                setTimeout(() => overlay.classList.add('opacity-100'), 10);
-
-                modal.classList.remove('hidden');
-                setTimeout(() => {
-                    modal.classList.remove('scale-90', 'opacity-0');
-                    modal.classList.add('scale-100', 'opacity-100');
-                }, 10);
-            } else {
-                overlay.classList.remove('opacity-100');
-                modal.classList.remove('scale-100', 'opacity-100');
-                modal.classList.add('scale-90', 'opacity-0');
-
-                setTimeout(() => {
-                    overlay.classList.add('hidden');
-                    modal.classList.add('hidden');
-                }, 300); // Match transition duration
-            }
-        }
-
-        function closePopup() {
-            toggleModal('loginPopup', false);
-            toggleModal('signupPopup', false);
-        }
-
-        function openLogin(isSwitch = false) {
-            if (isSwitch) {
-                toggleModal('signupPopup', false);
-                // Give a slight delay when switching to allow the previous one to start hiding
-                setTimeout(() => toggleModal('loginPopup', true), 100); 
-            } else {
-                toggleModal('loginPopup', true);
-            }
-        }
-
-        function openSignup(isSwitch = false) {
-            if (isSwitch) {
-                toggleModal('loginPopup', false);
-                setTimeout(() => toggleModal('signupPopup', true), 100);
-            } else {
-                toggleModal('signupPopup', true);
-            }
-        }
-
-        function toggleMobileMenu() {
-            mobileMenu.classList.toggle();
-        }
-
-        function handleSignup() {
-            alert("Signup functionality is not implemented yet.");
-            // In a real application, you'd handle form submission here
-        }
-
-// Scroll to Top Logic (Consolidated and Cleaned)
-const scrollTopBtn = document.getElementById('scrollTopBtn');
-window.addEventListener('scroll', () => {
-    // Show button when page is scrolled down 300px
-    if (window.scrollY > 300) {
-        scrollTopBtn.classList.remove('translate-y-24', 'opacity-0');
-        scrollTopBtn.classList.add('translate-y-0', 'opacity-100');
-    } else {
-        scrollTopBtn.classList.add('translate-y-24', 'opacity-0');
-        scrollTopBtn.classList.remove('translate-y-0', 'opacity-100');
+// Route protection - check login on page load
+document.addEventListener('DOMContentLoaded', () => {
+  if (typeof window.requireAuth === 'function') {
+    if (!window.requireAuth()) {
+      return; // Redirect will happen in requireAuth
     }
+  } else {
+    // Fallback protection
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
+      window.location.href = 'index.html';
+      return;
+    }
+  }
+  
+  // Load userId from localStorage if available
+  const storedUserId = localStorage.getItem('userId');
+  const userIdInput = document.getElementById('userIdInput');
+  if (storedUserId && userIdInput) {
+    userIdInput.value = storedUserId;
+  }
 });
 
-function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+if (window.AOS) {
+  AOS.init({
+    duration: 800,
+    easing: "ease-in-out",
+    once: true,
+    offset: 100,
+    mirror: false,
+  });
 }
 
-        // Toggle Mobile Menu
-        const btn = document.getElementById('mobile-menu-btn');
-        const menu = document.getElementById('mobile-menu');
+const scrollTopBtn = document.getElementById("scrollTopBtn");
+if (scrollTopBtn) {
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > 300) {
+      scrollTopBtn.classList.remove("translate-y-24", "opacity-0");
+      scrollTopBtn.classList.add("translate-y-0", "opacity-100");
+    } else {
+      scrollTopBtn.classList.add("translate-y-24", "opacity-0");
+      scrollTopBtn.classList.remove("translate-y-0", "opacity-100");
+    }
+  });
+}
 
-        btn.addEventListener('click', () => {
-            menu.classList.toggle('hidden');
-        });
+function scrollToTop() {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+}
 
-        // Simple file upload interaction demo
-        const fileInput = document.getElementById('fileInput');
-        const fileList = document.getElementById('fileList');
-        
-        fileInput.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            fileList.innerHTML = '';
-            files.forEach(file => {
-                const div = document.createElement('div');
-                div.className = 'flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700';
-                div.innerHTML = `<span>${file.name}</span> <i class="fas fa-check text-green-400"></i>`;
-                fileList.appendChild(div);
-            });
-        });
+// Resume upload widgets
+const resumeFileInput = document.getElementById("resumeFileInput");
+const resumeFileList = document.getElementById("resumeFileList");
+
+if (resumeFileInput && resumeFileList) {
+  resumeFileInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files || []);
+    resumeFileList.innerHTML = "";
+    files.forEach((file) => {
+      const div = document.createElement("div");
+      div.className =
+        "flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700";
+      div.innerHTML = `<span>${file.name}</span> <i class="fas fa-check text-green-400"></i>`;
+      resumeFileList.appendChild(div);
+    });
+  });
+}
+
+// Job description upload widgets (still local-only; backend parsing is handled on resume upload)
+const jdFileInput = document.getElementById("jdFileInput");
+const jdFileList = document.getElementById("jdFileList");
+
+if (jdFileInput && jdFileList) {
+  jdFileInput.addEventListener("change", (e) => {
+    const files = Array.from(e.target.files || []);
+    jdFileList.innerHTML = "";
+    files.forEach((file) => {
+      const div = document.createElement("div");
+      div.className =
+        "flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700";
+      div.innerHTML = `<span>${file.name}</span> <i class="fas fa-check text-green-400"></i>`;
+      jdFileList.appendChild(div);
+    });
+  });
+}
 
 // START: Skill Management Functionality
 const jobDomainSelect = document.getElementById('jobDomainSelect'); // New ID
@@ -253,3 +227,243 @@ if (jobDomainSelect && skillSelect && skillTagsContainer) {
     }
 }
 // END: Skill Management Functionality
+
+// === Resume Upload API Integration (POST + GET) ===
+const RESUME_API_BASE = `${window.location.origin}/api/resumes/upload`;
+
+async function uploadResumesForUser() {
+  const userIdInput = document.getElementById("userIdInput");
+  if (!userIdInput) return;
+
+  const userId = userIdInput.value.trim();
+  if (!userId) {
+    alert("Please enter a valid User ID before uploading resumes.");
+    return;
+  }
+
+  if (!resumeFileInput || !resumeFileInput.files.length) {
+    alert("Please select at least one resume file to upload.");
+    return;
+  }
+
+  const formData = new FormData();
+  Array.from(resumeFileInput.files).forEach((file) => {
+    formData.append("files", file);
+  });
+
+  const token = localStorage.getItem("jwtToken");
+
+  try {
+    const response = await fetch(`${RESUME_API_BASE}/${encodeURIComponent(userId)}`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Upload failed");
+    }
+
+    await response.json().catch(() => null);
+    alert("Resumes uploaded successfully.");
+    resumeFileInput.value = "";
+    if (resumeFileList) resumeFileList.innerHTML = "";
+
+    // Refresh uploaded list
+    fetchUploadedResumes();
+  } catch (err) {
+    console.error("Resume upload error:", err);
+    alert("Failed to upload resumes: " + err.message);
+  }
+}
+
+async function fetchUploadedResumes() {
+  const userIdInput = document.getElementById("userIdInput");
+  const container = document.getElementById("uploadedResumes");
+  if (!userIdInput || !container) return;
+
+  const userId = userIdInput.value.trim();
+  if (!userId) {
+    container.innerHTML =
+      '<p class="text-sm text-gray-400">Enter a User ID and click "Load Uploaded Resumes".</p>';
+    return;
+  }
+
+  const token = localStorage.getItem("jwtToken");
+
+  container.innerHTML =
+    '<p class="text-sm text-gray-400">Loading uploaded resumes...</p>';
+
+  try {
+    const response = await fetch(`${RESUME_API_BASE}/${encodeURIComponent(userId)}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(text || "Failed to fetch resumes");
+    }
+
+    const data = await response.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      container.innerHTML =
+        '<p class="text-sm text-gray-400">No resumes found for this user.</p>';
+      return;
+    }
+
+    const list = document.createElement("div");
+    list.className = "space-y-2";
+
+    data.forEach((resume) => {
+      const row = document.createElement("div");
+      row.className =
+        "flex justify-between items-center bg-brand-dark p-3 rounded-lg border border-gray-700";
+      row.innerHTML = `
+        <div class="text-xs md:text-sm text-gray-200">
+          <div class="font-semibold">${resume.fileName || "Resume"}</div>
+          <div class="text-gray-400">${resume.originalFileName || ""}</div>
+        </div>
+        <span class="text-[10px] md:text-xs text-brand-accent">Uploaded</span>
+      `;
+      list.appendChild(row);
+    });
+
+    container.innerHTML = "";
+    container.appendChild(list);
+  } catch (err) {
+    console.error("Fetch resumes error:", err);
+    container.innerHTML =
+      '<p class="text-sm text-red-400">Error loading resumes. Please try again.</p>';
+  }
+}
+
+// === Job Creation Form Handler ===
+async function handleJobCreation(event) {
+  event.preventDefault();
+  
+  const jobTitle = document.getElementById('jobTitle').value.trim();
+  const jobDepartment = document.getElementById('jobDepartment').value.trim();
+  const requiredSkills = document.getElementById('requiredSkills').value.trim();
+  const preferredSkills = document.getElementById('preferredSkills').value.trim();
+  const minExperience = document.getElementById('minExperience').value;
+  const educationLevel = document.getElementById('educationLevel').value;
+  const jobDescription = document.getElementById('jobDescription').value.trim();
+  
+  // Client-side validation
+  if (!jobTitle) {
+    alert('Job Title is required.');
+    return;
+  }
+  
+  if (!requiredSkills) {
+    alert('At least one required skill must be provided.');
+    return;
+  }
+  
+  if (!minExperience || isNaN(minExperience) || parseFloat(minExperience) < 0) {
+    alert('Please enter a valid minimum experience (number >= 0).');
+    return;
+  }
+  
+  // Get userId from input or localStorage
+  const userIdInput = document.getElementById('userIdInput');
+  const userId = userIdInput ? userIdInput.value.trim() : localStorage.getItem('userId');
+  
+  if (!userId) {
+    alert('Please enter a User ID first.');
+    return;
+  }
+  
+  // Convert comma-separated skills to array
+  const requiredSkillsArray = requiredSkills.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  const preferredSkillsArray = preferredSkills ? preferredSkills.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
+  
+  // Build request body matching JobPosting entity
+  const requestBody = {
+    title: jobTitle,
+    department: jobDepartment || null,
+    description: jobDescription || null,
+    minExperienceYears: parseInt(minExperience),
+    educationLevel: educationLevel || null
+  };
+  
+  const token = localStorage.getItem('jwtToken');
+  const API_BASE = `${window.location.origin}/api/job-postings/create`;
+  
+  try {
+    const response = await fetch(`${API_BASE}?userId=${encodeURIComponent(userId)}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
+      body: JSON.stringify(requestBody)
+    });
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Failed to create job posting');
+    }
+    
+    const jobData = await response.json();
+    
+    // Store jobId and userId in localStorage
+    if (jobData && jobData.id) {
+      localStorage.setItem('jobId', jobData.id.toString());
+      localStorage.setItem('userId', userId);
+      
+      alert('Job posting created successfully! Job ID: ' + jobData.id);
+      
+      // Redirect to Resume Upload section (scroll to it or stay on page)
+      document.getElementById('resumeFileInput')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+      throw new Error('Invalid response from server');
+    }
+  } catch (error) {
+    console.error('Job creation error:', error);
+    alert('Failed to create job posting: ' + error.message);
+  }
+}
+
+// === Analyze Candidates Handler ===
+async function handleAnalyzeCandidates() {
+  const jobId = localStorage.getItem('jobId');
+  
+  if (!jobId) {
+    alert('Please create a job posting first before analyzing candidates.');
+    return;
+  }
+  
+  const token = localStorage.getItem('jwtToken');
+  const SCORE_API_BASE = `${window.location.origin}/api/score`;
+  
+  try {
+    // Trigger scoring
+    const scoreResponse = await fetch(`${SCORE_API_BASE}/${encodeURIComponent(jobId)}`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+    
+    if (!scoreResponse.ok) {
+      const errorText = await scoreResponse.text();
+      throw new Error(errorText || 'Failed to trigger scoring');
+    }
+    
+    const scoreData = await scoreResponse.json();
+    alert('Analysis started! ' + (scoreData.message || 'Scoring is running in the background.'));
+    
+    // Redirect to dashboard with jobId
+    window.location.href = `dashboard.html?jobId=${encodeURIComponent(jobId)}`;
+  } catch (error) {
+    console.error('Analyze error:', error);
+    alert('Failed to start analysis: ' + error.message);
+  }
+}
+
+// Expose functions for buttons in HTML
+window.uploadResumesForUser = uploadResumesForUser;
+window.fetchUploadedResumes = fetchUploadedResumes;
+window.handleJobCreation = handleJobCreation;
+window.handleAnalyzeCandidates = handleAnalyzeCandidates;

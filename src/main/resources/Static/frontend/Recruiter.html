@@ -86,30 +86,117 @@
             <h2 class="text-lg md:text-xl font-semibold text-white mb-2">1. Upload Resumes</h2>
             <p class="text-gray-400 text-sm mb-6">Select up to 20 PDF/DOCX files.</p>
 
-            <div class="border-2 border-dashed border-brand-accent/40 rounded-xl p-6 md:p-10 text-center hover:bg-brand-dark/50 hover:border-brand-accent transition cursor-pointer group" onclick="document.getElementById('fileInput').click()">
+            <div class="border-2 border-dashed border-brand-accent/40 rounded-xl p-6 md:p-10 text-center hover:bg-brand-dark/50 hover:border-brand-accent transition cursor-pointer group" onclick="document.getElementById('resumeFileInput').click()">
                 <i class="fas fa-cloud-upload-alt text-3xl md:text-4xl text-brand-accent mb-4 group-hover:scale-110 transition duration-300"></i>
                 <h3 class="text-base md:text-lg font-medium text-white">Drag & Drop Resumes</h3>
                 <p class="text-gray-500 text-xs md:text-sm mt-1">or click to browse</p>
-                <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx" class="hidden">
+                <input type="file" id="resumeFileInput" multiple accept=".pdf,.doc,.docx" class="hidden">
             </div>
 
-            <div id="fileList" class="mt-4 max-h-40 overflow-y-auto space-y-2 text-sm text-gray-300">
+            <div id="resumeFileList" class="mt-4 max-h-40 overflow-y-auto space-y-2 text-sm text-gray-300"></div>
+
+            <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+                <div class="md:col-span-1">
+                    <label for="userIdInput" class="block text-gray-300 text-sm font-medium mb-2">User ID</label>
+                    <input
+                        type="number"
+                        id="userIdInput"
+                        class="w-full bg-brand-dark border border-brand-accent/40 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent text-sm"
+                        placeholder="e.g. 1"
+                    />
                 </div>
+                <div class="md:col-span-2 flex gap-3 md:justify-end">
+                    <button
+                        type="button"
+                        onclick="uploadResumesForUser()"
+                        class="w-full md:w-auto px-6 py-2.5 rounded-lg bg-brand-primary text-white font-semibold shadow-lg hover:bg-blue-600 hover:shadow-brand-primary/50 transition"
+                    >
+                        Upload Resumes
+                    </button>
+                    <button
+                        type="button"
+                        onclick="fetchUploadedResumes()"
+                        class="w-full md:w-auto px-6 py-2.5 rounded-lg border border-brand-accent text-brand-accent font-semibold hover:bg-brand-accent hover:text-brand-dark transition"
+                    >
+                        Load Uploaded Resumes
+                    </button>
+                </div>
+            </div>
+
+            <div id="uploadedResumes" class="mt-6 border-t border-gray-700 pt-4 text-sm text-gray-300"></div>
         </section>
 
         <section class="bg-brand-card rounded-2xl p-5 md:p-8 mb-8 shadow-xl border border-gray-700/50 hover:border-brand-primary/30 transition duration-300">
             <h2 class="text-lg md:text-xl font-semibold text-white mb-2">2. Upload Job Description</h2>
             <p class="text-gray-400 text-sm mb-6">Select up to 20 PDF/DOCX files.</p>
 
-            <div class="border-2 border-dashed border-brand-accent/40 rounded-xl p-6 md:p-10 text-center hover:bg-brand-dark/50 hover:border-brand-accent transition cursor-pointer group" onclick="document.getElementById('fileInput').click()">
+            <div class="border-2 border-dashed border-brand-accent/40 rounded-xl p-6 md:p-10 text-center hover:bg-brand-dark/50 hover:border-brand-accent transition cursor-pointer group" onclick="document.getElementById('jdFileInput').click()">
                 <i class="fas fa-cloud-upload-alt text-3xl md:text-4xl text-brand-accent mb-4 group-hover:scale-110 transition duration-300"></i>
                 <h3 class="text-base md:text-lg font-medium text-white">Drag & Drop Job Descriptions</h3>
                 <p class="text-gray-500 text-xs md:text-sm mt-1">or click to browse</p>
-                <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx" class="hidden">
+                <input type="file" id="jdFileInput" multiple accept=".pdf,.doc,.docx" class="hidden">
             </div>
 
-            <div id="fileList" class="mt-4 max-h-40 overflow-y-auto space-y-2 text-sm text-gray-300">
+            <div id="jdFileList" class="mt-4 max-h-40 overflow-y-auto space-y-2 text-sm text-gray-300"></div>
+        </section>
+
+        <section class="bg-brand-card rounded-2xl p-5 md:p-8 mb-8 shadow-xl border border-gray-700/50">
+            <h2 class="text-lg md:text-xl font-semibold text-white mb-2">2. Create Job Posting</h2>
+            <p class="text-gray-400 text-sm mb-6">Fill in the job details to create a new job posting.</p>
+
+            <form id="jobCreationForm" onsubmit="handleJobCreation(event)" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="jobTitle" class="block text-gray-300 text-sm font-medium mb-2">Job Title <span class="text-red-400">*</span></label>
+                        <input type="text" id="jobTitle" required class="w-full bg-brand-dark border border-brand-accent/30 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent" placeholder="e.g. Senior Software Engineer">
+                    </div>
+                    <div>
+                        <label for="jobDepartment" class="block text-gray-300 text-sm font-medium mb-2">Department</label>
+                        <input type="text" id="jobDepartment" class="w-full bg-brand-dark border border-brand-accent/30 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent" placeholder="e.g. Engineering">
+                    </div>
                 </div>
+
+                <div>
+                    <label for="requiredSkills" class="block text-gray-300 text-sm font-medium mb-2">Required Skills (comma-separated) <span class="text-red-400">*</span></label>
+                    <input type="text" id="requiredSkills" required class="w-full bg-brand-dark border border-brand-accent/30 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent" placeholder="e.g. Java, Spring Boot, MySQL">
+                    <p class="text-gray-500 text-xs mt-1">Separate multiple skills with commas</p>
+                </div>
+
+                <div>
+                    <label for="preferredSkills" class="block text-gray-300 text-sm font-medium mb-2">Preferred Skills (optional, comma-separated)</label>
+                    <input type="text" id="preferredSkills" class="w-full bg-brand-dark border border-brand-accent/30 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent" placeholder="e.g. AWS, Docker, Kubernetes">
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="minExperience" class="block text-gray-300 text-sm font-medium mb-2">Minimum Experience (years) <span class="text-red-400">*</span></label>
+                        <input type="number" id="minExperience" required min="0" step="0.5" class="w-full bg-brand-dark border border-brand-accent/30 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent" placeholder="e.g. 3">
+                    </div>
+                    <div>
+                        <label for="educationLevel" class="block text-gray-300 text-sm font-medium mb-2">Education Level</label>
+                        <select id="educationLevel" class="w-full bg-brand-dark border border-brand-accent/30 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent">
+                            <option value="">Select Education Level</option>
+                            <option value="High School">High School</option>
+                            <option value="Associate Degree">Associate Degree</option>
+                            <option value="Bachelor's Degree">Bachelor's Degree</option>
+                            <option value="Master's Degree">Master's Degree</option>
+                            <option value="PhD">PhD</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="jobDescription" class="block text-gray-300 text-sm font-medium mb-2">Job Description</label>
+                    <textarea id="jobDescription" rows="5" class="w-full bg-brand-dark border border-brand-accent/30 text-white py-2.5 px-3 rounded-lg focus:outline-none focus:border-brand-accent" placeholder="Enter detailed job description..."></textarea>
+                </div>
+
+                <div class="flex justify-end">
+                    <button type="submit" class="px-8 py-3 rounded-lg bg-gradient-to-r from-brand-primary to-purple-600 text-white font-bold shadow-lg hover:shadow-brand-primary/50 transform hover:-translate-y-1 transition">
+                        Create Job Posting
+                    </button>
+                </div>
+            </form>
         </section>
 
         <section class="bg-brand-card rounded-2xl p-5 md:p-8 mb-8 shadow-xl border border-gray-700/50">
@@ -164,9 +251,9 @@
             <button id="clearAllBtn" type="button" aria-label="Clear all inputs" class="w-full sm:w-auto px-6 py-3 rounded-lg border border-brand-accent text-brand-accent hover:bg-brand-accent hover:text-brand-dark transition font-medium text-center">
                 Clear All
             </button>
-            <a href="dashboard.html" class="w-full sm:w-auto px-8 py-3 rounded-lg bg-gradient-to-r from-brand-primary to-purple-600 text-white font-bold shadow-lg hover:shadow-brand-primary/50 transform hover:-translate-y-1 transition text-center">
+            <button id="analyzeBtn" type="button" onclick="handleAnalyzeCandidates()" class="w-full sm:w-auto px-8 py-3 rounded-lg bg-gradient-to-r from-brand-primary to-purple-600 text-white font-bold shadow-lg hover:shadow-brand-primary/50 transform hover:-translate-y-1 transition text-center">
                 Analyze Candidates
-            </a>
+            </button>
         </div>
 
     </main>

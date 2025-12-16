@@ -243,9 +243,72 @@ function addSkill(event) {
 }
 
 
+// --- Load User Data from localStorage and Display ---
+function loadUserProfile() {
+    const userDataStr = localStorage.getItem('userData');
+    const token = localStorage.getItem('jwtToken');
+    
+    // If not logged in, redirect to home
+    if (!token) {
+        window.location.href = 'index.html';
+        return;
+    }
+    
+    if (userDataStr) {
+        try {
+            const userData = JSON.parse(userDataStr);
+            
+            // Update profile page with user data
+            const profileName = document.getElementById('profile-name');
+            const profileTitle = document.getElementById('profile-title');
+            const profileLocation = document.getElementById('profile-location');
+            const profileAbout = document.getElementById('profile-about');
+            
+            if (profileName && userData.name) {
+                profileName.textContent = userData.name;
+            }
+            if (profileTitle && userData.email) {
+                profileTitle.textContent = userData.email;
+            }
+            // Keep default location and about if not in userData
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+        }
+    }
+}
+
+// --- Logout Handler ---
+function handleLogoutClick() {
+    if (confirm('Are you sure you want to logout?')) {
+        if (typeof window.handleLogout === 'function') {
+            window.handleLogout();
+        } else {
+            // Fallback if nav.js not loaded
+            localStorage.removeItem('jwtToken');
+            localStorage.removeItem('userData');
+            localStorage.removeItem('jobId');
+            window.location.href = 'index.html';
+        }
+    }
+}
+
 // --- Initialization and Event Listeners ---
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Load user profile data
+    loadUserProfile();
+    
+    // Wire logout button
+    const logoutLinks = document.querySelectorAll('a[href="#"]');
+    logoutLinks.forEach(link => {
+        if (link.textContent.includes('Logout') || link.textContent.includes('Sign out')) {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                handleLogoutClick();
+            });
+        }
+    });
+    
     // Set Current Year
     const yearSpan = document.getElementById('year');
     if (yearSpan) {
