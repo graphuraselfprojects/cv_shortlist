@@ -1,308 +1,209 @@
-// Shared navbar, login & signup behaviour across all pages
-document.addEventListener("DOMContentLoaded", () => {
-  // Dynamically inject navbar into pages that define `nav-placeholder`
-  async function includeHTML(url, elementId) {
-    const placeholder = document.getElementById(elementId);
-    if (!placeholder) return;
+/* nav.js */
 
-    try {
-      const response = await fetch(url);
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status} (${url})`);
-      }
-      const html = await response.text();
-      placeholder.innerHTML = html;
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Load the Navbar
+    includeHTML('nav-bar.html', 'nav-placeholder').then(() => {
+        // 2. Once Navbar is loaded, update UI based on login state
+        updateNavbarUI();
+    });
 
-      initNavbarInteractions();
-    } catch (error) {
-      console.error(
-        `Could not load component from ${url}. If you are opening index.html directly (file://), this is expected. You must use a local server.`,
-        error
-      );
+    // Initialize AOS
+    if (typeof AOS !== 'undefined') {
+        AOS.init();
     }
-  }
-
-  includeHTML("nav-bar.html", "nav-placeholder");
-
-  const yearElement = document.getElementById("year");
-  if (yearElement) {
-    yearElement.textContent = new Date().getFullYear();
-  }
-
-  if (window.AOS) {
-    AOS.init();
-  }
-
-  // If a page already has the navbar markup inlined (rare), still wire events
-  if (document.getElementById("navbar")) {
-    initNavbarInteractions();
-  }
 });
 
-function initNavbarInteractions() {
-  const overlay = document.getElementById("overlay");
-  const loginPopup = document.getElementById("loginPopup");
-  const signupPopup = document.getElementById("signupPopup");
-  const mobileMenu = document.getElementById("mobile-menu");
-  const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+// Function to load external HTML
+async function includeHTML(url, elementId) {
+    const placeholder = document.getElementById(elementId);
+    if (!placeholder) return;
+    try {
+        const response = await fetch(url);
+        if (response.ok) {
+            placeholder.innerHTML = await response.text();
+        }
+    } catch (error) {
+        console.error(`Error loading ${url}:`, error);
+    }
+}
 
-  // Guard – some pages may not have auth modals
-  function toggleModal(modalId, show) {
+// --- CORE UI UPDATE LOGIC ---
+function updateNavbarUI() {
+    const token = localStorage.getItem('jwtToken');
+    
+    // Desktop Elements
+    const authButtons = document.getElementById('nav-auth-buttons');
+    const userProfile = document.getElementById('nav-user-profile');
+    
+    // Mobile Elements
+    const mobileAuth = document.getElementById('mobile-auth-buttons');
+    const mobileProfile = document.getElementById('mobile-user-profile');
+
+    if (token) {
+        // LOGGED IN: Hide Login/Signup, Show My Account
+        if (authButtons) authButtons.classList.add('hidden');
+        if (userProfile) userProfile.classList.remove('hidden');
+        
+        if (mobileAuth) mobileAuth.classList.add('hidden');
+        if (mobileProfile) mobileProfile.classList.remove('hidden');
+    } else {
+        // LOGGED OUT: Show Login/Signup, Hide My Account
+        if (authButtons) authButtons.classList.remove('hidden');
+        if (userProfile) userProfile.classList.add('hidden');
+        
+        if (mobileAuth) mobileAuth.classList.remove('hidden');
+        if (mobileProfile) mobileProfile.classList.add('hidden');
+    }
+}
+
+// --- Navigation Guard ---
+function handleRecruiterClick() {
+    const token = localStorage.getItem('jwtToken');
+    if (token) {
+        window.location.href = "Recruiter.html";
+    } else {
+        alert("Please login first to access the Recruiter Dashboard.");
+        openLogin();
+    }
+}
+
+// --- LOGIN LOGIC (Updates Name) ---
+async function handleLogin() {
+    
+    const loginUrl = `${CONFIG.API_BASE_URL}/login`;
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    const requestBody = { email: email, password: password };
+
+    
+
+    try {
+        const response = await fetch(loginUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            
+            // 1. Save Token
+            localStorage.setItem('jwtToken', data.token);
+
+            // NEW: Save the real ID and Name from backend
+            localStorage.setItem('userId', data.userId); 
+            localStorage.setItem('userName', data.name);
+
+            // 2. NAME HACK: Since backend doesn't return name, extract from email
+            // Example: ayush@gmail.com -> Ayush
+            const derivedName = email.split('@')[0];
+            // Capitalize first letter
+            const formattedName = derivedName.charAt(0).toUpperCase() + derivedName.slice(1);
+            localStorage.setItem('userName', formattedName);
+
+            // 3. Update UI and Redirect
+            updateNavbarUI();
+            alert("Login successful!");
+            window.location.href = "profile.html";
+            
+        } else {
+            const errorMessage = await response.text();
+            alert("Login Failed: " + errorMessage);
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong.");
+    }
+}
+
+// --- SIGNUP LOGIC (Saves Real Name) ---
+async function handleSignup() {
+    const name = document.getElementById('signup-name').value;
+    const email = document.getElementById('signup-email').value;
+    const password = document.getElementById('signup-password').value;
+
+    const requestBody = { name: name, email: email, password: password };
+    const apiUrl = `${CONFIG.API_BASE_URL}/register`;
+
+    try {
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            
+            // On signup, we KNOW the real name, so save it!
+            if(data.token) {
+                localStorage.setItem('jwtToken', data.token);
+                localStorage.setItem('userId', data.userId);
+                localStorage.setItem('userName', data.name);
+            }
+            
+            alert('Registration successful! Please login.');
+            closePopup();
+            openLogin();
+        } else {
+            const error = await response.text();
+            alert('Registration Failed: ' + error);
+        }
+    } catch (error) {
+        console.error('Network Error:', error);
+        alert('An unexpected network error occurred.');
+    }
+}
+
+// --- MODAL & LOGOUT UTILS ---
+function toggleModal(modalId, show) {
+    const overlay = document.getElementById('overlay');
     const modal = document.getElementById(modalId);
     if (!modal || !overlay) return;
 
     if (show) {
-      overlay.classList.remove("hidden");
-      setTimeout(() => overlay.classList.add("opacity-100"), 10);
-
-      modal.classList.remove("hidden");
-      setTimeout(() => {
-        modal.classList.remove("scale-90", "opacity-0");
-        modal.classList.add("scale-100", "opacity-100");
-      }, 10);
+        overlay.classList.remove('hidden');
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            overlay.classList.remove('opacity-0');
+            modal.classList.remove('scale-90', 'opacity-0');
+            modal.classList.add('scale-100', 'opacity-100');
+        }, 10);
     } else {
-      overlay.classList.remove("opacity-100");
-      modal.classList.remove("scale-100", "opacity-100");
-      modal.classList.add("scale-90", "opacity-0");
-
-      setTimeout(() => {
-        overlay.classList.add("hidden");
-        modal.classList.add("hidden");
-      }, 300);
+        overlay.classList.add('opacity-0');
+        modal.classList.remove('scale-100', 'opacity-100');
+        modal.classList.add('scale-90', 'opacity-0');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            modal.classList.add('hidden');
+        }, 300);
     }
-  }
-
-  window.closePopup = function () {
-    toggleModal("loginPopup", false);
-    toggleModal("signupPopup", false);
-  };
-
-  window.openLogin = function (isSwitch = false) {
-    if (isSwitch) {
-      toggleModal("signupPopup", false);
-      setTimeout(() => toggleModal("loginPopup", true), 100);
-    } else {
-      toggleModal("loginPopup", true);
-    }
-  };
-
-  window.openSignup = function (isSwitch = false) {
-    if (isSwitch) {
-      toggleModal("loginPopup", false);
-      setTimeout(() => toggleModal("signupPopup", true), 100);
-    } else {
-      toggleModal("signupPopup", true);
-    }
-  };
-
-  // Mobile menu toggle
-  if (mobileMenu && mobileMenuBtn) {
-    mobileMenuBtn.addEventListener("click", () => {
-      mobileMenu.classList.toggle("hidden");
-    });
-  }
-
-  // Nav button behaviour with login gating + redirect
-  const navButtons = document.querySelectorAll('[data-nav-target]');
-  navButtons.forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const target = btn.getAttribute("data-nav-target");
-      const token = localStorage.getItem("jwtToken");
-
-      // If not logged in, open login popup and remember desired page
-      if (!token && (target === "Recruiter.html" || target === "dashboard.html")) {
-        localStorage.setItem("redirectAfterLogin", target);
-        if (mobileMenu) mobileMenu.classList.add("hidden");
-        window.openLogin(false);
-      } else {
-        if (mobileMenu) mobileMenu.classList.add("hidden");
-        window.location.href = target;
-      }
-    });
-  });
-
-  // Login / Signup buttons on navbar
-  document.querySelectorAll("[data-open-login]").forEach((el) => {
-    el.addEventListener("click", () => {
-      window.openLogin(false);
-      if (mobileMenu) mobileMenu.classList.add("hidden");
-    });
-  });
-
-  document.querySelectorAll("[data-open-signup]").forEach((el) => {
-    el.addEventListener("click", () => {
-      window.openSignup(false);
-      if (mobileMenu) mobileMenu.classList.add("hidden");
-    });
-  });
-
-  // Active link styling based on current page
-  const currentPage = window.location.pathname.split("/").pop() || "index.html";
-  navButtons.forEach((btn) => {
-    const target = btn.getAttribute("data-nav-target");
-    if (target === currentPage) {
-      btn.classList.add("text-brand-primary");
-    }
-  });
-
-  // Wire modal submit buttons if they exist
-  if (loginPopup) {
-    const loginBtn = loginPopup.querySelector("button[onclick], button[data-login-submit]");
-    if (loginBtn) {
-      loginBtn.onclick = handleLogin;
-    }
-  }
-  if (signupPopup) {
-    const signupBtn = signupPopup.querySelector("button[onclick], button[data-signup-submit]");
-    if (signupBtn) {
-      signupBtn.onclick = handleSignup;
-    }
-  }
 }
 
-// Shared login / signup handlers used across pages
-const AUTH_BASE_URL = CONFIG && CONFIG.API_BASE_URL ? CONFIG.API_BASE_URL : "/api/auth";
-
-async function handleLogin() {
-  const emailInput = document.getElementById("login-email");
-  const passwordInput = document.getElementById("login-password");
-
-  if (!emailInput || !passwordInput) return;
-
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-
-  if (!email || !password) {
-    alert("Please enter both email and password.");
-    return;
-  }
-
-  const requestBody = { email, password };
-
-  try {
-    const response = await fetch(`${AUTH_BASE_URL}/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-
-      if (data && data.token) {
-        localStorage.setItem("jwtToken", data.token);
-        // Store user data from login form
-        const userData = {
-          email: email,
-          name: email.split("@")[0], // Fallback name from email if not available
-        };
-        localStorage.setItem("userData", JSON.stringify(userData));
-      }
-
-      const desired = localStorage.getItem("redirectAfterLogin");
-      localStorage.removeItem("redirectAfterLogin");
-
-      // Close popup then redirect
-      if (typeof window.closePopup === "function") {
-        window.closePopup();
-      }
-
-      // Always redirect to profile page after successful login
-      window.location.href = "profile.html";
-    } else {
-      const errorMessage = await response.text();
-      alert("Login Failed: " + (errorMessage || "Invalid credentials"));
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Something went wrong while logging in. Please try again.");
-  }
+function closePopup() {
+    toggleModal('loginPopup', false);
+    toggleModal('signupPopup', false);
+}
+function openLogin(isSwitch) {
+    if(isSwitch) toggleModal('signupPopup', false);
+    toggleModal('loginPopup', true);
+}
+function openSignup(isSwitch) {
+    if(isSwitch) toggleModal('loginPopup', false);
+    toggleModal('signupPopup', true);
+}
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    if(menu) menu.classList.toggle('hidden');
 }
 
-async function handleSignup() {
-  const nameInput = document.getElementById("signup-name");
-  const emailInput = document.getElementById("signup-email");
-  const passwordInput = document.getElementById("signup-password");
-
-  if (!nameInput || !emailInput || !passwordInput) return;
-
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim();
-  const password = passwordInput.value.trim();
-
-  if (!name || !email || !password) {
-    alert("Please fill all signup fields.");
-    return;
-  }
-
-  const requestBody = { name, email, password };
-
-  try {
-    const response = await fetch(`${AUTH_BASE_URL}/register`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (response.ok) {
-      const data = await response.json().catch(() => null);
-      
-      // Store user data from signup form
-      if (data && data.token) {
-        localStorage.setItem("jwtToken", data.token);
-      }
-      const userData = {
-        name: name,
-        email: email,
-      };
-      localStorage.setItem("userData", JSON.stringify(userData));
-      
-      alert("Registration successful! Redirecting to profile...");
-
-      if (typeof window.closePopup === "function") {
-        window.closePopup();
-      }
-      
-      // Redirect to profile page after signup
-      window.location.href = "profile.html";
-    } else {
-      const error = await response.text();
-      console.error("Registration Failed:", error);
-      alert("Registration Failed: " + (error || "Unable to register"));
-    }
-  } catch (error) {
-    console.error("Network Error:", error);
-    alert("An unexpected network error occurred. Please try again.");
-  }
-}
-
-// Logout function - clears localStorage and redirects to login
-window.handleLogout = function() {
-  localStorage.removeItem("jwtToken");
-  localStorage.removeItem("userData");
-  localStorage.removeItem("jobId");
-  localStorage.removeItem("redirectAfterLogin");
-  
-  // Redirect to home page (which will show login)
-  window.location.href = "index.html";
-};
-
-// Route protection utility - check if user is logged in
-window.requireAuth = function() {
-  const token = localStorage.getItem("jwtToken");
-  if (!token) {
-    // Store current page to redirect after login
-    const currentPage = window.location.pathname.split("/").pop();
-    if (currentPage !== "index.html" && currentPage !== "profile.html") {
-      localStorage.setItem("redirectAfterLogin", currentPage);
-    }
-    // Redirect to home page to show login
-    window.location.href = "index.html";
-    return false;
-  }
-  return true;
-};
+// Expose functions globally
+window.handleRecruiterClick = handleRecruiterClick;
+window.handleLogin = handleLogin;
+window.handleSignup = handleSignup;
+window.openLogin = openLogin;
+window.openSignup = openSignup;
+window.closePopup = closePopup;
+window.toggleMobileMenu = toggleMobileMenu;
+window.updateNavbarUI = updateNavbarUI;

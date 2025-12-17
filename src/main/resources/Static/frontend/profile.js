@@ -1,33 +1,21 @@
 /**
  * profile.js
- * * This script contains the necessary JavaScript functions for the 'My Account' page, 
- * including dynamic addition of Experience, Education, and Skills.
  */
 
 // --- 1. Mobile Menu Toggle ---
 function toggleMobileMenu() {
     const mobileMenu = document.getElementById('mobile-menu');
-    const isHidden = mobileMenu.classList.contains('hidden');
-
-    if (isHidden) {
-        mobileMenu.classList.remove('hidden');
-    } else {
-        mobileMenu.classList.add('hidden');
-    }
+    if (!mobileMenu) return; // Guard clause
+    mobileMenu.classList.toggle('hidden');
 }
 
 // --- 2. Scroll to Top Functionality ---
-
 function scrollToTop() {
-    window.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 function handleScrollToTopButton() {
     const scrollTopBtn = document.getElementById('scrollTopBtn');
-    
     if (!scrollTopBtn) return;
 
     if (window.scrollY > 300) {
@@ -40,11 +28,9 @@ function handleScrollToTopButton() {
 }
 
 // --- 3. Navigation Bar Scroll Styling ---
-
 function handleNavbarScroll() {
     const navbar = document.getElementById('navbar');
     if (!navbar) return;
-
     if (window.scrollY > 50) {
         navbar.classList.add('shadow-xl', 'border-opacity-0');
     } else {
@@ -52,8 +38,7 @@ function handleNavbarScroll() {
     }
 }
 
-// --- 4. Profile Editing Functionality (Basic Info) ---
-
+// --- 4. Profile Editing Functionality ---
 const editProfileModal = document.getElementById('edit-profile-modal');
 const editModalContent = document.getElementById('edit-modal-content');
 
@@ -66,12 +51,9 @@ function loadProfileDataToForm() {
 
 function openEditProfileModal() {
     if (!editProfileModal || !editModalContent) return;
-
     loadProfileDataToForm();
-
     editProfileModal.classList.remove('hidden');
     void editProfileModal.offsetWidth; 
-    
     editProfileModal.classList.add('opacity-100');
     editModalContent.classList.remove('scale-95', 'opacity-0');
     editModalContent.classList.add('scale-100', 'opacity-100');
@@ -79,29 +61,18 @@ function openEditProfileModal() {
 
 function closeEditProfileModal() {
     if (!editProfileModal || !editModalContent) return;
-
     editProfileModal.classList.remove('opacity-100');
     editModalContent.classList.remove('scale-100', 'opacity-100');
     editModalContent.classList.add('scale-95', 'opacity-0');
-
-    setTimeout(() => {
-        editProfileModal.classList.add('hidden');
-    }, 300);
+    setTimeout(() => { editProfileModal.classList.add('hidden'); }, 300);
 }
 
 function saveProfileChanges(event) {
     event.preventDefault();
-
-    const newName = document.getElementById('edit-name').value;
-    const newTitle = document.getElementById('edit-title').value;
-    const newLocation = document.getElementById('edit-location').value;
-    const newAbout = document.getElementById('edit-about').value;
-
-    document.getElementById('profile-name').textContent = newName;
-    document.getElementById('profile-title').textContent = newTitle;
-    document.getElementById('profile-location').textContent = newLocation;
-    document.getElementById('profile-about').textContent = newAbout;
-
+    document.getElementById('profile-name').textContent = document.getElementById('edit-name').value;
+    document.getElementById('profile-title').textContent = document.getElementById('edit-title').value;
+    document.getElementById('profile-location').textContent = document.getElementById('edit-location').value;
+    document.getElementById('profile-about').textContent = document.getElementById('edit-about').value;
     closeEditProfileModal();
 }
 
@@ -110,7 +81,6 @@ function handlePhotoUpload(event) {
     const file = event.target.files[0];
     const profilePhoto = document.getElementById('profile-photo');
     const photoPlaceholder = document.getElementById('photo-placeholder');
-    
     if (file) {
         const reader = new FileReader();
         reader.onload = (e) => {
@@ -122,19 +92,15 @@ function handlePhotoUpload(event) {
     }
 }
 
-// --- 6. Generic Add Modal Functions (Experience, Education, Skill) ---
-
+// --- 6. Generic Add Modal Functions ---
 function openAddModal(type) {
     const modal = document.getElementById(`add-${type}-modal`);
     const content = document.getElementById(`add-${type}-modal-content`);
     const form = document.getElementById(`add-${type}-form`);
-
     if (!modal || !content) return;
-    form.reset(); // Clear any previous input
-
+    form.reset();
     modal.classList.remove('hidden');
     void modal.offsetWidth; 
-    
     modal.classList.add('opacity-100');
     content.classList.remove('scale-95', 'opacity-0');
     content.classList.add('scale-100', 'opacity-100');
@@ -143,24 +109,16 @@ function openAddModal(type) {
 function closeAddModal(type) {
     const modal = document.getElementById(`add-${type}-modal`);
     const content = document.getElementById(`add-${type}-modal-content`);
-    
     if (!modal || !content) return;
-
     modal.classList.remove('opacity-100');
     content.classList.remove('scale-100', 'opacity-100');
     content.classList.add('scale-95', 'opacity-0');
-
-    setTimeout(() => {
-        modal.classList.add('hidden');
-    }, 300);
+    setTimeout(() => { modal.classList.add('hidden'); }, 300);
 }
 
-
-// --- 7. Specific Add Functions ---
-
+// --- 7. Specific Add Functions (Experience, Education, Skill) ---
 function addExperience(event) {
     event.preventDefault();
-    
     const title = document.getElementById('exp-title').value;
     const company = document.getElementById('exp-company').value;
     const start = document.getElementById('exp-start').value;
@@ -168,8 +126,6 @@ function addExperience(event) {
     const description = document.getElementById('exp-description').value;
     
     const container = document.getElementById('experience-container');
-
-    // Create the new HTML element
     const newEntry = document.createElement('div');
     newEntry.classList.add('flex', 'items-start');
     newEntry.innerHTML = `
@@ -182,25 +138,18 @@ function addExperience(event) {
             ${description ? `<p class="text-gray-500 text-sm mt-1">${description}</p>` : ''}
         </div>
     `;
-
-    // Prepend the new entry to the container (like LinkedIn, new items go to the top)
     container.prepend(newEntry);
-
     closeAddModal('experience');
 }
 
-
 function addEducation(event) {
     event.preventDefault();
-
     const degree = document.getElementById('edu-degree').value;
     const school = document.getElementById('edu-school').value;
     const startYear = document.getElementById('edu-start-year').value;
     const endYear = document.getElementById('edu-end-year').value;
 
     const container = document.getElementById('education-container');
-
-    // Create the new HTML element
     const newEntry = document.createElement('div');
     newEntry.classList.add('flex', 'items-start');
     newEntry.innerHTML = `
@@ -212,157 +161,75 @@ function addEducation(event) {
             <p class="text-gray-400 text-sm">${school} | ${startYear} – ${endYear}</p>
         </div>
     `;
-
-    // Prepend the new entry to the container
     container.prepend(newEntry);
-    
     closeAddModal('education');
 }
 
 function addSkill(event) {
     event.preventDefault();
-
     const skillName = document.getElementById('skill-name').value;
     const verified = document.getElementById('skill-verified').checked;
-
     const container = document.getElementById('skills-container');
 
-    // Create the new HTML element
     const newEntry = document.createElement('span');
     newEntry.classList.add('px-3', 'py-1', 'bg-brand-primary/20', 'text-brand-accent', 'rounded-full', 'text-sm', 'font-medium');
     newEntry.textContent = skillName;
-
-    if (verified) {
-        newEntry.innerHTML += ` <i class="fas fa-check-circle ml-1"></i>`;
-    }
-
-    // Append the new skill to the container
+    if (verified) { newEntry.innerHTML += ` <i class="fas fa-check-circle ml-1"></i>`; }
     container.appendChild(newEntry);
-
     closeAddModal('skill');
 }
 
-
-// --- Load User Data from localStorage and Display ---
-function loadUserProfile() {
-    const userDataStr = localStorage.getItem('userData');
-    const token = localStorage.getItem('jwtToken');
+// --- 8. LOGOUT FUNCTIONALITY (New) ---
+function handleLogout() {
+    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('userName'); // Clean up name too
     
-    // If not logged in, redirect to home
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-    
-    if (userDataStr) {
-        try {
-            const userData = JSON.parse(userDataStr);
-            
-            // Update profile page with user data
-            const profileName = document.getElementById('profile-name');
-            const profileTitle = document.getElementById('profile-title');
-            const profileLocation = document.getElementById('profile-location');
-            const profileAbout = document.getElementById('profile-about');
-            
-            if (profileName && userData.name) {
-                profileName.textContent = userData.name;
-            }
-            if (profileTitle && userData.email) {
-                profileTitle.textContent = userData.email;
-            }
-            // Keep default location and about if not in userData
-        } catch (e) {
-            console.error('Error parsing user data:', e);
-        }
-    }
+    // Simply redirect to home. 
+    // nav.js will handle the UI state if they stay on a page that allows public access.
+    window.location.href = "index.html";
 }
 
-// --- Logout Handler ---
-function handleLogoutClick() {
-    if (confirm('Are you sure you want to logout?')) {
-        if (typeof window.handleLogout === 'function') {
-            window.handleLogout();
-        } else {
-            // Fallback if nav.js not loaded
-            localStorage.removeItem('jwtToken');
-            localStorage.removeItem('userData');
-            localStorage.removeItem('jobId');
-            window.location.href = 'index.html';
-        }
-    }
-}
-
-// --- Initialization and Event Listeners ---
-
+// --- Initialization ---
 document.addEventListener('DOMContentLoaded', () => {
-    // Load user profile data
-    loadUserProfile();
-    
-    // Wire logout button
-    const logoutLinks = document.querySelectorAll('a[href="#"]');
-    logoutLinks.forEach(link => {
-        if (link.textContent.includes('Logout') || link.textContent.includes('Sign out')) {
-            link.addEventListener('click', (e) => {
-                e.preventDefault();
-                handleLogoutClick();
-            });
-        }
-    });
-    
-    // Set Current Year
+    // Set Year
     const yearSpan = document.getElementById('year');
-    if (yearSpan) {
-        yearSpan.textContent = new Date().getFullYear();
-    }
+    if (yearSpan) yearSpan.textContent = new Date().getFullYear();
 
-    // Initialize AOS (Animate On Scroll)
-    if (window.AOS) {
+    // Init AOS
+    if (typeof AOS !== 'undefined') {
         AOS.init({
-            disable: false, 
-            startEvent: 'DOMContentLoaded', 
-            initClassName: 'aos-init', 
-            animatedClassName: 'aos-animate', 
-            useClassNames: false, 
-            disableMutationObserver: false, 
-            debounceDelay: 50, 
-            throttleDelay: 99, 
-            offset: 120, 
-            delay: 0, 
-            duration: 800, 
-            easing: 'ease', 
-            once: true, 
-            mirror: false, 
-            anchorPlacement: 'top-bottom', 
+            disable: false, startEvent: 'DOMContentLoaded', initClassName: 'aos-init', 
+            animatedClassName: 'aos-animate', useClassNames: false, disableMutationObserver: false, 
+            debounceDelay: 50, throttleDelay: 99, offset: 120, delay: 0, duration: 800, 
+            easing: 'ease', once: true, mirror: false, anchorPlacement: 'top-bottom',
         });
     }
 
-    // Attach the photo upload handler
+    // Photo Upload
     const photoUploadInput = document.getElementById('photo-upload');
     if (photoUploadInput) {
         photoUploadInput.addEventListener('change', handlePhotoUpload);
     }
 });
 
-// Event listener for scroll events
+// Window Event Listeners
 window.addEventListener('scroll', () => {
     handleScrollToTopButton();
     handleNavbarScroll();
 });
 
-// Initial call to set the correct state on load
 handleScrollToTopButton();
 handleNavbarScroll();
 
-// Expose the function to the global scope so it can be called from the HTML `onclick`
+// Expose Global Functions
 window.toggleMobileMenu = toggleMobileMenu;
 window.scrollToTop = scrollToTop;
 window.openEditProfileModal = openEditProfileModal;
 window.closeEditProfileModal = closeEditProfileModal;
 window.saveProfileChanges = saveProfileChanges;
-
-// Expose the new add/close functions
 window.openAddModal = openAddModal;
 window.closeAddModal = closeAddModal;
 window.addExperience = addExperience;
 window.addEducation = addEducation;
 window.addSkill = addSkill;
+window.handleLogout = handleLogout; // Exposed Logout

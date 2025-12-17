@@ -107,9 +107,6 @@
 			<version>0.13.0</version>
 			<scope>runtime</scope>
 		</dependency>
-
-
-
 		<!-- Test -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

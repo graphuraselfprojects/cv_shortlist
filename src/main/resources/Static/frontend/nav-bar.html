@@ -1,104 +1,63 @@
-<nav class="fixed w-full z-50 transition-all duration-300 glass-nav shadow-lg" id="navbar">
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex justify-between items-center h-20">
-      <a href="index.html" class="flex-shrink-0 flex items-center gap-2 group">
-        <img
-          src="images/graphuralogo.png"
-          alt="Graphura Logo"
-          class="h-16 w-auto transition-transform duration-300 group-hover:scale-105 group-hover:rotate-2"
-        />
-      </a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Navbar</title>
+</head>
+<body>
+    <nav class="fixed w-full z-50 transition-all duration-300 glass-nav shadow-lg" id="navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-20">
+            <a href="index.html" class="flex-shrink-0 flex items-center gap-2 group">
+                <img src="images/graphuralogo.png" alt="Graphura Logo" class="h-16 w-auto transition-transform duration-300 group-hover:scale-105 group-hover:rotate-2">
+            </a>
 
-      <div class="hidden md:flex space-x-8 items-center">
-        <button
-          type="button"
-          data-nav-target="index.html"
-          class="nav-link text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation"
-        >
-          Home
-        </button>
-        <button
-          type="button"
-          data-nav-target="Recruiter.html"
-          class="nav-link text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation"
-        >
-          Recruiter
-        </button>
-        <button
-          type="button"
-          data-nav-target="dashboard.html"
-          class="nav-link text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation"
-        >
-          Analytics
-        </button>
-        <button
-          type="button"
-          class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation"
-          data-open-login="true"
-        >
-          Login
-        </button>
-        <button
-          type="button"
-          data-open-signup="true"
-          class="px-6 py-2.5 rounded-full bg-brand-primary text-white font-semibold shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95"
-        >
-          Sign Up
-        </button>
-      </div>
+            <div class="hidden md:flex space-x-8 items-center">
+                <a href="index.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Home</a>
+                
+                <a href="javascript:void(0)" onclick="handleRecruiterClick()" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Recruiter</a>
+                
+                <div id="nav-auth-buttons" class="flex items-center space-x-6">
+                    <button onclick="openLogin()" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Login</button>
+                    <button onclick="openSignup()" class="px-6 py-2.5 rounded-full bg-brand-primary text-white font-semibold shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95">
+                        Sign Up
+                    </button>
+                </div>
 
-      <div class="md:hidden flex items-center">
-        <button
-          id="mobile-menu-btn"
-          type="button"
-          class="text-gray-800 hover:text-brand-primary focus:outline-none p-2 transition-transform active:scale-90"
-        >
-          <i class="fas fa-bars text-2xl"></i>
-        </button>
-      </div>
+                <div id="nav-user-profile" class="hidden">
+                    <a href="profile.html" class="px-6 py-2.5 rounded-full bg-brand-primary text-white font-semibold shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95 flex items-center gap-2">
+                        <i class="fas fa-user-circle"></i>
+                        My Account
+                    </a>
+                </div>
+            </div>
+
+            <div class="md:hidden flex items-center">
+                <button onclick="toggleMobileMenu()" class="text-gray-800 hover:text-brand-primary focus:outline-none p-2 transition-transform active:scale-90">
+                    <i class="fas fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div
-    id="mobile-menu"
-    class="hidden md:hidden bg-white/95 backdrop-blur-md border-t absolute w-full left-0 shadow-xl transition-all duration-300 origin-top transform scale-y-100"
-  >
-    <div class="px-4 pt-2 pb-6 space-y-2">
-      <button
-        type="button"
-        data-nav-target="index.html"
-        class="nav-link block w-full text-left px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors"
-      >
-        Home
-      </button>
-      <button
-        type="button"
-        data-nav-target="Recruiter.html"
-        class="nav-link block w-full text-left px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors"
-      >
-        Recruiter
-      </button>
-      <button
-        type="button"
-        data-nav-target="dashboard.html"
-        class="nav-link block w-full text-left px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors"
-      >
-        Analytics
-      </button>
-      <button
-        type="button"
-        data-open-login="true"
-        class="block w-full text-left px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors"
-      >
-        Login
-      </button>
-      <button
-        type="button"
-        data-open-signup="true"
-        class="block w-full text-left px-4 py-3 text-brand-primary font-bold bg-brand-primary/5 hover:bg-brand-primary/10 rounded-lg transition-colors"
-      >
-        Sign Up
-      </button>
+    <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-md border-t absolute w-full left-0 shadow-xl transition-all duration-300 origin-top transform scale-y-100">
+        <div class="px-4 pt-2 pb-6 space-y-2">
+            <a href="index.html" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Home</a>
+            <a href="javascript:void(0)" onclick="handleRecruiterClick()" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Recruiter</a>
+            
+            <div id="mobile-auth-buttons">
+                <a href="#" onclick="openLogin()" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Login</a>
+                <a href="#" onclick="openSignup()" class="block px-4 py-3 text-brand-primary font-bold bg-brand-primary/5 hover:bg-brand-primary/10 rounded-lg transition-colors">Sign Up</a>
+            </div>
+
+            <div id="mobile-user-profile" class="hidden">
+                <a href="profile.html" class="block px-4 py-3 text-brand-primary font-bold bg-brand-primary/5 hover:bg-brand-primary/10 rounded-lg transition-colors">
+                    <i class="fas fa-user-circle mr-2"></i> My Account
+                </a>
+            </div>
+        </div>
     </div>
-  </div>
 </nav>
+</body>
+</html>

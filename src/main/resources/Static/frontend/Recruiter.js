@@ -1,469 +1,409 @@
-// Recruiter page specific behaviour (upload UI + skills). Shared navbar/auth lives in nav.js.
+/**
+ * Recruiter.js
+ * Handles AOS init, Popups, File Uploads, and Skill Management
+ */
 
-// Route protection - check login on page load
 document.addEventListener('DOMContentLoaded', () => {
-  if (typeof window.requireAuth === 'function') {
-    if (!window.requireAuth()) {
-      return; // Redirect will happen in requireAuth
+    
+    // --- 1. Init AOS ---
+    if (typeof AOS !== 'undefined') {
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true,
+            offset: 100,
+            mirror: false
+        });
     }
-  } else {
-    // Fallback protection
-    const token = localStorage.getItem('jwtToken');
-    if (!token) {
-      window.location.href = 'index.html';
-      return;
+
+    // --- 2. Set Year ---
+    const yearEl = document.getElementById('year');
+    if (yearEl) {
+        yearEl.textContent = new Date().getFullYear();
     }
-  }
-  
-  // Load userId from localStorage if available
-  const storedUserId = localStorage.getItem('userId');
-  const userIdInput = document.getElementById('userIdInput');
-  if (storedUserId && userIdInput) {
-    userIdInput.value = storedUserId;
-  }
-});
 
-if (window.AOS) {
-  AOS.init({
-    duration: 800,
-    easing: "ease-in-out",
-    once: true,
-    offset: 100,
-    mirror: false,
-  });
-}
+    // --- 3. Popup Logic ---
+    const loginPopup = document.getElementById('loginPopup');
+    const signupPopup = document.getElementById('signupPopup');
+    const overlay = document.getElementById('overlay');
+    
+    // Helper to toggle modal visibility safely
+    window.toggleModal = function(modalId, show) {
+        const modal = document.getElementById(modalId);
+        const overlay = document.getElementById('overlay');
+        
+        if (!modal || !overlay) return;
 
-const scrollTopBtn = document.getElementById("scrollTopBtn");
-if (scrollTopBtn) {
-  window.addEventListener("scroll", () => {
-    if (window.scrollY > 300) {
-      scrollTopBtn.classList.remove("translate-y-24", "opacity-0");
-      scrollTopBtn.classList.add("translate-y-0", "opacity-100");
-    } else {
-      scrollTopBtn.classList.add("translate-y-24", "opacity-0");
-      scrollTopBtn.classList.remove("translate-y-0", "opacity-100");
+        if (show) {
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.add('opacity-100'), 10);
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.classList.remove('scale-90', 'opacity-0');
+                modal.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        } else {
+            overlay.classList.remove('opacity-100');
+            modal.classList.remove('scale-100', 'opacity-100');
+            modal.classList.add('scale-90', 'opacity-0');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                modal.classList.add('hidden');
+            }, 300);
+        }
+    };
+
+    window.closePopup = function() {
+        toggleModal('loginPopup', false);
+        toggleModal('signupPopup', false);
+    };
+
+    window.openLogin = function(isSwitch = false) {
+        if (isSwitch) {
+            toggleModal('signupPopup', false);
+            setTimeout(() => toggleModal('loginPopup', true), 100); 
+        } else {
+            toggleModal('loginPopup', true);
+        }
+    };
+
+    window.openSignup = function(isSwitch = false) {
+        if (isSwitch) {
+            toggleModal('loginPopup', false);
+            setTimeout(() => toggleModal('signupPopup', true), 100);
+        } else {
+            toggleModal('signupPopup', true);
+        }
+    };
+
+    // --- 4. Mobile Menu ---
+    const btn = document.getElementById('mobile-menu-btn'); // Ensure you have this ID in HTML if used
+    const menu = document.getElementById('mobile-menu');
+    if (btn && menu) {
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+        });
     }
-  });
-}
 
-function scrollToTop() {
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth",
-  });
-}
+    // --- 5. File Upload Logic (Visual Only) ---
+    // Handle multiple file inputs (Resumes & JDs)
+    const fileInputs = ['fileInput', 'jdInput'];
+    
+    fileInputs.forEach(inputId => {
+        const input = document.getElementById(inputId);
+        // Find the specific list container associated with this input
+        // (Assuming the list is immediately after the parent section or found by ID)
+        // For simplicity, we'll map IDs to their list containers if they are unique
+        let listId = inputId === 'fileInput' ? 'fileList' : 'jdList'; 
+        const list = document.getElementById(listId);
 
-// Resume upload widgets
-const resumeFileInput = document.getElementById("resumeFileInput");
-const resumeFileList = document.getElementById("resumeFileList");
-
-if (resumeFileInput && resumeFileList) {
-  resumeFileInput.addEventListener("change", (e) => {
-    const files = Array.from(e.target.files || []);
-    resumeFileList.innerHTML = "";
-    files.forEach((file) => {
-      const div = document.createElement("div");
-      div.className =
-        "flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700";
-      div.innerHTML = `<span>${file.name}</span> <i class="fas fa-check text-green-400"></i>`;
-      resumeFileList.appendChild(div);
+        if (input && list) {
+            input.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                list.innerHTML = ''; // Clear current list
+                files.forEach(file => {
+                    const div = document.createElement('div');
+                    div.className = 'flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700 mt-2';
+                    div.innerHTML = `<span class="truncate max-w-[80%]">${file.name}</span> <i class="fas fa-check text-green-400"></i>`;
+                    list.appendChild(div);
+                });
+            });
+        }
     });
-  });
-}
 
-// Job description upload widgets (still local-only; backend parsing is handled on resume upload)
-const jdFileInput = document.getElementById("jdFileInput");
-const jdFileList = document.getElementById("jdFileList");
 
-if (jdFileInput && jdFileList) {
-  jdFileInput.addEventListener("change", (e) => {
-    const files = Array.from(e.target.files || []);
-    jdFileList.innerHTML = "";
-    files.forEach((file) => {
-      const div = document.createElement("div");
-      div.className =
-        "flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700";
-      div.innerHTML = `<span>${file.name}</span> <i class="fas fa-check text-green-400"></i>`;
-      jdFileList.appendChild(div);
-    });
-  });
-}
+    // --- 6. SKILL MANAGEMENT SYSTEM (The Fix) ---
+    const jobDomainSelect = document.getElementById('jobDomainSelect');
+    const skillSelect = document.getElementById('skillSelect'); 
+    const skillTagsContainer = document.getElementById('skillTags');
+    const addSkillBtn = document.getElementById('addSkillBtn'); // Optional if you have a button
 
-// START: Skill Management Functionality
-const jobDomainSelect = document.getElementById('jobDomainSelect'); // New ID
-const skillSelect = document.getElementById('skillSelect'); 
-const skillTagsContainer = document.getElementById('skillTags');
+    // Map Domains to Skills
+    const domainToSkillsMap = {
+        "Sales & Marketing": ["Market Research", "SEO", "Content Strategy", "CRM (Salesforce)", "Email Marketing", "Social Media Advertising", "Lead Generation", "Public Relations", "Brand Management"],
+        "Data Science & Analytics": ["Python", "R", "SQL", "Machine Learning", "Data Visualization", "Big Data", "Statistical Analysis", "Deep Learning", "Pandas", "NumPy"],
+        "Human Resources": ["Recruitment", "Onboarding", "Employee Relations", "HRIS", "Compensation & Benefits", "Labor Law", "Performance Management", "Talent Acquisition"],
+        "Social Media Management": ["Instagram Marketing", "Facebook Ads", "Community Management", "TikTok Strategy", "Content Scheduling", "Analytics", "Crisis Communication", "Influencer Marketing"],
+        "Digital Marketing": ["Google Ads", "SEO", "PPC", "Google Analytics", "Content Marketing", "CRO", "Email Marketing", "Marketing Automation", "HubSpot"],
+        "Graphic Design": ["Adobe Photoshop", "Adobe Illustrator", "InDesign", "Branding", "Typography", "UI/UX Design", "Print Design", "Vector Graphics", "Figma"],
+        "Video Editing": ["Adobe Premiere Pro", "Final Cut Pro", "Motion Graphics", "Color Correction", "Sound Design", "After Effects", "Davinci Resolve"],
+        "Full Stack Developer": ["JavaScript", "Node.js", "React", "Python", "SQL", "NoSQL", "AWS", "REST APIs", "Git"],
+        "MERN Stack Developer": ["MongoDB", "Express.js", "React", "Node.js", "Redux", "REST APIs", "Mongoose", "JWT"],
+        "E-Mail & Outreaching": ["Cold Emailing", "Outreach Tools", "A/B Testing", "Sequencing", "Lead Generation", "HubSpot", "Mailchimp"],
+        "Content Writing": ["Blogging", "Copywriting", "SEO Content", "Technical Writing", "Editing", "Research", "Content Strategy"],
+        "Content Creator": ["Videography", "Scripting", "Social Media Strategy", "Community Management", "Live Streaming", "Storytelling", "Adobe Creative Suite"],
+        "UI/UX Designing": ["Figma", "Sketch", "Prototyping", "User Research", "Wireframing", "Usability Testing", "Design Systems", "Adobe XD"],
+        "Front-End Developer": ["HTML/CSS", "JavaScript", "React", "Angular", "Vue", "Tailwind CSS", "Responsive Design", "Webpack", "Accessibility"],
+        "Back-End Developer": ["Node.js", "Python", "Java", "Database Design", "API Development", "Security", "Microservices", "Docker"]
+    };
 
-// 1. Define the Skill Map (UPDATED with Social Media Management and Digital Marketing skills)
-const domainToSkillsMap = {
-    "Select Domain": [], // Default
-    "Sales & Marketing": ["Market Research", "SEO", "Content Strategy", "CRM (Salesforce)", "Email Marketing", "Social Media Advertising", "Lead Generation", "Public Relations", "Brand Management"],
-    "Data Science & Analytics": ["Python", "R", "SQL", "Machine Learning", "Data Visualization", "Big Data", "Statistical Analysis", "Deep Learning", "Pandas", "NumPy"],
-    "Human Resources": ["Recruitment", "Onboarding", "Employee Relations", "HRIS", "Compensation & Benefits", "Labor Law", "Performance Management", "Talent Acquisition"],
-    "Social Media Management": ["Instagram Marketing", "Facebook Ads", "Community Management", "TikTok Strategy", "Content Scheduling", "Analytics (e.g., Buffer/Hootsuite)", "Crisis Communication", "Influencer Marketing"], // ADDED
-    "Digital Marketing": ["Google Ads", "Search Engine Optimization (SEO)", "Pay-Per-Click (PPC)", "Google Analytics", "Content Marketing", "Conversion Rate Optimization (CRO)", "Email Marketing", "Marketing Automation", "HubSpot"], // ADDED
-    "Graphic Design": ["Adobe Photoshop", "Adobe Illustrator", "InDesign", "Branding", "Typography", "UI/UX Design", "Print Design", "Vector Graphics", "Figma"],
-    "Video Editing": ["Adobe Premiere Pro", "Final Cut Pro", "Motion Graphics", "Color Correction", "Sound Design", "After Effects", "Davinci Resolve"],
-    "Full Stack Developer": ["JavaScript", "Node.js", "React", "Python", "Databases (SQL/NoSQL)", "Cloud (AWS/Azure)", "REST APIs", "Security", "Git"],
-    "MERN Stack Developer": ["MongoDB", "Express.js", "React", "Node.js", "Redux", "REST APIs", "Mongoose", "Authentication (JWT)"],
-    "E-Mail & Outreaching": ["Cold Emailing", "Outreach Tools", "A/B Testing", "Sequencing", "Lead Generation", "HubSpot", "Mailchimp", "Email Automation"],
-    "Content Writing": ["Blogging", "Copywriting", "SEO Content", "Technical Writing", "Editing", "Grammarly", "Research", "Content Strategy"],
-    "Content Creator": ["Videography", "Scripting", "Social Media Strategy", "Community Management", "Live Streaming", "Storytelling", "Adobe Creative Suite"],
-    "UI/UX Designing": ["Figma", "Sketch", "Prototyping", "User Research", "Wireframing", "Usability Testing", "Design Systems", "Adobe XD"],
-    "Front-End Developer": ["HTML/CSS", "JavaScript", "React/Vue/Angular", "Tailwind CSS", "Responsive Design", "Webpack", "SASS/LESS", "Accessibility"],
-    "Back-End Developer": ["Node.js/Python/Java", "Database Design", "API Development", "Security", "Server Management", "Microservices", "Docker", "Testing"],
-};
+    if (jobDomainSelect && skillSelect && skillTagsContainer) {
+        
+        // Function to update dropdown options
+        function updateSkillOptions() {
+            const selectedDomain = jobDomainSelect.value;
+            console.log("Domain Changed to:", selectedDomain); // Debugging log
 
-if (jobDomainSelect && skillSelect && skillTagsContainer) {
+            const skills = domainToSkillsMap[selectedDomain] || [];
 
-    // Function to dynamically update skill options based on domain
-    function updateSkillOptions() {
-        const selectedDomain = jobDomainSelect.value;
-        const skills = domainToSkillsMap[selectedDomain] || [];
+            // Reset dropdown
+            skillSelect.innerHTML = '<option disabled selected value="">Select a Skill</option>';
 
-        // Clear existing options
-        skillSelect.innerHTML = '<option disabled selected value="">Select a Skill</option>';
+            // Populate new options
+            skills.forEach(skill => {
+                const option = document.createElement('option');
+                option.value = skill;
+                option.textContent = skill;
+                skillSelect.appendChild(option);
+            });
+            
+            // Force reset selected index
+            skillSelect.selectedIndex = 0;
+        }
 
-        // Populate with new options
-        skills.forEach(skill => {
-            const option = document.createElement('option');
-            option.value = skill;
-            option.textContent = skill;
-            skillSelect.appendChild(option);
+        // Create a visual tag for a skill
+        function createSkillTag(skillName) {
+            const skillText = skillName.trim();
+            if (!skillText || skillText === "Select a Skill") return null;
+
+            const span = document.createElement('span');
+            span.className = 'bg-brand-accent text-brand-dark px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 transition duration-200 ease-in-out transform hover:scale-105';
+            span.innerHTML = `${skillText} <i class="fas fa-times cursor-pointer hover:text-red-600 remove-skill"></i>`;
+            return span;
+        }
+
+        // Add skill logic
+        function addSkill() {
+            const skillName = skillSelect.value;
+            
+            // Validation
+            if (!skillName || skillName === "") {
+                skillSelect.selectedIndex = 0;
+                return;
+            }
+
+            // Duplicate Check
+            const currentTags = Array.from(skillTagsContainer.querySelectorAll('span')).map(s => s.textContent.trim().split(' ')[0]); // simplistic split
+            // Better duplicate check: check innerText excluding the 'X'
+            let isDuplicate = false;
+            skillTagsContainer.querySelectorAll('span').forEach(tag => {
+                if(tag.innerText.includes(skillName)) isDuplicate = true;
+            });
+
+            if (isDuplicate) {
+                skillSelect.selectedIndex = 0;
+                return;
+            }
+
+            // Create and Append
+            const newTag = createSkillTag(skillName);
+            if (newTag) {
+                skillTagsContainer.appendChild(newTag);
+            }
+
+            // Reset Dropdown
+            skillSelect.selectedIndex = 0;
+        }
+
+        // --- Event Listeners ---
+        
+        // 1. When Domain Changes -> Update Skills
+        jobDomainSelect.addEventListener('change', updateSkillOptions);
+
+        // 2. When Skill Selected -> Add Tag
+        skillSelect.addEventListener('change', addSkill);
+
+        // 3. Remove Tag (Delegation)
+        skillTagsContainer.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-skill')) {
+                e.target.closest('span').remove();
+            }
         });
 
-        // FIX: Ensure placeholder is selected by index (0)
-        skillSelect.selectedIndex = 0; 
-    }
-
-    // Attach listener to Job Domain dropdown
-    jobDomainSelect.addEventListener('change', updateSkillOptions);
-
-    // Initial call to ensure the skill dropdown is cleared/populated on load
-    updateSkillOptions(); 
-    
-    // Function to create a new skill tag element
-    function createSkillTag(skillName) {
-        const skillText = skillName.trim();
-        // Don't add if the text is empty or the default placeholder
-        if (skillText === "" || skillText === "Select a Skill") return null;
-
-        const span = document.createElement('span');
-        span.className = 'bg-brand-accent text-brand-dark px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-2 transition duration-200 ease-in-out transform hover:scale-105';
-        span.innerHTML = `${skillText} <i class="fas fa-times cursor-pointer hover:text-red-600 remove-skill" aria-label="Remove skill ${skillText}"></i>`;
-        return span;
-    }
-
-    // Function to add a skill
-    function addSkill() {
-        const skillName = skillSelect.value.trim(); // Read value from the select element
-        
-        // 1. Check for placeholder (value is empty string)
-        // If the placeholder is selected, reset the index and exit.
-        if (skillName.length === 0) { 
-            skillSelect.selectedIndex = 0;
-            return; 
+        // 4. Manual Add Button (if exists)
+        if (addSkillBtn) {
+            addSkillBtn.addEventListener('click', addSkill);
         }
 
-        // 2. Check for duplicates
-        const existingSkills = Array.from(skillTagsContainer.querySelectorAll('span')).map(s => s.textContent.split(' ')[0].trim().toLowerCase());
-        
-        if (existingSkills.includes(skillName.toLowerCase())) {
-            // Reset selection using selectedIndex even if duplicate to allow re-selection later
-            skillSelect.selectedIndex = 0; 
-            return; 
-        }
-
-        // 3. Add skill
-        const newTag = createSkillTag(skillName);
-        if (newTag) {
-            skillTagsContainer.appendChild(newTag);
-        }
-        
-        // 4. CRITICAL FIX: Reset the select box using selectedIndex (0)
-        // This is the key step that allows the change event to fire again 
-        // when the same option is subsequently re-selected.
-        skillSelect.selectedIndex = 0;
+        // Initialize empty state
+        updateSkillOptions();
+    } else {
+        console.error("Critical Elements Missing: Check IDs 'jobDomainSelect', 'skillSelect', 'skillTags'");
     }
 
-    // Event listener for the Add button
-    const addBtn = document.getElementById('addSkillBtn');
-    if (addBtn) {
-        addBtn.addEventListener('click', addSkill);
-    }
-    
-    // Event listener for selecting an option from the dropdown (also triggers addSkill)
-    skillSelect.addEventListener('change', addSkill);
-
-    // Event listener for removing a skill using event delegation on the container
-    skillTagsContainer.addEventListener('click', (e) => {
-        const removeIcon = e.target.closest('.remove-skill');
-        if (removeIcon) {
-            removeIcon.closest('span').remove();
-        }
-    });
-
-    // Clear All button functionality: resets file inputs, file lists, domain and skills
+    // --- 7. Clear All Button ---
     const clearAllBtn = document.getElementById('clearAllBtn');
     if (clearAllBtn) {
         clearAllBtn.addEventListener('click', () => {
-            // Clear all file inputs found on the page
-            document.querySelectorAll('input[type="file"]').forEach(fi => { try { fi.value = ''; } catch(e) {} });
+            // Reset files
+            document.querySelectorAll('input[type="file"]').forEach(input => input.value = '');
+            document.getElementById('fileList').innerHTML = '';
+            const jdList = document.getElementById('jdList');
+            if(jdList) jdList.innerHTML = '';
 
-            // Clear all file list displays (there may be multiple with same id in markup)
-            document.querySelectorAll('#fileList').forEach(fl => fl.innerHTML = '');
+            // Reset Domain
+            if(jobDomainSelect) jobDomainSelect.selectedIndex = 0;
+            
+            // Reset Skills
+            if(skillSelect) {
+                skillSelect.innerHTML = '<option disabled selected value="">Select a Skill</option>';
+            }
+            if(skillTagsContainer) skillTagsContainer.innerHTML = '';
 
-            // Reset job domain and skill dropdowns
-            if (jobDomainSelect) jobDomainSelect.selectedIndex = 0;
-            if (typeof updateSkillOptions === 'function') updateSkillOptions();
-            if (skillSelect) skillSelect.selectedIndex = 0;
-
-            // Remove any selected skill tags
-            if (skillTagsContainer) skillTagsContainer.innerHTML = '';
-
-            // Optionally move focus to top so user can start again
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
-}
-// END: Skill Management Functionality
 
-// === Resume Upload API Integration (POST + GET) ===
-const RESUME_API_BASE = `${window.location.origin}/api/resumes/upload`;
-
-async function uploadResumesForUser() {
-  const userIdInput = document.getElementById("userIdInput");
-  if (!userIdInput) return;
-
-  const userId = userIdInput.value.trim();
-  if (!userId) {
-    alert("Please enter a valid User ID before uploading resumes.");
-    return;
-  }
-
-  if (!resumeFileInput || !resumeFileInput.files.length) {
-    alert("Please select at least one resume file to upload.");
-    return;
-  }
-
-  const formData = new FormData();
-  Array.from(resumeFileInput.files).forEach((file) => {
-    formData.append("files", file);
-  });
-
-  const token = localStorage.getItem("jwtToken");
-
-  try {
-    const response = await fetch(`${RESUME_API_BASE}/${encodeURIComponent(userId)}`, {
-      method: "POST",
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-      body: formData,
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || "Upload failed");
+    // --- 8. Scroll to Top ---
+    const scrollTopBtn = document.getElementById('scrollTopBtn');
+    if (scrollTopBtn) {
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                scrollTopBtn.classList.remove('translate-y-24', 'opacity-0');
+                scrollTopBtn.classList.add('translate-y-0', 'opacity-100');
+            } else {
+                scrollTopBtn.classList.add('translate-y-24', 'opacity-0');
+                scrollTopBtn.classList.remove('translate-y-0', 'opacity-100');
+            }
+        });
     }
 
-    await response.json().catch(() => null);
-    alert("Resumes uploaded successfully.");
-    resumeFileInput.value = "";
-    if (resumeFileList) resumeFileList.innerHTML = "";
+}); // End DOMContentLoaded
 
-    // Refresh uploaded list
-    fetchUploadedResumes();
-  } catch (err) {
-    console.error("Resume upload error:", err);
-    alert("Failed to upload resumes: " + err.message);
-  }
-}
 
-async function fetchUploadedResumes() {
-  const userIdInput = document.getElementById("userIdInput");
-  const container = document.getElementById("uploadedResumes");
-  if (!userIdInput || !container) return;
+window.uploadResumesToBackend = async function() {
+    // 1. Get User Data
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('jwtToken');
 
-  const userId = userIdInput.value.trim();
-  if (!userId) {
-    container.innerHTML =
-      '<p class="text-sm text-gray-400">Enter a User ID and click "Load Uploaded Resumes".</p>';
-    return;
-  }
-
-  const token = localStorage.getItem("jwtToken");
-
-  container.innerHTML =
-    '<p class="text-sm text-gray-400">Loading uploaded resumes...</p>';
-
-  try {
-    const response = await fetch(`${RESUME_API_BASE}/${encodeURIComponent(userId)}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || "Failed to fetch resumes");
+    if (!userId || !token) {
+        alert("Please login first.");
+        return;
     }
 
-    const data = await response.json();
+    // 2. Get Files
+    const fileInput = document.getElementById('fileInput');
+    const files = fileInput.files;
 
-    if (!Array.isArray(data) || data.length === 0) {
-      container.innerHTML =
-        '<p class="text-sm text-gray-400">No resumes found for this user.</p>';
-      return;
+    if (files.length === 0) {
+        alert("Please select files to upload.");
+        return;
     }
 
-    const list = document.createElement("div");
-    list.className = "space-y-2";
-
-    data.forEach((resume) => {
-      const row = document.createElement("div");
-      row.className =
-        "flex justify-between items-center bg-brand-dark p-3 rounded-lg border border-gray-700";
-      row.innerHTML = `
-        <div class="text-xs md:text-sm text-gray-200">
-          <div class="font-semibold">${resume.fileName || "Resume"}</div>
-          <div class="text-gray-400">${resume.originalFileName || ""}</div>
-        </div>
-        <span class="text-[10px] md:text-xs text-brand-accent">Uploaded</span>
-      `;
-      list.appendChild(row);
-    });
-
-    container.innerHTML = "";
-    container.appendChild(list);
-  } catch (err) {
-    console.error("Fetch resumes error:", err);
-    container.innerHTML =
-      '<p class="text-sm text-red-400">Error loading resumes. Please try again.</p>';
-  }
-}
-
-// === Job Creation Form Handler ===
-async function handleJobCreation(event) {
-  event.preventDefault();
-  
-  const jobTitle = document.getElementById('jobTitle').value.trim();
-  const jobDepartment = document.getElementById('jobDepartment').value.trim();
-  const requiredSkills = document.getElementById('requiredSkills').value.trim();
-  const preferredSkills = document.getElementById('preferredSkills').value.trim();
-  const minExperience = document.getElementById('minExperience').value;
-  const educationLevel = document.getElementById('educationLevel').value;
-  const jobDescription = document.getElementById('jobDescription').value.trim();
-  
-  // Client-side validation
-  if (!jobTitle) {
-    alert('Job Title is required.');
-    return;
-  }
-  
-  if (!requiredSkills) {
-    alert('At least one required skill must be provided.');
-    return;
-  }
-  
-  if (!minExperience || isNaN(minExperience) || parseFloat(minExperience) < 0) {
-    alert('Please enter a valid minimum experience (number >= 0).');
-    return;
-  }
-  
-  // Get userId from input or localStorage
-  const userIdInput = document.getElementById('userIdInput');
-  const userId = userIdInput ? userIdInput.value.trim() : localStorage.getItem('userId');
-  
-  if (!userId) {
-    alert('Please enter a User ID first.');
-    return;
-  }
-  
-  // Convert comma-separated skills to array
-  const requiredSkillsArray = requiredSkills.split(',').map(s => s.trim()).filter(s => s.length > 0);
-  const preferredSkillsArray = preferredSkills ? preferredSkills.split(',').map(s => s.trim()).filter(s => s.length > 0) : [];
-  
-  // Build request body matching JobPosting entity
-  const requestBody = {
-    title: jobTitle,
-    department: jobDepartment || null,
-    description: jobDescription || null,
-    minExperienceYears: parseInt(minExperience),
-    educationLevel: educationLevel || null
-  };
-  
-  const token = localStorage.getItem('jwtToken');
-  const API_BASE = `${window.location.origin}/api/job-postings/create`;
-  
-  try {
-    const response = await fetch(`${API_BASE}?userId=${encodeURIComponent(userId)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {})
-      },
-      body: JSON.stringify(requestBody)
-    });
-    
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(errorText || 'Failed to create job posting');
+    // 3. Prepare Form Data
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]); // Must match @RequestPart("files") in backend
     }
-    
-    const jobData = await response.json();
-    
-    // Store jobId and userId in localStorage
-    if (jobData && jobData.id) {
-      localStorage.setItem('jobId', jobData.id.toString());
-      localStorage.setItem('userId', userId);
-      
-      alert('Job posting created successfully! Job ID: ' + jobData.id);
-      
-      // Redirect to Resume Upload section (scroll to it or stay on page)
-      document.getElementById('resumeFileInput')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    } else {
-      throw new Error('Invalid response from server');
-    }
-  } catch (error) {
-    console.error('Job creation error:', error);
-    alert('Failed to create job posting: ' + error.message);
-  }
-}
 
-// === Analyze Candidates Handler ===
-async function handleAnalyzeCandidates() {
-  const jobId = localStorage.getItem('jobId');
-  
-  if (!jobId) {
-    alert('Please create a job posting first before analyzing candidates.');
-    return;
-  }
-  
-  const token = localStorage.getItem('jwtToken');
-  const SCORE_API_BASE = `${window.location.origin}/api/score`;
-  
-  try {
-    // Trigger scoring
-    const scoreResponse = await fetch(`${SCORE_API_BASE}/${encodeURIComponent(jobId)}`, {
-      method: 'POST',
-      headers: token ? { Authorization: `Bearer ${token}` } : {}
-    });
-    
-    if (!scoreResponse.ok) {
-      const errorText = await scoreResponse.text();
-      throw new Error(errorText || 'Failed to trigger scoring');
-    }
-    
-    const scoreData = await scoreResponse.json();
-    alert('Analysis started! ' + (scoreData.message || 'Scoring is running in the background.'));
-    
-    // Redirect to dashboard with jobId
-    window.location.href = `dashboard.html?jobId=${encodeURIComponent(jobId)}`;
-  } catch (error) {
-    console.error('Analyze error:', error);
-    alert('Failed to start analysis: ' + error.message);
-  }
-}
+    // 4. Send Request
+    const btn = document.querySelector('button[onclick="uploadResumesToBackend()"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading...`;
+    btn.disabled = true;
 
-// Expose functions for buttons in HTML
-window.uploadResumesForUser = uploadResumesForUser;
-window.fetchUploadedResumes = fetchUploadedResumes;
-window.handleJobCreation = handleJobCreation;
-window.handleAnalyzeCandidates = handleAnalyzeCandidates;
+    try {
+        // Construct URL: http://localhost:8080/api/resumes/upload/{userId}
+        const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
+        const response = await fetch(`${baseUrl}/resumes/upload/${userId}`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("Upload Successful!");
+            btn.innerHTML = `<i class="fas fa-check"></i> Done`;
+            document.getElementById('uploadStatus').classList.remove('hidden');
+        } else {
+            const err = await response.text();
+            alert("Upload Failed: " + err);
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Network Error");
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+    }
+};
+
+
+window.uploadJDToBackend = async function() {
+    console.log("Starting JD Upload...");
+
+    // 1. Auth Check
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('jwtToken');
+
+    if (!userId || !token) {
+        alert("Please login first.");
+        return;
+    }
+
+    // 2. Get Files
+    const jdInput = document.getElementById('jdInput');
+    const files = jdInput.files;
+
+    if (files.length === 0) {
+        alert("Please select Job Description files first!");
+        return;
+    }
+
+    // 3. Prepare Form Data
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append("files", files[i]);
+    }
+    formData.append("userId", userId);
+
+    // 4. API Call
+    // URL: http://localhost:8080/api/job-postings/upload
+    const baseUrl = CONFIG.API_BASE_URL.replace('/auth', ''); 
+    const uploadUrl = `${baseUrl}/job-postings/upload`;
+
+    // Button UI
+    const btn = document.querySelector('button[onclick="uploadJDToBackend()"]');
+    const originalContent = btn.innerHTML;
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading...`;
+    btn.disabled = true;
+
+    try {
+        const response = await fetch(uploadUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log("JD Upload Success:", result);
+            
+            alert(`Success! ${result.length} Job Descriptions uploaded.`);
+            document.getElementById('jdUploadStatus').classList.remove('hidden');
+            btn.innerHTML = `<i class="fas fa-check"></i> Done`;
+            
+            setTimeout(() => {
+                btn.innerHTML = originalContent;
+                btn.disabled = false;
+            }, 3000);
+
+        } else {
+            const errorText = await response.text();
+            throw new Error(errorText);
+        }
+
+    } catch (error) {
+        console.error("JD Upload Error:", error);
+        alert("Upload Failed: " + error.message);
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    }
+};

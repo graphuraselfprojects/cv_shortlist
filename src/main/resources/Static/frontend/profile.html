@@ -9,6 +9,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
+    <script src="config.js"></script>
+    <script src="nav.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -44,13 +47,11 @@
             backdrop-filter: blur(12px);
             border-bottom: 1px solid rgba(255, 255, 255, 0.3);
         }
-        /* Gradient Text */
         .text-gradient {
             background: linear-gradient(135deg, #4a6cf7 0%, #764ba2 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        /* Hover Underline Animation */
         .hover-underline-animation {
             display: inline-block;
             position: relative;
@@ -75,42 +76,7 @@
 </head>
 <body class="bg-brand-dark text-gray-200 font-sans overflow-x-hidden selection:bg-brand-primary selection:text-white">
 
-    <nav class="fixed w-full z-50 transition-all duration-300 glass-nav shadow-lg" id="navbar">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-20">
-                <a href="index.html" class="flex-shrink-0 flex items-center gap-2 group">
-                    <img src="images/graphuralogo.png" alt="Graphura Logo" class="h-16 w-auto transition-transform duration-300 group-hover:scale-105 group-hover:rotate-2">
-                </a>
-
-                <div class="hidden md:flex space-x-8 items-center">
-                    <a href="index.html#home" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Home</a>
-                    <a href="Recruiter.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Recruiter</a>
-                    <a href="dashboard.html" class="text-gray-800 hover:text-brand-primary font-medium transition hover-underline-animation">Analytics</a>
-                    
-                    <a href="#" class="px-6 py-2.5 rounded-full bg-brand-primary text-white font-semibold shadow-lg shadow-brand-primary/30 hover:shadow-brand-primary/50 hover:bg-blue-600 transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 active:scale-95">
-                        <i class="fas fa-user-circle mr-2"></i> My Account
-                    </a>
-                </div>
-
-                <div class="md:hidden flex items-center">
-                    <button onclick="toggleMobileMenu()" class="text-gray-800 hover:text-brand-primary focus:outline-none p-2 transition-transform active:scale-90">
-                        <i class="fas fa-bars text-2xl"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <div id="mobile-menu" class="hidden md:hidden bg-white/95 backdrop-blur-md border-t absolute w-full left-0 shadow-xl transition-all duration-300 origin-top transform scale-y-100">
-            <div class="px-4 pt-2 pb-6 space-y-2">
-                <a href="index.html#home" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Home</a>
-                <a href="Recruiter.html" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Recruiter</a>
-                <a href="dashboard.html" class="block px-4 py-3 text-gray-800 hover:bg-brand-primary/10 hover:text-brand-primary rounded-lg transition-colors">Analytics</a>
-                <a href="#" class="block px-4 py-3 text-brand-primary font-bold bg-brand-primary/5 hover:bg-brand-primary/10 rounded-lg transition-colors">
-                    <i class="fas fa-user-circle mr-2"></i> My Account
-                </a>
-            </div>
-        </div>
-    </nav>
+    <div id="nav-placeholder"></div>
 
     <main class="pt-32 pb-16 bg-brand-dark">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -127,7 +93,7 @@
                                     <i class="fas fa-edit text-white text-xl"></i>
                                 </div>
                             </div>
-                            <h1 id="profile-name" class="text-2xl font-bold text-white">Jane Doe</h1>
+                            <h1 id="profile-name" class="text-2xl font-bold text-white">Loading...</h1>
                             <p id="profile-title" class="text-brand-accent font-medium">Senior Software Engineer</p>
                             <p id="profile-location" class="text-gray-400 text-sm mt-1">San Francisco Bay Area</p>
                             <button onclick="openEditProfileModal()" class="mt-4 px-6 py-2 rounded-full bg-brand-primary text-white font-semibold hover:bg-blue-600 transition-colors text-sm">
@@ -146,7 +112,11 @@
                             <li><a href="#" class="flex items-center text-gray-400 hover:text-brand-primary transition-colors"><i class="fas fa-file-alt w-5 mr-3"></i> My Resumes (Upload/Manage)</a></li>
                             <li><a href="#" class="flex items-center text-gray-400 hover:text-brand-primary transition-colors"><i class="fas fa-chart-bar w-5 mr-3"></i> Career Insights</a></li>
                             <li><a href="#" class="flex items-center text-gray-400 hover:text-brand-primary transition-colors"><i class="fas fa-cog w-5 mr-3"></i> Account Settings</a></li>
-                            <li><a href="#" class="flex items-center text-red-400 hover:text-red-500 transition-colors pt-3 border-t border-gray-700 mt-3"><i class="fas fa-sign-out-alt w-5 mr-3"></i> Logout</a></li>
+                            <li>
+                                <a href="javascript:void(0)" onclick="handleLogout()" class="flex items-center text-red-400 hover:text-red-500 transition-colors pt-3 border-t border-gray-700 mt-3">
+                                    <i class="fas fa-sign-out-alt w-5 mr-3"></i> Logout
+                                </a>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -363,6 +333,7 @@
             </form>
         </div>
     </div>
+    
     <footer class="glass-nav border-t border-gray-200 pt-16 pb-8 relative shadow-inner">
         <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
             <div data-aos="fade-up" data-aos-delay="0">
@@ -407,5 +378,19 @@
     
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="profile.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Retrieve Name from LocalStorage
+            const storedName = localStorage.getItem('userName');
+            
+            // Set it to the H1 tag
+            const profileNameEl = document.getElementById('profile-name');
+            if (profileNameEl) {
+                // If name exists, use it. Else default to "User".
+                profileNameEl.textContent = storedName ? storedName : "User";
+            }
+        });
+    </script>
 </body>
 </html>

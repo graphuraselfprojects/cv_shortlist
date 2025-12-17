@@ -1,12 +1,21 @@
 package com.resumeshortlist.resume_shortlist_backend.controller;
 
 import com.resumeshortlist.resume_shortlist_backend.entity.JobPosting;
+import com.resumeshortlist.resume_shortlist_backend.entity.User;
+import com.resumeshortlist.resume_shortlist_backend.repository.JobPostingRepository;
+import com.resumeshortlist.resume_shortlist_backend.repository.UserRepository;
 import com.resumeshortlist.resume_shortlist_backend.service.JobPostingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/job-postings")
@@ -14,6 +23,10 @@ public class JobPostingController {
 
     @Autowired
     private JobPostingService jobPostingService;
+    @Autowired
+    private JobPostingRepository jobPostingRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/create")
     public JobPosting createJobPosting(
@@ -39,7 +52,50 @@ public class JobPostingController {
         return ResponseEntity.ok(jobPostingService.deleteJobById(id));
     }
 
+    @PostMapping("/upload")
+    public ResponseEntity<?> uploadJobPostings(
+            @RequestParam("files") MultipartFile[] files,
+            @RequestParam("userId") Long userId) {
+        
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
 
+            List<JobPosting> savedPostings = new ArrayList<>();
+            String uploadDir = "uploads/job_descriptions/";
+            File folder = new File(uploadDir);
+            if (!folder.exists()) folder.mkdirs();
+
+            for (MultipartFile file : files) {
+                // 1. Save File
+                String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+                File dest = new File(uploadDir + uniqueName);
+                try (FileOutputStream fos = new FileOutputStream(dest)) {
+                    fos.write(file.getBytes());
+                }
+
+                // 2. Save Entity
+                JobPosting jp = new JobPosting();
+                jp.setTitle(file.getOriginalFilename()); // Use filename as temporary title
+                jp.setFileName(file.getOriginalFilename());
+                jp.setFilePath(dest.getAbsolutePath());
+                jp.setFileType(file.getContentType());
+                jp.setCreatedBy(user);
+                jp.setCreatedAt(LocalDateTime.now());
+                
+                // Set defaults for required fields to avoid DB errors
+                jp.setDescription("Uploaded via File"); 
+                
+                savedPostings.add(jobPostingRepository.save(jp));
+            }
+
+            return ResponseEntity.ok(savedPostings);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("JD Upload Failed: " + e.getMessage());
+        }
+    }
 
 }
 

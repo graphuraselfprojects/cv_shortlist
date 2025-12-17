@@ -21,6 +21,10 @@ public class JobPosting {
 
     @Column(columnDefinition = "TEXT")
     private String description;
+    // new fields added 
+    private String fileName;
+    private String filePath;
+    private String fileType;
 
     private Integer minExperienceYears;
 

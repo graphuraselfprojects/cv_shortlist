@@ -1,7 +1,187 @@
 feather.replace();
 
-// ===== Real-time data from backend dashboard API =====
-let rawCandidates = []; // Filled from /api/dashboard/{jobId}
+// ===== Login/Signup Functionality (NEW) =====
+const loginPopup = document.getElementById('loginPopup');
+const signupPopup = document.getElementById('signupPopup');
+const overlay = document.getElementById('overlay');
+const mobileMenu = document.getElementById('mobile-menu');
+
+function toggleModal(modalId, show) {
+    const modal = document.getElementById(modalId);
+    if (!modal || !overlay) return; // Safety check
+
+    if (show) {
+        overlay.classList.remove('hidden');
+        setTimeout(() => overlay.classList.add('opacity-100'), 10);
+
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.remove('scale-90', 'opacity-0');
+            modal.classList.add('scale-100', 'opacity-100');
+        }, 10);
+    } else {
+        overlay.classList.remove('opacity-100');
+        modal.classList.remove('scale-100', 'opacity-100');
+        modal.classList.add('scale-90', 'opacity-0');
+
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+            modal.classList.add('hidden');
+        }, 300); // Match transition duration
+    }
+}
+
+function closePopup() {
+    toggleModal('loginPopup', false);
+    toggleModal('signupPopup', false);
+}
+
+function openLogin(isSwitch = false) {
+    if (isSwitch) {
+        toggleModal('signupPopup', false);
+        // Give a slight delay when switching to allow the previous one to start hiding
+        setTimeout(() => toggleModal('loginPopup', true), 100); 
+    } else {
+        toggleModal('loginPopup', true);
+    }
+}
+
+function openSignup(isSwitch = false) {
+    if (isSwitch) {
+        toggleModal('loginPopup', false);
+        setTimeout(() => toggleModal('signupPopup', true), 100);
+    } else {
+        toggleModal('signupPopup', true);
+    }
+}
+
+const loginUrl = `${CONFIG.API_BASE_URL}/login`;
+
+async function handleLogin() {
+    
+
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+
+    const requestBody = {
+        email: email,
+        password: password
+    };
+
+    try {
+
+        const response = await fetch(loginUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        if (response.ok) {
+
+            const data = await response.json();
+
+
+            localStorage.setItem('jwtToken', data.token);
+
+
+            console.log("Login Successful!");
+            window.location.href = "profile.html";
+            alert("login successfull");
+        } else {
+
+            const errorMessage = await response.text();
+            alert("Login Failed: " + errorMessage);
+        }
+
+    } catch (error) {
+        console.error("Error:", error);
+        alert("Something went wrong. Please check the console.");
+    }
+}
+
+async function handleSignup() {
+            // 1. Get input values from the new IDs in index.html
+            const name = document.getElementById('signup-name').value;
+            const email = document.getElementById('signup-email').value;
+            const password = document.getElementById('signup-password').value;
+
+            // The RegisterRequest in your Spring Boot likely requires these fields.
+            const requestBody = {
+                name: name,
+                email: email,
+                password: password
+            };
+
+            // Endpoint URL (Assuming Spring Boot is running on the same host/port)
+            const apiUrl = `${CONFIG.API_BASE_URL}/register`;
+
+            try {
+                // 2. Make the API Call using fetch
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        // Crucial for sending JSON data
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestBody) // Convert JS object to JSON string
+                });
+                // 3. Handle the response
+                if (response.ok) {
+                    // Registration successful (Status 200 OK)
+                    const data = await response.json();
+                    console.log('Registration Successful. Received Token:', data.token);
+
+                    alert('Registration successful! Please login.');
+
+                    // Close signup and open login popup
+                    closePopup();
+                    openLogin();
+
+                } else {
+                    // Registration failed (e.g., Status 400 Bad Request)
+                    const error = await response.text(); // Get the plain error message from the body
+                    console.error('Registration Failed:', error);
+                    alert('Registration Failed: ' + error);
+                }
+            } catch (error) {
+                // Network or unexpected error
+                console.error('Network Error:', error);
+                alert('An unexpected network error occurred. Please try again.');
+            }
+        }
+// ===== END Login/Signup Functionality (NEW) =====
+
+
+// ===== Sample Data (CLEANED UP - photo and aiSummary removed) =====
+let rawCandidates = [
+  {id:1,name:"Sarah Johnson",position:"Frontend Developer",experience:5,score:94,skillsMatch:"28/30",status:"shortlisted", atsBreakdown: {keywords: 90, format: 95, length: 85}},
+  {id:2,name:"Robert Kim",position:"Backend Developer",experience:6,score:91,skillsMatch:"29/30",status:"shortlisted", atsBreakdown: {keywords: 95, format: 85, length: 90}},
+  {id:3,name:"UI Engineer",position:"UI Engineer",experience:4,score:87,skillsMatch:"25/30",status:"consider", atsBreakdown: {keywords: 88, format: 85, length: 86}},
+  {id:4,name:"Lisa Thompson",position:"Frontend Developer",experience:4,score:84,skillsMatch:"26/30",status:"consider", atsBreakdown: {keywords: 80, format: 92, length: 80}},
+  {id:5,name:"David Wilson",position:"Data Scientist",experience:7,score:82,skillsMatch:"24/30",status:"consider", atsBreakdown: {keywords: 90, format: 75, length: 85}},
+  {id:6,name:"Emily Davis",position:"Data Scientist",experience:3,score:78,skillsMatch:"21/30",status:"consider", atsBreakdown: {keywords: 75, format: 80, length: 80}},
+  {id:7,name:"Marcus Bell",position:"Product Manager",experience:8,score:75,skillsMatch:"19/30",status:"consider", atsBreakdown: {keywords: 70, format: 80, length: 75}},
+  {id:8,name:"Anna Lee",position:"Backend Developer",experience:2,score:68,skillsMatch:"15/30",status:"rejected", atsBreakdown: {keywords: 60, format: 75, length: 70}},
+  {id:9,name:"Chris Hall",position:"UI Engineer",experience:5,score:93,skillsMatch:"27/30",status:"shortlisted", atsBreakdown: {keywords: 95, format: 90, length: 95}},
+  {id:10,name:"Jessica Green",position:"Data Scientist",experience:10,score:90,skillsMatch:"30/30",status:"shortlisted", atsBreakdown: {keywords: 92, format: 90, length: 88}},
+  {id:11,name:"Kevin Smith",position:"Frontend Developer",experience:1,score:65,skillsMatch:"12/30",status:"rejected", atsBreakdown: {keywords: 55, format: 65, length: 75}},
+  {id:12,name:"Olivia Rodriguez",position:"Product Manager",experience:6,score:85,skillsMatch:"25/30",status:"consider", atsBreakdown: {keywords: 80, format: 85, length: 90}},
+  {id:13,name:"Thomas Young",position:"Backend Developer",experience:9,score:72,skillsMatch:"18/30",status:"consider", atsBreakdown: {keywords: 65, format: 78, length: 75}},
+  {id:14,name:"Mia Brown",position:"UI Engineer",experience:3,score:79,skillsMatch:"23/30",status:"consider", atsBreakdown: {keywords: 70, format: 85, length: 82}},
+  {id:15,name:"Noah Clark",position:"Product Manager",experience:5,score:88,skillsMatch:"27/30",status:"shortlisted", atsBreakdown: {keywords: 90, format: 85, length: 90}},
+  {id:16,name:"Sophie White",position:"Frontend Developer",experience:7,score:80,skillsMatch:"24/30",status:"consider", atsBreakdown: {keywords: 85, format: 70, length: 85}},
+  {id:17,name:"Ethan King",position:"Backend Developer",experience:4,score:60,skillsMatch:"10/30",status:"rejected", atsBreakdown: {keywords: 50, format: 60, length: 70}},
+  {id:18,name:"Chloe Martinez",position:"Data Scientist",experience:2,score:70,skillsMatch:"18/30",status:"consider", atsBreakdown: {keywords: 65, format: 75, length: 70}},
+  {id:19,name:"Ryan Perez",position:"UI Engineer",experience:6,score:89,skillsMatch:"26/30",status:"shortlisted", atsBreakdown: {keywords: 90, format: 90, length: 87}},
+  {id:20,name:"Zoe Taylor",position:"Frontend Developer",experience:3,score:74,skillsMatch:"20/30",status:"consider", atsBreakdown: {keywords: 75, format: 70, length: 80}},
+  {id:21,name:"Ben Carter",position:"Marketing Specialist",experience:4,score:81,skillsMatch:"22/30",status:"consider", atsBreakdown: {keywords: 80, format: 85, length: 78}},
+  {id:22,name:"Diana Ross",position:"Sales Manager",experience:9,score:76,skillsMatch:"20/30",status:"consider", atsBreakdown: {keywords: 75, format: 70, length: 83}},
+  {id:23,name:"Henry Adams",position:"HR Analyst",experience:3,score:71,skillsMatch:"17/30",status:"rejected", atsBreakdown: {keywords: 65, format: 75, length: 73}},
+  {id:24,name:"Ivy Lin",position:"Project Lead",experience:8,score:92,skillsMatch:"29/30",status:"shortlisted", atsBreakdown: {keywords: 95, format: 90, length: 91}},
+  {id:25,name:"Jack Miller",position:"Data Scientist",experience:5,score:86,skillsMatch:"25/30",status:"consider", atsBreakdown: {keywords: 88, format: 82, length: 85}},
+];
 
 // Reassign to `candidates` for filtering operations
 let candidates = [...rawCandidates];
@@ -383,12 +563,39 @@ document.getElementById('searchInput').addEventListener('input', applyFiltersAnd
 // Listener for sort dropdown (UNCHANGED)
 sortSelect.addEventListener('change', applyFiltersAndSort);
 
-// Disable the old "Add Sample" button – keep UI but detach static behaviour
-const addBtn = document.getElementById("addCandidates");
-if (addBtn) {
-  addBtn.disabled = true;
-  addBtn.classList.add("opacity-60", "cursor-not-allowed");
-}
+// LIST OF ALL POTENTIAL POSITIONS FOR THE RANDOM GENERATOR (UPDATED)
+const allPositions = [
+    "Frontend Developer", 
+    "Backend Developer", 
+    "Data Scientist", 
+    "Product Manager",
+    "UI Engineer",
+    "Marketing Specialist", 
+    "Sales Manager",      
+    "HR Analyst",         
+    "Project Lead"        
+];
+
+
+// Add sample candidate (CLEANED UP - photo and aiSummary removed)
+document.getElementById('addCandidates').addEventListener('click', () => {
+  const nextId = rawCandidates.length ? Math.max(...rawCandidates.map(x => x.id)) + 1 : 1;
+  const sample = {
+    id: nextId,
+    name: `New Candidate ${nextId}`,
+    position: allPositions[Math.floor(Math.random() * allPositions.length)], // Use expanded list
+    experience: Math.floor(Math.random() * 7) + 1,
+    score: Math.floor(Math.random() * 30) + 60,
+    skillsMatch: `${Math.floor(Math.random() * 10) + 15}/30`,
+    status: "consider",
+    atsBreakdown: {keywords: Math.floor(Math.random() * 30) + 60, format: Math.floor(Math.random() * 30) + 60, length: Math.floor(Math.random() * 30) + 60}
+  };
+  rawCandidates.push(sample);
+  // Re-run the initial population/filter to include the new position/candidate
+  populatePositionFilter(); 
+  applyFiltersAndSort(); 
+});
+
 
 // ===== Scroll to Top Functionality (EXISTING) =====
 const scrollTopBtn = document.getElementById('scrollTopBtn');
@@ -415,86 +622,11 @@ window.addEventListener('scroll', () => {
 });
 
 
-// ===== Route Protection =====
+// ===== Initial Load =====
 document.addEventListener('DOMContentLoaded', () => {
-  // Check authentication before loading data
-  if (typeof window.requireAuth === 'function') {
-    if (!window.requireAuth()) {
-      return; // Redirect will happen in requireAuth
-    }
-  } else {
-    // Fallback protection
-    const token = localStorage.getItem('jwtToken');
-    if (!token) {
-      window.location.href = 'index.html';
-      return;
-    }
-  }
-  
-  // Load dashboard data after auth check
-  loadDashboardData();
-});
-
-// ===== Initial Load: fetch real data from backend =====
-const DASHBOARD_API_BASE = `${window.location.origin}/api/dashboard`;
-
-async function loadDashboardData() {
-  const candidateContainer = document.getElementById("candidateList");
-  const noResultsEl = document.getElementById("noResults");
-
-  const urlParams = new URLSearchParams(window.location.search);
-  const jobId = urlParams.get("jobId") || "1";
-
-  if (candidateContainer) {
-    candidateContainer.innerHTML =
-      '<p class="col-span-full text-center text-gray-400 py-8">Loading analytics...</p>';
-  }
-
-  try {
-    const token = localStorage.getItem("jwtToken");
-    const response = await fetch(`${DASHBOARD_API_BASE}/${encodeURIComponent(jobId)}`, {
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-
-    if (!response.ok) {
-      const text = await response.text();
-      throw new Error(text || "Failed to load dashboard data");
-    }
-
-    const data = await response.json();
-
-    if (!Array.isArray(data) || data.length === 0) {
-      rawCandidates = [];
-      candidates = [];
-      renderCandidateCards([]);
-      updateSummaryStats();
-      if (noResultsEl) noResultsEl.classList.remove("hidden");
-      return;
-    }
-
-    // Map DashboardResponse -> candidate objects expected by UI
-    rawCandidates = data.map((item, index) => ({
-      id: item.candidateId || index + 1,
-      name: item.candidateName || "Candidate",
-      position: "Candidate", // Backend does not expose position; keep consistent label
-      experience: 0, // Not provided by API
-      score: item.totalScore || 0,
-      skillsMatch: item.resumeFile || "",
-      status: (item.status || "consider").toLowerCase(),
-      atsBreakdown: { keywords: 80, format: 80, length: 80 }, // Derived, keeps chart layout
-    }));
-
-    candidates = [...rawCandidates];
-
+    // Populate the position checkboxes dynamically first
     populatePositionFilter();
-    applyFiltersAndSort();
-  } catch (err) {
-    console.error("Dashboard load error:", err);
-    if (candidateContainer) {
-      candidateContainer.innerHTML =
-        '<p class="col-span-full text-center text-red-400 py-8">Failed to load analytics. Please try again.</p>';
-    }
-  }
-}
-
-// Route protection and initial load is handled in the DOMContentLoaded above
+    
+    // Then apply filters and render initial list
+    applyFiltersAndSort(); 
+});
