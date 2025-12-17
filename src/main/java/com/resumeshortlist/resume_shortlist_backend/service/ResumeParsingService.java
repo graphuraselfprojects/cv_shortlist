@@ -14,11 +14,11 @@ import org.springframework.http.*;
 import java.io.File;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 @Service
 public class ResumeParsingService {
@@ -131,80 +131,79 @@ public class ResumeParsingService {
         }
 
         // 10. Save Extracted Skills (normalized, confidence-scored)
-        if (rootNode.has("skills")) {
-            for (JsonNode node : rootNode.get("skills")) {
-                String skillName = getText(node, "skillName");
-                if (skillName == null || skillName.isBlank()) continue;
+        // if (rootNode.has("skills")) {
+        //     for (JsonNode node : rootNode.get("skills")) {
+        //         String skillName = getText(node, "skillName");
+        //         if (skillName == null || skillName.isBlank()) continue;
 
-                ExtractedSkill es = new ExtractedSkill();
-                es.setCandidate(candidate);
-                es.setSkillName(skillName);
-                es.setCategory(getText(node, "category"));
-                es.setConfidenceScore(getFloat(node, "confidenceScore"));
-                extractedSkillRepository.save(es);
-            }
-        }
+        //         ExtractedSkill es = new ExtractedSkill();
+        //         es.setCandidate(candidate);
+        //         es.setSkillName(skillName);
+        //         es.setCategory(getText(node, "category"));
+        //         es.setConfidenceScore(getFloat(node, "confidenceScore"));
+        //         extractedSkillRepository.save(es);
+        //     }
+        // }
         return "Success";
     }
 
     // --- GEMINI API CALLER ---
     // REPLACE YOUR callGeminiApi METHOD WITH THIS
 private String callGeminiApi(String resumeText) {
-    // 1. FIX: Clean URL (Removed Markdown brackets/parentheses)
-    String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+   String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
 
-    // 2. FIX: Restored the actual JSON Schema in the prompt
-    String prompt = "You are a resume parser. Extract structured data from the resume text into STRICT JSON. " +
-            "Keys: name, email, phone, linkedinUrl, githubUrl, portfolioUrl, education, workExperience, projects, certifications, skills.\n" +
-            "Dates: YYYY-MM-DD. If missing, null.\n" +
-            "JSON Structure:\n" +
-            "{ \"name\": \"\", \"email\": \"\", \"phone\": \"\", \"linkedinUrl\": \"\", \"githubUrl\": \"\", \"portfolioUrl\": \"\",\n" +
-            "  \"education\": [{ \"degree\": \"\", \"institution\": \"\", \"fieldOfStudy\": \"\", \"startYear\": 2020, \"endYear\": 2024, \"gpa\": 3.5 }],\n" +
-            "  \"workExperience\": [{ \"jobTitle\": \"\", \"company\": \"\", \"description\": \"\", \"startDate\": \"\", \"endDate\": \"\", \"isCurrent\": false }],\n" +
-            "  \"projects\": [{ \"title\": \"\", \"description\": \"\", \"techStack\": \"\", \"githubLink\": \"\", \"liveLink\": \"\" }],\n" +
-            "  \"certifications\": [{ \"name\": \"\", \"issuer\": \"\", \"issueDate\": \"\", \"certificateLink\": \"\" }],\n" +
-            "  \"skills\": [{ \"skillName\": \"\", \"category\": \"\", \"confidenceScore\": 0.0 }]\n" +
-            "}\n" +
-            "RESUME TEXT:\n" + resumeText;
+        // Strict JSON Prompt
+        String prompt = "You are a resume parser. Extract structured data from the resume text into STRICT JSON. " +
+                "Keys: name, email, phone, linkedinUrl, githubUrl, portfolioUrl, education, workExperience, projects, certifications, skills.\n" +
+                "Dates: YYYY-MM-DD. If missing, null.\n" +
+                "JSON Structure:\n" +
+                "{ \"name\": \"\", \"email\": \"\", \"phone\": \"\", \"linkedinUrl\": \"\", \"githubUrl\": \"\", \"portfolioUrl\": \"\",\n" +
+                "  \"education\": [{ \"degree\": \"\", \"institution\": \"\", \"fieldOfStudy\": \"\", \"startYear\": 2020, \"endYear\": 2024, \"gpa\": 3.5 }],\n" +
+                "  \"workExperience\": [{ \"jobTitle\": \"\", \"company\": \"\", \"description\": \"\", \"startDate\": \"\", \"endDate\": \"\", \"isCurrent\": false }],\n" +
+                "  \"projects\": [{ \"title\": \"\", \"description\": \"\", \"techStack\": \"\", \"githubLink\": \"\", \"liveLink\": \"\" }],\n" +
+                "  \"certifications\": [{ \"name\": \"\", \"issuer\": \"\", \"issueDate\": \"\", \"certificateLink\": \"\" }],\n" +
+                "  \"skills\": [{ \"skillName\": \"\", \"category\": \"\", \"confidenceScore\": 0.0 }]\n" +
+                "}\n" +
+                "RESUME TEXT:\n" + resumeText;
 
-    // 3. Construct Request (Java 9+ Map.of syntax)
-    Map<String, Object> textPart = Map.of("text", prompt);
-    Map<String, Object> content = Map.of("parts", List.of(textPart));
-
-    // 4. Configure JSON Mode (Temperature 0.0 for accuracy)
-    Map<String, Object> generationConfig = Map.of(
+        // Request Construction
+        Map<String, Object> textPart = Map.of("text", prompt);
+        Map<String, Object> content = Map.of("parts", List.of(textPart));
+        
+        // Configuration: JSON Mode + Low Temperature
+        Map<String, Object> generationConfig = Map.of(
             "response_mime_type", "application/json",
             "temperature", 0.0
-    );
+        );
 
-    Map<String, Object> requestBody = new HashMap<>();
-    requestBody.put("contents", List.of(content));
-    requestBody.put("generationConfig", generationConfig);
+        Map<String, Object> requestBody = new HashMap<>();
+        requestBody.put("contents", List.of(content));
+        requestBody.put("generationConfig", generationConfig);
 
-    HttpHeaders headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
 
-    HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
-    try {
-        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-        JsonNode root = objectMapper.readTree(response.getBody());
+        try {
+            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+            JsonNode root = objectMapper.readTree(response.getBody());
 
-        JsonNode candidates = root.path("candidates");
-        if (candidates.isEmpty()) {
-            throw new RuntimeException("Gemini returned no candidates. Likely a safety block or empty response.");
+            JsonNode candidates = root.path("candidates");
+            if (candidates.isEmpty()) {
+                throw new RuntimeException("Gemini returned no candidates. Safety block or empty result.");
+            }
+
+            String rawJson = candidates.get(0).path("content").path("parts").get(0).path("text").asText();
+
+            // Regex Cleaning to ensure valid JSON
+            return rawJson.replaceAll("(?i)^\\s*```json\\s*", "")
+                          .replaceAll("\\s*```\\s*$", "")
+                          .trim();
+
+        } catch (Exception e) {
+            throw new RuntimeException("Gemini API Error: " + e.getMessage());
         }
-
-        String rawJson = candidates.get(0).path("content").path("parts").get(0).path("text").asText();
-
-        // 5. Clean JSON (Remove markdown code fences)
-        return rawJson.replaceAll("(?i)^\\s*```json\\s*", "")
-                      .replaceAll("\\s*```\\s*$", "")
-                      .trim();
-
-    } catch (Exception e) {
-        throw new RuntimeException("Gemini Parsing Failed: " + e.getMessage(), e);
-    }
 }
     // --- Helper Methods to safely extract JSON fields ---
     private String getText(JsonNode node, String key) {
