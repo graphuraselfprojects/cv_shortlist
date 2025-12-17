@@ -16,8 +16,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import java.util.HashMap;
-
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 public class ResumeParsingService {
@@ -37,11 +38,16 @@ public class ResumeParsingService {
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate = new RestTemplate();
 
-    public void parseAndSaveResume(Long resumeId) throws Exception {
+    public String parseAndSaveResume(Long resumeId) throws Exception {
         // 1. Fetch Resume Record
         Resume resume = resumeRepository.findById(resumeId)
                 .orElseThrow(() -> new RuntimeException("Resume not found"));
 
+        Optional<Candidate> existingCandidate = candidateRepository.findByResume(resume);
+        if (existingCandidate.isPresent()) {
+            return "Skipped: Already Analyzed";
+        }
+        
         // 2. Extract Text from File
         File file = new File(resume.getFilePath());
         if (!file.exists()) throw new RuntimeException("File not found on server: " + resume.getFilePath());
@@ -138,106 +144,68 @@ public class ResumeParsingService {
                 extractedSkillRepository.save(es);
             }
         }
+        return "Success";
     }
 
     // --- GEMINI API CALLER ---
-    private String callGeminiApi(String resumeText) {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+    // REPLACE YOUR callGeminiApi METHOD WITH THIS
+private String callGeminiApi(String resumeText) {
+    // 1. FIX: Clean URL (Removed Markdown brackets/parentheses)
+    String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
 
-        // Strict JSON Schema Prompt (extended with certifications + skills)
-        String prompt =
-                "You are a resume parser. Extract structured data from the resume text into STRICT JSON.\n" +
-                "Rules:\n" +
-                "- Output ONLY JSON. No markdown, no comments.\n" +
-                "- Use EXACTLY these top-level keys: name, email, phone, linkedinUrl, githubUrl, portfolioUrl, " +
-                "education, workExperience, projects, certifications, skills.\n" +
-                "- Use ONLY information explicitly present in the resume; if a value is missing, use null (for scalars) " +
-                "or an empty array [] (for lists).\n" +
-                "- Dates must be in 'YYYY-MM-DD' format when possible.\n" +
-                "\n" +
-                "Expected JSON shape:\n" +
-                "{\n" +
-                "  \"name\": string | null,\n" +
-                "  \"email\": string | null,\n" +
-                "  \"phone\": string | null,\n" +
-                "  \"linkedinUrl\": string | null,\n" +
-                "  \"githubUrl\": string | null,\n" +
-                "  \"portfolioUrl\": string | null,\n" +
-                "  \"education\": [\n" +
-                "    {\n" +
-                "      \"degree\": string | null,\n" +
-                "      \"institution\": string | null,\n" +
-                "      \"fieldOfStudy\": string | null,\n" +
-                "      \"startYear\": number | null,\n" +
-                "      \"endYear\": number | null,\n" +
-                "      \"gpa\": number | null\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"workExperience\": [\n" +
-                "    {\n" +
-                "      \"jobTitle\": string | null,\n" +
-                "      \"company\": string | null,\n" +
-                "      \"description\": string | null,\n" +
-                "      \"startDate\": string | null,\n" +
-                "      \"endDate\": string | null,\n" +
-                "      \"isCurrent\": boolean | null\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"projects\": [\n" +
-                "    {\n" +
-                "      \"title\": string | null,\n" +
-                "      \"description\": string | null,\n" +
-                "      \"techStack\": string | null,\n" +
-                "      \"githubLink\": string | null,\n" +
-                "      \"liveLink\": string | null\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"certifications\": [\n" +
-                "    {\n" +
-                "      \"name\": string | null,\n" +
-                "      \"issuer\": string | null,\n" +
-                "      \"issueDate\": string | null,\n" +
-                "      \"certificateLink\": string | null\n" +
-                "    }\n" +
-                "  ],\n" +
-                "  \"skills\": [\n" +
-                "    {\n" +
-                "      \"skillName\": string,\n" +
-                "      \"category\": string | null,\n" +
-                "      \"confidenceScore\": number | null\n" +
-                "    }\n" +
-                "  ]\n" +
-                "}\n" +
-                "\n" +
-                "If you are unsure about a field, set it to null or []. Do NOT invent data.\n" +
-                "RESUME TEXT:\n" + resumeText;
+    // 2. FIX: Restored the actual JSON Schema in the prompt
+    String prompt = "You are a resume parser. Extract structured data from the resume text into STRICT JSON. " +
+            "Keys: name, email, phone, linkedinUrl, githubUrl, portfolioUrl, education, workExperience, projects, certifications, skills.\n" +
+            "Dates: YYYY-MM-DD. If missing, null.\n" +
+            "JSON Structure:\n" +
+            "{ \"name\": \"\", \"email\": \"\", \"phone\": \"\", \"linkedinUrl\": \"\", \"githubUrl\": \"\", \"portfolioUrl\": \"\",\n" +
+            "  \"education\": [{ \"degree\": \"\", \"institution\": \"\", \"fieldOfStudy\": \"\", \"startYear\": 2020, \"endYear\": 2024, \"gpa\": 3.5 }],\n" +
+            "  \"workExperience\": [{ \"jobTitle\": \"\", \"company\": \"\", \"description\": \"\", \"startDate\": \"\", \"endDate\": \"\", \"isCurrent\": false }],\n" +
+            "  \"projects\": [{ \"title\": \"\", \"description\": \"\", \"techStack\": \"\", \"githubLink\": \"\", \"liveLink\": \"\" }],\n" +
+            "  \"certifications\": [{ \"name\": \"\", \"issuer\": \"\", \"issueDate\": \"\", \"certificateLink\": \"\" }],\n" +
+            "  \"skills\": [{ \"skillName\": \"\", \"category\": \"\", \"confidenceScore\": 0.0 }]\n" +
+            "}\n" +
+            "RESUME TEXT:\n" + resumeText;
 
-        // Construct Request Body
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", new Object[]{ new HashMap<String, String>() {{ put("text", prompt); }} });
-        
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("contents", new Object[]{ content });
+    // 3. Construct Request (Java 9+ Map.of syntax)
+    Map<String, Object> textPart = Map.of("text", prompt);
+    Map<String, Object> content = Map.of("parts", List.of(textPart));
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
+    // 4. Configure JSON Mode (Temperature 0.0 for accuracy)
+    Map<String, Object> generationConfig = Map.of(
+            "response_mime_type", "application/json",
+            "temperature", 0.0
+    );
 
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+    Map<String, Object> requestBody = new HashMap<>();
+    requestBody.put("contents", List.of(content));
+    requestBody.put("generationConfig", generationConfig);
 
-        try {
-            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-            JsonNode root = objectMapper.readTree(response.getBody());
-            // Extract the actual text from Gemini's nested response structure
-            String rawJson = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
-            
-            // Clean markdown code blocks if Gemini adds them (```json ... ```)
-            return rawJson.replace("```json", "").replace("```", "").trim();
-            
-        } catch (Exception e) {
-            throw new RuntimeException("Gemini Parsing Failed: " + e.getMessage());
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+
+    HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+    try {
+        ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
+        JsonNode root = objectMapper.readTree(response.getBody());
+
+        JsonNode candidates = root.path("candidates");
+        if (candidates.isEmpty()) {
+            throw new RuntimeException("Gemini returned no candidates. Likely a safety block or empty response.");
         }
-    }
 
+        String rawJson = candidates.get(0).path("content").path("parts").get(0).path("text").asText();
+
+        // 5. Clean JSON (Remove markdown code fences)
+        return rawJson.replaceAll("(?i)^\\s*```json\\s*", "")
+                      .replaceAll("\\s*```\\s*$", "")
+                      .trim();
+
+    } catch (Exception e) {
+        throw new RuntimeException("Gemini Parsing Failed: " + e.getMessage(), e);
+    }
+}
     // --- Helper Methods to safely extract JSON fields ---
     private String getText(JsonNode node, String key) {
         return node.has(key) && !node.get(key).isNull() ? node.get(key).asText() : null;

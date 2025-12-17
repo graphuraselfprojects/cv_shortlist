@@ -114,11 +114,11 @@
 			<scope>runtime</scope>
 		</dependency>
 		<dependencies>
-  		<!-- <dependency>
+  		<dependency>
 			<groupId>com.google.genai</groupId>
 			<artifactId>google-genai</artifactId>
 			<version>1.0.0</version>
-  		</dependency> -->
+  		</dependency>
 </dependencies>
     
 		<!-- Test -->
@@ -127,10 +127,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/commons-io/commons-io -->
 		<dependency>
-		    <groupId>commons-io</groupId>
-		    <artifactId>commons-io</artifactId>
-		    <version>2.11.0</version>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.21.0</version>
 		</dependency>
 	</dependencies>
 
