@@ -87,27 +87,62 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- 5. File Upload Logic (Visual Only) ---
+    // --- 5. File Upload Logic (Visual + Validation) ---
     // Handle multiple file inputs (Resumes & JDs)
     const fileInputs = ['fileInput', 'jdInput'];
+    const MAX_FILES = 20;
+    const ALLOWED_EXTENSIONS = ['pdf', 'doc', 'docx'];
     
+    function isAllowedExtension(fileName) {
+        const parts = fileName.split('.');
+        if (parts.length < 2) return false;
+        const ext = parts.pop().toLowerCase();
+        return ALLOWED_EXTENSIONS.includes(ext);
+    }
+
     fileInputs.forEach(inputId => {
         const input = document.getElementById(inputId);
-        // Find the specific list container associated with this input
-        // (Assuming the list is immediately after the parent section or found by ID)
-        // For simplicity, we'll map IDs to their list containers if they are unique
-        let listId = inputId === 'fileInput' ? 'fileList' : 'jdList'; 
+        const listId = inputId === 'fileInput' ? 'fileList' : 'jdList'; 
         const list = document.getElementById(listId);
 
         if (input && list) {
             input.addEventListener('change', (e) => {
-                const files = Array.from(e.target.files);
+                const files = Array.from(e.target.files || []);
+
+                // Frontend max file count validation
+                if (files.length > MAX_FILES) {
+                    alert(`You can upload a maximum of ${MAX_FILES} files at once.`);
+                    input.value = '';
+                    list.innerHTML = '';
+                    return;
+                }
+
                 list.innerHTML = ''; // Clear current list
+
                 files.forEach(file => {
-                    const div = document.createElement('div');
-                    div.className = 'flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700 mt-2';
-                    div.innerHTML = `<span class="truncate max-w-[80%]">${file.name}</span> <i class="fas fa-check text-green-400"></i>`;
-                    list.appendChild(div);
+                    const validType = isAllowedExtension(file.name);
+                    const row = document.createElement('div');
+                    row.className = 'flex justify-between items-center bg-brand-dark p-2 rounded border border-gray-700 mt-2';
+                    row.dataset.fileName = file.name;
+
+                    const nameSpan = document.createElement('span');
+                    nameSpan.className = 'truncate max-w-[60%]';
+                    nameSpan.textContent = file.name;
+
+                    const statusSpan = document.createElement('span');
+                    statusSpan.className = 'text-xs';
+
+                    if (!validType) {
+                        statusSpan.textContent = 'Invalid file type';
+                        statusSpan.classList.add('text-red-400');
+                    } else {
+                        statusSpan.textContent = 'Ready';
+                        statusSpan.classList.add('text-gray-400');
+                    }
+
+                    row.appendChild(nameSpan);
+                    row.appendChild(statusSpan);
+                    list.appendChild(row);
                 });
             });
         }
@@ -243,6 +278,15 @@ document.addEventListener('DOMContentLoaded', () => {
             const jdList = document.getElementById('jdList');
             if(jdList) jdList.innerHTML = '';
 
+            const progressWrapper = document.getElementById('resumeUploadProgressWrapper');
+            const progressBar = document.getElementById('resumeUploadProgressBar');
+            const progressText = document.getElementById('resumeUploadProgressText');
+            if (progressWrapper && progressBar && progressText) {
+                progressWrapper.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            }
+
             // Reset Domain
             if(jobDomainSelect) jobDomainSelect.selectedIndex = 0;
             
@@ -285,51 +329,143 @@ window.uploadResumesToBackend = async function() {
 
     // 2. Get Files
     const fileInput = document.getElementById('fileInput');
-    const files = fileInput.files;
+    const files = Array.from(fileInput.files || []);
 
     if (files.length === 0) {
         alert("Please select files to upload.");
         return;
     }
 
-    // 3. Prepare Form Data
-    const formData = new FormData();
-    for (let i = 0; i < files.length; i++) {
-        formData.append("files", files[i]); // Must match @RequestPart("files") in backend
+    // Frontend validation: max count + allowed extensions
+    if (files.length > 20) {
+        alert("You can upload a maximum of 20 resumes at once.");
+        return;
     }
 
-    // 4. Send Request
-    const btn = document.querySelector('button[onclick="uploadResumesToBackend()"]');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading...`;
-    btn.disabled = true;
+    const invalidFiles = files.filter(f => {
+        const parts = f.name.split('.');
+        const ext = parts.length > 1 ? parts.pop().toLowerCase() : '';
+        return !['pdf', 'doc', 'docx'].includes(ext);
+    });
+
+    if (invalidFiles.length > 0) {
+        const names = invalidFiles.map(f => f.name).join(', ');
+        alert(`Only PDF, DOC, and DOCX files are allowed. Invalid: ${names}`);
+        return;
+    }
+
+    // 3. Prepare Form Data
+    const formData = new FormData();
+    files.forEach(file => {
+        formData.append("files", file); // Must match @RequestPart("files") in backend
+    });
+
+    // 4. Send Request with progress tracking (XMLHttpRequest to support upload.onprogress)
+    const btn = document.getElementById('resumeUploadBtn') ||
+        document.querySelector('button[onclick="uploadResumesToBackend()"]');
+    const originalText = btn ? btn.innerHTML : '';
+
+    const progressWrapper = document.getElementById('resumeUploadProgressWrapper');
+    const progressBar = document.getElementById('resumeUploadProgressBar');
+    const progressText = document.getElementById('resumeUploadProgressText');
+
+    if (progressWrapper && progressBar && progressText) {
+        progressWrapper.classList.remove('hidden');
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+    }
+
+    if (btn) {
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading...`;
+        btn.disabled = true;
+    }
 
     try {
-        // Construct URL: http://localhost:8080/api/resumes/upload/{userId}
         const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
-        const response = await fetch(`${baseUrl}/resumes/upload/${userId}`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            body: formData
+        const url = `${baseUrl}/resumes/upload/${userId}`;
+
+        const responseData = await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+
+            xhr.upload.onprogress = function (event) {
+                if (!event.lengthComputable || !progressBar || !progressText) return;
+                const percent = Math.round((event.loaded / event.total) * 100);
+                progressBar.style.width = `${percent}%`;
+                progressText.textContent = `${percent}%`;
+            };
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status >= 200 && xhr.status < 300) {
+                        try {
+                            const json = xhr.responseText ? JSON.parse(xhr.responseText) : null;
+                            resolve(json);
+                        } catch (e) {
+                            // Backend might not return JSON – treat as generic success
+                            resolve(null);
+                        }
+                    } else {
+                        reject(new Error(xhr.responseText || `Upload failed with status ${xhr.status}`));
+                    }
+                }
+            };
+
+            xhr.onerror = function () {
+                reject(new Error('Network error during upload.'));
+            };
+
+            xhr.send(formData);
         });
 
-        if (response.ok) {
-            alert("Upload Successful!");
+        // Update UI: mark per-file success/failure if backend returned structured data
+        const list = document.getElementById('fileList');
+        if (Array.isArray(responseData) && list) {
+            responseData.forEach(item => {
+                if (!item || !item.fileName) return;
+                const row = list.querySelector(`[data-file-name="${CSS.escape(item.fileName)}"]`);
+                if (!row) return;
+                const statusSpan = row.querySelector('span.text-xs') || row.lastElementChild;
+                if (!statusSpan) return;
+
+                const isSuccess = String(item.status || '').toUpperCase() === 'SUCCESS';
+                statusSpan.textContent = isSuccess
+                    ? (item.message || 'Uploaded')
+                    : (item.message || 'Failed');
+                statusSpan.classList.remove('text-gray-400', 'text-red-400', 'text-green-400');
+                statusSpan.classList.add(isSuccess ? 'text-green-400' : 'text-red-400');
+            });
+        } else if (list) {
+            // Fallback: mark all as success
+            list.querySelectorAll('[data-file-name]').forEach(row => {
+                const statusSpan = row.querySelector('span.text-xs') || row.lastElementChild;
+                if (!statusSpan) return;
+                statusSpan.textContent = 'Uploaded';
+                statusSpan.classList.remove('text-gray-400', 'text-red-400');
+                statusSpan.classList.add('text-green-400');
+            });
+        }
+
+        alert("Upload completed.");
+        const statusBadge = document.getElementById('uploadStatus');
+        if (statusBadge) {
+            statusBadge.classList.remove('hidden');
+        }
+
+        if (btn) {
             btn.innerHTML = `<i class="fas fa-check"></i> Done`;
-            document.getElementById('uploadStatus').classList.remove('hidden');
-        } else {
-            const err = await response.text();
-            alert("Upload Failed: " + err);
-            btn.innerHTML = originalText;
-            btn.disabled = false;
         }
     } catch (e) {
         console.error(e);
-        alert("Network Error");
-        btn.innerHTML = originalText;
-        btn.disabled = false;
+        alert(`Upload Failed: ${e.message}`);
+    } finally {
+        if (btn) {
+            setTimeout(() => {
+                btn.innerHTML = originalText || '<i class="fas fa-upload"></i> Upload Resumes';
+                btn.disabled = false;
+            }, 1500);
+        }
     }
 };
 

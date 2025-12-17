@@ -96,19 +96,43 @@
         <h2 class="text-lg md:text-xl font-semibold text-white">1. Upload Resumes</h2>
         <span id="uploadStatus" class="hidden text-xs font-semibold px-2 py-1 rounded bg-green-500/20 text-green-400">Uploaded</span>
     </div>
-    <p class="text-gray-400 text-sm mb-6">Select up to 20 PDF/DOCX files.</p>
+    <p class="text-gray-400 text-sm mb-6">
+        Select up to <span class="font-semibold text-brand-accent">20</span> resumes (PDF, DOC, DOCX) for a single account.
+    </p>
 
-    <div class="border-2 border-dashed border-brand-accent/40 rounded-xl p-6 md:p-10 text-center hover:bg-brand-dark/50 hover:border-brand-accent transition cursor-pointer group" onclick="document.getElementById('fileInput').click()">
+    <div class="border-2 border-dashed border-brand-accent/40 rounded-xl p-6 md:p-10 text-center hover:bg-brand-dark/50 hover:border-brand-accent transition cursor-pointer group"
+         onclick="document.getElementById('fileInput').click()">
         <i class="fas fa-cloud-upload-alt text-3xl md:text-4xl text-brand-accent mb-4 group-hover:scale-110 transition duration-300"></i>
         <h3 class="text-base md:text-lg font-medium text-white">Drag & Drop Resumes</h3>
         <p class="text-gray-500 text-xs md:text-sm mt-1">or click to browse</p>
-        <input type="file" id="fileInput" multiple accept=".pdf,.doc,.docx" class="hidden">
+        <input
+            type="file"
+            id="fileInput"
+            multiple
+            accept=".pdf,.doc,.docx"
+            class="hidden"
+        >
     </div>
 
     <div id="fileList" class="mt-4 max-h-40 overflow-y-auto space-y-2 text-sm text-gray-300"></div>
 
+    <!-- Overall upload progress (all resumes in a single multipart request) -->
+    <div id="resumeUploadProgressWrapper" class="mt-4 hidden">
+        <div class="flex items-center justify-between text-xs text-gray-400 mb-1">
+            <span>Upload progress</span>
+            <span id="resumeUploadProgressText">0%</span>
+        </div>
+        <div class="w-full bg-brand-dark rounded-full h-2 overflow-hidden">
+            <div id="resumeUploadProgressBar" class="bg-brand-primary h-2 rounded-full transition-all duration-200" style="width: 0%;"></div>
+        </div>
+    </div>
+
     <div class="mt-6 flex justify-end gap-4">
-        <button onclick="uploadResumesToBackend()" class="px-6 py-3 rounded-lg bg-gradient-to-r from-brand-primary to-purple-600 text-white font-bold shadow-lg hover:shadow-brand-primary/50 transform hover:-translate-y-1 transition text-center flex items-center gap-2">
+        <button
+            id="resumeUploadBtn"
+            onclick="uploadResumesToBackend()"
+            class="px-6 py-3 rounded-lg bg-gradient-to-r from-brand-primary to-purple-600 text-white font-bold shadow-lg hover:shadow-brand-primary/50 transform hover:-translate-y-1 transition text-center flex items-center gap-2"
+        >
             <i class="fas fa-upload"></i> Upload Resumes
         </button>
         
