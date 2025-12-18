@@ -18,32 +18,20 @@ import com.resumeshortlist.resume_shortlist_backend.service.ResumeParsingService
 
 @RestController
 @RequestMapping("/api/resumes")
-//@CrossOrigin
 @RequiredArgsConstructor
 public class ResumeController {
 
     private final FileUploadService FileUploadService;
     @Autowired
     private ResumeParsingService resumeParsingService;
-
     // 🎯 API #7 Upload Multiple Resumes
     @PostMapping("/upload/{userId}")
     public ResponseEntity<?> uploadResumes(
             @PathVariable Long userId,
             @RequestPart("files") MultipartFile[] files) {
         try {
+            // Only saves the file to disk and DB. Does NOT trigger Gemini yet.
             List<Resume> saved = FileUploadService.uploadMultipleResumes(userId, files);
-
-            // After upload, trigger Gemini-based parsing & extraction for each resume.
-            for (Resume r : saved) {
-                try {
-                    resumeParsingService.parseAndSaveResume(r.getId());
-                } catch (Exception ex) {
-                    // Do not fail the whole upload if parsing a single resume fails.
-                    // You can log this in a real application.
-                }
-            }
-
             return ResponseEntity.ok(saved);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Upload failed: " + e.getMessage());

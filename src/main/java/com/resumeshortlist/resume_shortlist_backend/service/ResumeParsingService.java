@@ -2,8 +2,12 @@ package com.resumeshortlist.resume_shortlist_backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentConfig;
+import com.google.genai.types.GenerateContentResponse;
 import com.resumeshortlist.resume_shortlist_backend.entity.*;
 import com.resumeshortlist.resume_shortlist_backend.repository.*;
+import lombok.RequiredArgsConstructor;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +25,7 @@ import java.util.Optional;
 
 
 @Service
+@RequiredArgsConstructor
 public class ResumeParsingService {
 
     @Autowired private ResumeRepository resumeRepository;
@@ -31,12 +36,11 @@ public class ResumeParsingService {
     @Autowired private CertificationRepository certificationRepository;
     @Autowired private ExtractedSkillRepository extractedSkillRepository;
 
-    @Value("${gemini.api.key}") // You must add this to application.properties
-    private String geminiApiKey;
+    @Autowired
+    private Client geminiClient;
 
     private final Tika tika = new Tika();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final RestTemplate restTemplate = new RestTemplate();
 
     public String parseAndSaveResume(Long resumeId) throws Exception {
         // 1. Fetch Resume Record
@@ -149,9 +153,10 @@ public class ResumeParsingService {
 
     // --- UPDATED GEMINI API CALLER WITH CORRECT MODEL ---
     private String callGeminiApi(String resumeText) {
-        // UPDATED: Changed to v1beta and gemini-2.0-flash model
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent" + //
-              "?key=" + geminiApiKey;
+        GenerateContentConfig config = GenerateContentConfig.builder()
+                .responseMimeType("application/json")
+                .temperature(0.0f)
+                .build();
 
         // Strict JSON Prompt
         String prompt =
@@ -213,52 +218,24 @@ public class ResumeParsingService {
         "RESUME TEXT:\n" +
         resumeText;
 
-        // Request Construction
-        Map<String, Object> requestBody = new HashMap<>();
-        
-        // Create the content structure
-        Map<String, Object> textPart = Map.of("text", prompt);
-        Map<String, Object> content = Map.of("parts", List.of(textPart));
-        
-        // Add generation config for better JSON output
-        Map<String, Object> generationConfig = Map.of(
-            "temperature", 0.1,
-            "maxOutputTokens", 4096,
-            "responseMimeType", "application/json"
-        );
-        
-        requestBody.put("contents", List.of(content));
-        requestBody.put("generationConfig", generationConfig);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-            JsonNode root = objectMapper.readTree(response.getBody());
+            // 3. Call Model using the injected Client bean
+            // NOTE: 'gemini-1.5-flash' is the most stable. 2.5-flash does not exist yet.
+            // 2.0-flash is experimental. Use 1.5-flash for reliability.
+            GenerateContentResponse response = geminiClient.models.generateContent(
+                    "gemini-2.5-flash",
+                    prompt,
+                    config
+            );
 
-            // Check for errors in response
-            if (root.has("error")) {
-                throw new RuntimeException("Gemini API Error: " + root.get("error").get("message").asText());
-            }
-
-            JsonNode candidates = root.path("candidates");
-            if (candidates.isEmpty()) {
-                throw new RuntimeException("Gemini returned no candidates. Safety block or empty result.");
-            }
-
-            String rawJson = candidates.get(0).path("content").path("parts").get(0).path("text").asText();
-
-            // Clean the response to ensure valid JSON
+            // 4. Clean Response
+            String rawJson = response.text();
             return rawJson.replaceAll("(?i)^\\s*```json\\s*", "")
-                          .replaceAll("\\s*```\\s*$", "")
-                          .replaceAll("^\\s*```\\s*", "")
-                          .trim();
+                    .replaceAll("\\s*```\\s*$", "")
+                    .trim();
 
         } catch (Exception e) {
-            throw new RuntimeException("Gemini API Error: " + e.getMessage(), e);
+            throw new RuntimeException("Gemini SDK Error: " + e.getMessage(), e);
         }
     }
 
