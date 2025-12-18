@@ -4,6 +4,7 @@ import com.resumeshortlist.resume_shortlist_backend.entity.JobPosting;
 import com.resumeshortlist.resume_shortlist_backend.entity.User;
 import com.resumeshortlist.resume_shortlist_backend.repository.JobPostingRepository;
 import com.resumeshortlist.resume_shortlist_backend.repository.UserRepository;
+import com.resumeshortlist.resume_shortlist_backend.service.JobDescriptionParsingService;
 import com.resumeshortlist.resume_shortlist_backend.service.JobPostingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,10 @@ public class JobPostingController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private JobDescriptionParsingService jobDescriptionParsingService;
+
+    
     @PostMapping("/create")
     public JobPosting createJobPosting(
             @RequestBody JobPosting jobPosting,
@@ -99,25 +104,34 @@ public class JobPostingController {
             if (!folder.exists()) folder.mkdirs();
 
             for (MultipartFile file : files) {
-                // 1. Save File
+                // 1. Save File Physically
                 String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 File dest = new File(uploadDir + uniqueName);
                 try (FileOutputStream fos = new FileOutputStream(dest)) {
                     fos.write(file.getBytes());
                 }
 
-                // 2. Save Entity
+                // 2. Parse File content using Gemini (Auto-Extraction)
+                JobPosting extractedData = jobDescriptionParsingService.parseJobDescription(dest);
+
+                // 3. Create Entity & Merge Data
                 JobPosting jp = new JobPosting();
-                jp.setTitle(file.getOriginalFilename()); // Use filename as temporary title
+                
+                // Use Extracted data if available, else fallback to filename
+                jp.setTitle(extractedData.getTitle() != null ? extractedData.getTitle() : file.getOriginalFilename());
+                jp.setDepartment(extractedData.getDepartment());
+                jp.setDescription(extractedData.getDescription() != null ? extractedData.getDescription() : "Uploaded via File");
+                jp.setMinExperienceYears(extractedData.getMinExperienceYears());
+                jp.setEducationLevel(extractedData.getEducationLevel());
+
+                // Metadata
                 jp.setFileName(file.getOriginalFilename());
                 jp.setFilePath(dest.getAbsolutePath());
                 jp.setFileType(file.getContentType());
                 jp.setCreatedBy(user);
                 jp.setCreatedAt(LocalDateTime.now());
                 
-                // Set defaults for required fields to avoid DB errors
-                jp.setDescription("Uploaded via File"); 
-                
+                // 4. Save to DB
                 savedPostings.add(jobPostingRepository.save(jp));
             }
 
@@ -125,7 +139,7 @@ public class JobPostingController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(500).body("JD Upload Failed: " + e.getMessage());
+            return ResponseEntity.status(500).body("JD Upload & Analysis Failed: " + e.getMessage());
         }
     }
 

@@ -471,7 +471,7 @@ window.uploadResumesToBackend = async function() {
 
 
 window.uploadJDToBackend = async function() {
-    console.log("Starting JD Upload...");
+    console.log("Starting JD Upload & Analysis...");
 
     // 1. Auth Check
     const userId = localStorage.getItem('userId');
@@ -499,14 +499,14 @@ window.uploadJDToBackend = async function() {
     formData.append("userId", userId);
 
     // 4. API Call
-    // URL: http://localhost:8080/api/job-postings/upload
     const baseUrl = CONFIG.API_BASE_URL.replace('/auth', ''); 
     const uploadUrl = `${baseUrl}/job-postings/upload`;
 
     // Button UI
     const btn = document.querySelector('button[onclick="uploadJDToBackend()"]');
     const originalContent = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Uploading...`;
+    // Update text to reflect analysis is happening
+    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing & Uploading...`;
     btn.disabled = true;
 
     try {
@@ -520,9 +520,11 @@ window.uploadJDToBackend = async function() {
 
         if (response.ok) {
             const result = await response.json();
-            console.log("JD Upload Success:", result);
+            console.log("JD Upload & Analysis Success:", result);
             
-            alert(`Success! ${result.length} Job Descriptions uploaded.`);
+            // Show detail about extracted data
+            alert(`Success! ${result.length} Job Descriptions uploaded and analyzed.\nFirst Job Title: ${result[0].title}`);
+            
             document.getElementById('jdUploadStatus').classList.remove('hidden');
             btn.innerHTML = `<i class="fas fa-check"></i> Done`;
             
@@ -568,64 +570,6 @@ window.analyzeCandidates = async function() {
         const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
         const url = `${baseUrl}/resumes/analyze/all/${userId}`;
         
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        if (response.ok) {
-            const result = await response.json();
-            console.log("Analysis Result:", result);
-
-            // 5. Success Popup
-            alert(`Analysis Complete!\n\n` +
-                  `✅ Successfully extracted data from: ${result.processed} new resumes.\n` +
-                  `⏭️ Skipped (already analyzed): ${result.skipped}`);
-            
-            // Optional: Redirect to results page
-            // window.location.href = "dashboard.html"; 
-
-        } else {
-            const errorText = await response.text();
-            throw new Error(errorText);
-        }
-
-    } catch (error) {
-        console.error("Analysis Error:", error);
-        alert("Analysis Failed: " + error.message);
-    } finally {
-        // 6. Reset Button
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-};
-
-window.analyzeJobPostingByJobDescription = async function() {
-    // 1. Auth Check
-    const userId = localStorage.getItem('userId');
-    const token = localStorage.getItem('jwtToken');
-
-    if (!userId || !token) {
-        alert("Please login first.");
-        return;
-    }
-
-    // 2. Button State Loading
-    const btn = document.getElementById('analyzeBtn2');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing...`;
-    btn.disabled = true;
-    
-    // 3. User Feedback
-    alert("Analysis started! This uses Gemini AI to read your resumes. Please wait...");
-
-    try {
-        // 4. API Call
-        const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
-        const url = `${baseUrl}/job-postings/create`;
-
         const response = await fetch(url, {
             method: 'POST',
             headers: {
