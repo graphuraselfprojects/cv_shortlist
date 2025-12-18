@@ -2,8 +2,12 @@ package com.resumeshortlist.resume_shortlist_backend.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.genai.Client;
+import com.google.genai.types.GenerateContentConfig;
+import com.google.genai.types.GenerateContentResponse;
 import com.resumeshortlist.resume_shortlist_backend.entity.JobPosting;
 import org.apache.tika.Tika;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -20,12 +24,11 @@ import java.util.Map;
 @Service
 public class JobDescriptionParsingService {
 
-    @Value("${gemini.api.key}")
-    private String geminiApiKey;
+    @Autowired
+    private Client geminiClient;
 
     private final Tika tika = new Tika();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final RestTemplate restTemplate = new RestTemplate();
 
     public JobPosting parseJobDescription(File file) {
         JobPosting extractedData = new JobPosting();
@@ -55,7 +58,10 @@ public class JobDescriptionParsingService {
     }
 
     private String callGeminiApi(String text) {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+        GenerateContentConfig config = GenerateContentConfig.builder()
+                .responseMimeType("application/json")
+                .temperature(0.0f)
+                .build();
 
         String prompt = "Extract structured data from this Job Description into STRICT JSON.\n" +
                 "Keys: title, department, description (summarized, max 500 chars), minExperienceYears (integer), educationLevel.\n" +
@@ -63,33 +69,23 @@ public class JobDescriptionParsingService {
                 "{ \"title\": \"\", \"department\": \"\", \"description\": \"\", \"minExperienceYears\": 0, \"educationLevel\": \"\" }\n" +
                 "JOB DESCRIPTION TEXT:\n" + text;
 
-        Map<String, Object> textPart = Map.of("text", prompt);
-        Map<String, Object> content = Map.of("parts", List.of(textPart));
-        
-        Map<String, Object> generationConfig = Map.of(
-            "response_mime_type", "application/json",
-            "temperature", 0.0
-        );
-
-        Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("contents", List.of(content));
-        requestBody.put("generationConfig", generationConfig);
-
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
-
         try {
-            ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
-            JsonNode root = objectMapper.readTree(response.getBody());
-            String rawJson = root.path("candidates").get(0).path("content").path("parts").get(0).path("text").asText();
-            
+            // 3. Call Model using the injected Client bean
+            // Using 'gemini-1.5-flash' as it is the stable model currently.
+            GenerateContentResponse response = geminiClient.models.generateContent(
+                    "gemini-2.5-flash",
+                    prompt,
+                    config
+            );
+
+            // 4. Clean Response
+            String rawJson = response.text();
             return rawJson.replaceAll("(?i)^\\s*```json\\s*", "")
-                          .replaceAll("\\s*```\\s*$", "")
-                          .trim();
+                    .replaceAll("\\s*```\\s*$", "")
+                    .trim();
+
         } catch (Exception e) {
-            throw new RuntimeException("Gemini API Error: " + e.getMessage());
+            throw new RuntimeException("Gemini SDK Error: " + e.getMessage(), e);
         }
     }
 
