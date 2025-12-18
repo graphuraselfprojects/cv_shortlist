@@ -131,52 +131,102 @@ public class ResumeParsingService {
         }
 
         // 10. Save Extracted Skills (normalized, confidence-scored)
-        // if (rootNode.has("skills")) {
-        //     for (JsonNode node : rootNode.get("skills")) {
-        //         String skillName = getText(node, "skillName");
-        //         if (skillName == null || skillName.isBlank()) continue;
+        if (rootNode.has("skills")) {
+            for (JsonNode node : rootNode.get("skills")) {
+                String skillName = getText(node, "skillName");
+                if (skillName == null || skillName.isBlank()) continue;
 
-        //         ExtractedSkill es = new ExtractedSkill();
-        //         es.setCandidate(candidate);
-        //         es.setSkillName(skillName);
-        //         es.setCategory(getText(node, "category"));
-        //         es.setConfidenceScore(getFloat(node, "confidenceScore"));
-        //         extractedSkillRepository.save(es);
-        //     }
-        // }
+                ExtractedSkill es = new ExtractedSkill();
+                es.setCandidate(candidate);
+                es.setSkillName(skillName);
+                es.setCategory(getText(node, "category"));
+                es.setConfidenceScore(getFloat(node, "confidenceScore"));
+                extractedSkillRepository.save(es);
+            }
+        }
         return "Success";
     }
 
-    // --- GEMINI API CALLER ---
-    // REPLACE YOUR callGeminiApi METHOD WITH THIS
-private String callGeminiApi(String resumeText) {
-   String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
+    // --- UPDATED GEMINI API CALLER WITH CORRECT MODEL ---
+    private String callGeminiApi(String resumeText) {
+        // UPDATED: Changed to v1beta and gemini-2.0-flash model
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent" + //
+              "?key=" + geminiApiKey;
 
         // Strict JSON Prompt
-        String prompt = "You are a resume parser. Extract structured data from the resume text into STRICT JSON. " +
-                "Keys: name, email, phone, linkedinUrl, githubUrl, portfolioUrl, education, workExperience, projects, certifications, skills.\n" +
-                "Dates: YYYY-MM-DD. If missing, null.\n" +
-                "JSON Structure:\n" +
-                "{ \"name\": \"\", \"email\": \"\", \"phone\": \"\", \"linkedinUrl\": \"\", \"githubUrl\": \"\", \"portfolioUrl\": \"\",\n" +
-                "  \"education\": [{ \"degree\": \"\", \"institution\": \"\", \"fieldOfStudy\": \"\", \"startYear\": 2020, \"endYear\": 2024, \"gpa\": 3.5 }],\n" +
-                "  \"workExperience\": [{ \"jobTitle\": \"\", \"company\": \"\", \"description\": \"\", \"startDate\": \"\", \"endDate\": \"\", \"isCurrent\": false }],\n" +
-                "  \"projects\": [{ \"title\": \"\", \"description\": \"\", \"techStack\": \"\", \"githubLink\": \"\", \"liveLink\": \"\" }],\n" +
-                "  \"certifications\": [{ \"name\": \"\", \"issuer\": \"\", \"issueDate\": \"\", \"certificateLink\": \"\" }],\n" +
-                "  \"skills\": [{ \"skillName\": \"\", \"category\": \"\", \"confidenceScore\": 0.0 }]\n" +
-                "}\n" +
-                "RESUME TEXT:\n" + resumeText;
+        String prompt =
+        "You are a resume parser. Extract structured data from the resume text into STRICT JSON.\n" +
+        "Keys: name, email, phone, linkedinUrl, githubUrl, portfolioUrl, education, workExperience, projects, certifications, skills.\n" +
+        "Dates: YYYY-MM-DD. If missing, use null.\n" +
+        "JSON Structure:\n" +
+        "{\n" +
+        "  \"name\": \"\",\n" +
+        "  \"email\": \"\",\n" +
+        "  \"phone\": \"\",\n" +
+        "  \"linkedinUrl\": \"\",\n" +
+        "  \"githubUrl\": \"\",\n" +
+        "  \"portfolioUrl\": \"\",\n" +
+        "  \"education\": [\n" +
+        "    {\n" +
+        "      \"degree\": \"\",\n" +
+        "      \"institution\": \"\",\n" +
+        "      \"fieldOfStudy\": \"\",\n" +
+        "      \"startDate\": \"\",\n" +
+        "      \"endDate\": \"\",\n" +
+        "      \"gpa\": null\n" +
+        "    }\n" +
+        "  ],\n" +
+        "  \"workExperience\": [\n" +
+        "    {\n" +
+        "      \"jobTitle\": \"\",\n" +
+        "      \"company\": \"\",\n" +
+        "      \"startDate\": \"\",\n" +
+        "      \"endDate\": \"\",\n" +
+        "      \"description\": \"\"\n" +
+        "    }\n" +
+        "  ],\n" +
+        "  \"projects\": [\n" +
+        "    {\n" +
+        "      \"title\": \"\",\n" +
+        "      \"description\": \"\",\n" +
+        "      \"techStack\": \"\",\n" +
+        "      \"githubLink\": \"\",\n" +
+        "      \"liveLink\": \"\"\n" +
+        "    }\n" +
+        "  ],\n" +
+        "  \"certifications\": [\n" +
+        "    {\n" +
+        "      \"name\": \"\",\n" +
+        "      \"issuer\": \"\",\n" +
+        "      \"issueDate\": \"\",\n" +
+        "      \"certificateLink\": \"\"\n" +
+        "    }\n" +
+        "  ],\n" +
+        "  \"skills\": [\n" +
+        "    {\n" +
+        "      \"skillName\": \"\",\n" +
+        "      \"category\": \"\",\n" +
+        "      \"confidenceScore\": 0.0\n" +
+        "    }\n" +
+        "  ]\n" +
+        "}\n\n" +
+        "RESUME TEXT:\n" +
+        resumeText;
 
         // Request Construction
+        Map<String, Object> requestBody = new HashMap<>();
+        
+        // Create the content structure
         Map<String, Object> textPart = Map.of("text", prompt);
         Map<String, Object> content = Map.of("parts", List.of(textPart));
         
-        // Configuration: JSON Mode + Low Temperature
+        // Add generation config for better JSON output
         Map<String, Object> generationConfig = Map.of(
-            "response_mime_type", "application/json",
-            "temperature", 0.0
+            "temperature", 0.1,
+            "maxOutputTokens", 4096,
+            "responseMimeType", "application/json"
         );
-
-        Map<String, Object> requestBody = new HashMap<>();
+        
         requestBody.put("contents", List.of(content));
         requestBody.put("generationConfig", generationConfig);
 
@@ -189,6 +239,11 @@ private String callGeminiApi(String resumeText) {
             ResponseEntity<String> response = restTemplate.postForEntity(url, entity, String.class);
             JsonNode root = objectMapper.readTree(response.getBody());
 
+            // Check for errors in response
+            if (root.has("error")) {
+                throw new RuntimeException("Gemini API Error: " + root.get("error").get("message").asText());
+            }
+
             JsonNode candidates = root.path("candidates");
             if (candidates.isEmpty()) {
                 throw new RuntimeException("Gemini returned no candidates. Safety block or empty result.");
@@ -196,32 +251,40 @@ private String callGeminiApi(String resumeText) {
 
             String rawJson = candidates.get(0).path("content").path("parts").get(0).path("text").asText();
 
-            // Regex Cleaning to ensure valid JSON
+            // Clean the response to ensure valid JSON
             return rawJson.replaceAll("(?i)^\\s*```json\\s*", "")
                           .replaceAll("\\s*```\\s*$", "")
+                          .replaceAll("^\\s*```\\s*", "")
                           .trim();
 
         } catch (Exception e) {
-            throw new RuntimeException("Gemini API Error: " + e.getMessage());
+            throw new RuntimeException("Gemini API Error: " + e.getMessage(), e);
         }
-}
+    }
+
     // --- Helper Methods to safely extract JSON fields ---
     private String getText(JsonNode node, String key) {
         return node.has(key) && !node.get(key).isNull() ? node.get(key).asText() : null;
     }
+    
     private Integer getInt(JsonNode node, String key) {
         return node.has(key) && !node.get(key).isNull() ? node.get(key).asInt() : null;
     }
+    
     private Float getFloat(JsonNode node, String key) {
         return node.has(key) && !node.get(key).isNull() ? (float) node.get(key).asDouble() : null;
     }
+    
     private Boolean getBool(JsonNode node, String key) {
         return node.has(key) && !node.get(key).isNull() && node.get(key).asBoolean();
     }
+    
     private LocalDate getDate(JsonNode node, String key) {
         try {
             String dateStr = getText(node, key);
             return dateStr != null ? LocalDate.parse(dateStr) : null;
-        } catch (Exception e) { return null; }
+        } catch (Exception e) { 
+            return null; 
+        }
     }
 }
