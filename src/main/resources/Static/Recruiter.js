@@ -316,8 +316,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
 }); // End DOMContentLoaded
 
-let uploadedJobId = null;
-let uploadedJobDepartment = null;
+let uploadedJobId = localStorage.getItem('activeJobId') || null;
+let uploadedJobDepartment = localStorage.getItem('activeJobDept') || null;
+
+if(uploadedJobId) {
+    console.log("Restored Session - Job ID:", uploadedJobId);
+}
 
 
 window.uploadResumesToBackend = async function() {
@@ -523,36 +527,31 @@ window.uploadJDToBackend = async function() {
         });
 
         if (response.ok) {
-            const result = await response.json();
-            console.log("JD Upload & Analysis Success:", result);
+            const data = await res.json();
+            const job = Array.isArray(data) ? data[0] : data;
+            
+            // ✅ CRITICAL: SAVE JOB ID TO STORAGE
+            uploadedJobId = job.id;
+            uploadedJobDepartment = job.department || job.title || "";
+            
+            localStorage.setItem('activeJobId', uploadedJobId);
+            localStorage.setItem('activeJobDept', uploadedJobDepartment);
 
-            if (result && result.length > 0) {
-                uploadedJobId = result[0].id;
-                // Store the extracted department (or fallback to title if department is null)
-                uploadedJobDepartment = result[0].department || result[0].title || "";
-                console.log("Set Current Job Context:", uploadedJobId, uploadedJobDepartment);
-            }
-            
-            // Show detail about extracted data
-            alert(`Success! JD Analyzed. Extracted Department: ${uploadedJobDepartment}`);
-            
+            console.log("✅ New Job Created with ID:", uploadedJobId);
+
+            alert(`JD Uploaded & Analyzed!\nJob ID: ${uploadedJobId}\nExtracted Dept: ${uploadedJobDepartment}`);
             document.getElementById('jdUploadStatus').classList.remove('hidden');
             btn.innerHTML = `<i class="fas fa-check"></i> Done`;
-            
-            setTimeout(() => {
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
-            }, 3000);
-
         } else {
             throw new Error(await response.text());
         }
-
     } catch (error) {
         console.error("JD Upload Error:", error);
         alert("Upload Failed: " + error.message);
         btn.innerHTML = originalContent;
         btn.disabled = false;
+    }finally {
+        if(btn) setTimeout(() => btn.disabled = false, 2000);
     }
 };
 
@@ -590,28 +589,18 @@ window.saveRequirements = async function() {
     // 3. Conditional Validation (Only runs IF a file was previously uploaded)
     // If uploadedJobId is null, we assume the user skipped Section 2 and is creating a fresh job.
     if (uploadedJobId) {
-        const errorMsg = document.getElementById('domainErrorMsg');
-        
+                
         // Loose matching logic: Check if one string contains the other (case-insensitive)
         // Also allows "Engineer" in JD to match "Developer" in selection
-        const jdDept = uploadedJobDepartment.toLowerCase();
+        const jdDept = (uploadedJobDepartment || "").toLowerCase();
         const selDept = selectedDomain.toLowerCase();
 
-        const isMatch = jdDept.includes(selDept) || 
-                        selDept.includes(jdDept) ||
-                        (jdDept.includes('engineer') && selDept.includes('developer')) ||
-                        (jdDept.includes('developer') && selDept.includes('engineer'));
+        const isMatch = jdDept.includes(selDept) || selDept.includes(jdDept) ||
+                        (jdDept.includes('engineer') && selDept.includes('developer'));
 
         if (!isMatch) {
-            if (errorMsg) {
-                errorMsg.textContent = `Error: Selected domain (${selectedDomain}) does not match uploaded JD (${uploadedJobDepartment}).`;
-                errorMsg.classList.remove('hidden');
-            } else {
-                alert(`Error: Selected domain (${selectedDomain}) does not match uploaded JD (${uploadedJobDepartment}).`);
-            }
-            return; // Stop execution if mismatch found
-        } else {
-            if (errorMsg) errorMsg.classList.add('hidden');
+            alert(`Warning: Domain '${selectedDomain}' doesn't match extracted JD '${uploadedJobDepartment}'. Proceeding anyway...`);
+            // We allow proceeding now, just a warning.
         }
     }
 
@@ -621,12 +610,12 @@ window.saveRequirements = async function() {
     const url = `${baseUrl}/job-postings/save-requirements`;
 
     // Visual Feedback (Optional: Disable button)
-    const saveBtn = document.querySelector('button[onclick="saveRequirements()"]');
-    const originalBtnText = saveBtn ? saveBtn.innerHTML : '';
-    if (saveBtn) {
-        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        saveBtn.disabled = true;
-    }
+    // const saveBtn = document.querySelector('button[onclick="saveRequirements()"]');
+    // const originalBtnText = saveBtn ? saveBtn.innerHTML : '';
+    // if (saveBtn) {
+    //     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+    //     saveBtn.disabled = true;
+    // }
 
     try {
         const response = await fetch(url, {
@@ -642,7 +631,20 @@ window.saveRequirements = async function() {
                 skills: skills
             })
         });
-
+        
+        const responseText = await response.text();
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (e) {
+            // If response is not JSON (e.g., just "Skills saved"), construct a fake object
+            console.warn("Backend returned non-JSON:", responseText);
+            if (response.ok) {
+                result = { message: responseText, jobId: uploadedJobId };
+            } else {
+                throw new Error(responseText);
+            }
+        }
         if (response.ok) {
             const result = await response.json();
             alert(`Requirements saved successfully!\n(Job ID: ${result.jobId})`);
@@ -650,8 +652,13 @@ window.saveRequirements = async function() {
             // CRITICAL: Update global state
             // If we created a new job from scratch, we must save its ID now.
             // This ensures if the user clicks "Save" again, it updates the same job instead of creating another one.
-            uploadedJobId = result.jobId; 
-            uploadedJobDepartment = selectedDomain; 
+            if (result.jobId) {
+                uploadedJobId = result.jobId;
+                uploadedJobDepartment = selectedDomain;
+                
+                localStorage.setItem('activeJobId', uploadedJobId);
+                localStorage.setItem('activeJobDept', uploadedJobDepartment);
+            }
             
         } else {
             const errorText = await response.text();
@@ -726,3 +733,55 @@ window.analyzeCandidates = async function() {
         btn.disabled = false;
     }
 };
+
+
+// --- NEW FUNCTION: TRIGGER SCORING & REDIRECT ---
+window.finishAndAnalyze = async function() {
+    
+    // 1. Check State (If null, try localStorage one last time)
+    if (!uploadedJobId) {
+        uploadedJobId = localStorage.getItem('activeJobId');
+    }
+
+    // 2. Only block if we truly have NO job ID to score against
+    if (!uploadedJobId) {
+        alert("No Job found to analyze.\nPlease upload a JD (Section 2) OR Save Requirements (Section 3) first.");
+        return;
+    }
+
+    const token = localStorage.getItem('jwtToken');
+    const btn = document.getElementById('analyzeFinalBtn');
+    const originalText = btn ? btn.innerHTML : 'Analyze';
+    
+    if(btn) { 
+        btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Scoring...`; 
+        btn.disabled = true; 
+    }
+
+    try {
+        const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
+        const url = `${baseUrl}/score/${uploadedJobId}`;
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+            alert("Scoring Complete! Redirecting to Dashboard...");
+            window.location.href = `dashboard.html?jobId=${uploadedJobId}`;
+        } else {
+            const errText = await response.text();
+            throw new Error(errText);
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Analysis Failed: " + e.message);
+    } finally {
+        if(btn) { 
+            btn.innerHTML = originalText; 
+            btn.disabled = false; 
+        }
+    }
+};
+

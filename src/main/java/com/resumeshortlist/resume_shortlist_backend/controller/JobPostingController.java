@@ -14,10 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/job-postings")
@@ -55,32 +52,29 @@ public class JobPostingController {
                 jobId = Long.valueOf(payload.get("jobId").toString());
             }
 
-            List<String> skills = (List<String>) payload.get("skills");
-            String jobDomain = (String) payload.get("jobDomain");
-
+            // --- STRICT CHECK ---
+            // If ID is missing, return error instead of creating a new one.
             if (jobId == null) {
-                if (payload.get("userId") == null) {
-                    return ResponseEntity.badRequest().body("User ID is required when creating a new job from scratch.");
-                }
-                Long userId = Long.valueOf(payload.get("userId").toString());
-
-                // Create a placeholder job using the Domain as the Title
-                JobPosting newJob = jobPostingService.createJobPostingWithSkills(jobDomain, userId, null);
-                jobId = newJob.getId();
+                return ResponseEntity.badRequest().body(Map.of("error", "Job ID is missing. Please upload a Job Description first."));
             }
 
+            List<String> skills = (List<String>) payload.get("skills");
             if (skills == null || skills.isEmpty()) {
-                return ResponseEntity.badRequest().body("No skills provided");
+                return ResponseEntity.badRequest().body(Map.of("error", "No skills provided"));
             }
 
             jobPostingService.saveRequiredSkills(jobId, skills);
-            return ResponseEntity.ok("Skills saved successfully");
+            
+            // Return JSON Object
+            return ResponseEntity.ok(Map.of(
+                "message", "Skills saved successfully", 
+                "jobId", jobId
+            ));
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).body("Failed to save requirements: " + e.getMessage());
+            return ResponseEntity.status(500).body(Map.of("error", "Failed to save requirements: " + e.getMessage()));
         }
     }
-
 
     // API: Create a job posting + required skills from recruiter domain/skills selection
     @PostMapping("/domain-skills")
@@ -134,32 +128,30 @@ public class JobPostingController {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("User not found"));
 
-            List<JobPosting> savedPostings = new ArrayList<>();
+            List<Map<String, Object>> responseList = new ArrayList<>();
             String uploadDir = "uploads/job_descriptions/";
             File folder = new File(uploadDir);
             if (!folder.exists()) folder.mkdirs();
 
             for (MultipartFile file : files) {
-                // 1. Save File Physically
+                // 1. Save File
                 String uniqueName = UUID.randomUUID() + "_" + file.getOriginalFilename();
                 File dest = new File(uploadDir + uniqueName);
                 try (FileOutputStream fos = new FileOutputStream(dest)) {
                     fos.write(file.getBytes());
                 }
 
-                // 2. Parse File content using Gemini (Auto-Extraction)
+                // 2. Parse (Uses Gemini)
                 JobPosting extractedData = jobDescriptionParsingService.parseJobDescription(dest);
 
-                // 3. Create Entity & Merge Data
+                // 3. Create Entity
                 JobPosting jp = new JobPosting();
-                
-                // Use Extracted data if available, else fallback to filename
                 jp.setTitle(extractedData.getTitle() != null ? extractedData.getTitle() : file.getOriginalFilename());
                 jp.setDepartment(extractedData.getDepartment());
                 jp.setDescription(extractedData.getDescription() != null ? extractedData.getDescription() : "Uploaded via File");
                 jp.setMinExperienceYears(extractedData.getMinExperienceYears());
                 jp.setEducationLevel(extractedData.getEducationLevel());
-
+                
                 // Metadata
                 jp.setFileName(file.getOriginalFilename());
                 jp.setFilePath(dest.getAbsolutePath());
@@ -168,16 +160,24 @@ public class JobPostingController {
                 jp.setCreatedAt(LocalDateTime.now());
                 
                 // 4. Save to DB
-                savedPostings.add(jobPostingRepository.save(jp));
+                JobPosting savedJob = jobPostingRepository.save(jp);
+
+                // 5. Build Safe Response (Manual Map to prevent JSON errors)
+                Map<String, Object> jobMap = new HashMap<>();
+                jobMap.put("id", savedJob.getId());
+                jobMap.put("title", savedJob.getTitle());
+                jobMap.put("department", savedJob.getDepartment());
+                jobMap.put("description", savedJob.getDescription());
+                
+                responseList.add(jobMap);
             }
 
-            return ResponseEntity.ok(savedPostings);
+            return ResponseEntity.ok(responseList);
 
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("JD Upload & Analysis Failed: " + e.getMessage());
         }
-    }
-
+            }
 }
 
