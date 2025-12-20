@@ -15,9 +15,9 @@ public class ScoreBreakdown {
 
     private String category; // e.g., "FORMAT", "CONTACT", etc.
 
-    private Float earnedPoints;
+    private Integer earnedPoints; //Come from candidate score
 
-    private Float maxPoints;
+    private Integer maxPoints;
 
     @Column(columnDefinition = "TEXT")
     private String remarks;

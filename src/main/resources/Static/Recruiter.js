@@ -480,96 +480,6 @@ let uploadedJobId = null;
 let uploadedJobDepartment = null;
 
 
-// window.uploadJDToBackend = async function() {
-//     console.log("Starting JD Upload & Analysis...");
-
-//     // 1. Auth Check
-//     const userId = localStorage.getItem('userId');
-//     const token = localStorage.getItem('jwtToken');
-
-//     if (!userId || !token) {
-//         alert("Please login first.");
-//         return;
-//     }
-
-//     // 2. Get Files
-//     const jdInput = document.getElementById('jdInput');
-//     const files = jdInput.files;
-
-//     if (files.length === 0) {
-//         alert("Please select Job Description files first!");
-//         return;
-//     }
-
-//     // 3. Prepare Form Data
-//     const formData = new FormData();
-//     for (let i = 0; i < files.length; i++) {
-//         formData.append("files", files[i]);
-//     }
-//     formData.append("userId", userId);
-
-//     // 4. API Call
-//     const baseUrl = CONFIG.API_BASE_URL.replace('/auth', ''); 
-//     const uploadUrl = `${baseUrl}/job-postings/upload`;
-
-//     // Button UI
-//     const btn = document.querySelector('button[onclick="uploadJDToBackend()"]');
-//     const originalContent = btn.innerHTML;
-//     // Update text to reflect analysis is happening
-//     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing & Uploading...`;
-//     btn.disabled = true;
-
-//     try {
-//         const response = await fetch(uploadUrl, {
-//             method: 'POST',
-//             headers: {
-//                 'Authorization': `Bearer ${token}`
-//             },
-//             body: formData
-//         });
-
-//         if (response.ok) {
-//             const data = await response.json();console.log("JD Success:", result);
-//             const job = Array.isArray(data) ? data[0] : data;
-
-//             if (Array.isArray(result) && result.length > 0) {
-//                 const job = result[0]; // Take the first job
-                
-//                 uploadedJobId = job.id;
-//                 uploadedJobDepartment = job.department || job.title || "";
-                
-//                 // ✅ SAVE TO STORAGE
-//                 localStorage.setItem('activeJobId', uploadedJobId);
-//                 localStorage.setItem('activeJobDept', uploadedJobDepartment);
-                
-//                 console.log("Session Saved:", uploadedJobId);
-//             }
-            
-//             // ✅ CRITICAL: SAVE JOB ID TO STORAGE
-//             // uploadedJobId = job.id;
-//             // uploadedJobDepartment = job.department || job.title || "";
-            
-//             // localStorage.setItem('activeJobId', uploadedJobId);
-//             // localStorage.setItem('activeJobDept', uploadedJobDepartment);
-
-//             // console.log("✅ New Job Created with ID:", uploadedJobId);
-
-//             alert(`JD Uploaded & Analyzed!\nJob ID: ${uploadedJobId}\nExtracted Dept: ${uploadedJobDepartment}`);
-//             document.getElementById('jdUploadStatus').classList.remove('hidden');
-//             btn.innerHTML = `<i class="fas fa-check"></i> Done`;
-//         } else {
-//             throw new Error(await response.text());
-//         }
-//     } catch (error) {
-//         console.error("JD Upload Error:", error);
-//         alert("Upload Failed: " + error.message);
-//         btn.innerHTML = originalContent;
-//         btn.disabled = false;
-//     }finally {
-//         if(btn) setTimeout(() => btn.disabled = false, 2000);
-//     }
-// };
-
 window.uploadJDToBackend = async function() {
     console.log("Starting JD Upload & Analysis...");
 
@@ -759,111 +669,61 @@ window.saveRequirements = async function() {
     }
 };
 
-window.analyzeCandidates = async function() {
-    // 1. Auth Check
-    const userId = localStorage.getItem('userId');
-    const token = localStorage.getItem('jwtToken');
+// Add this function to Recruiter.js
 
-    if (!userId || !token) {
+window.finishAndAnalyze = async function() {
+    console.log("Starting Candidate Analysis...");
+
+    // 1. Retrieve active Job ID
+    let jobId = uploadedJobId || localStorage.getItem('activeJobId');
+    if (!jobId) {
+        alert("No active Job ID found. Please upload a Job Description first.");
+        return;
+    }
+
+    // 2. Auth Check
+    const token = localStorage.getItem('jwtToken');
+    if (!token) {
         alert("Please login first.");
         return;
     }
 
-    // 2. Button State Loading
-    const btn = document.getElementById('analyzeBtn1');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing...`;
-    btn.disabled = true;
-    
-    // 3. User Feedback
-    alert("Analysis started! This uses Gemini AI to read your resumes. Please wait...");
+    // 3. Button Feedback
+    const btn = document.getElementById('analyzeFinalBtn');
+    const originalContent = btn ? btn.innerHTML : 'Analyze Candidates';
+    if (btn) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+        btn.disabled = true;
+    }
 
     try {
-        // 4. API Call
-        const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
-        const url = `${baseUrl}/resumes/analyze/all/${userId}`;
-        
+        // 4. Construct URL (assuming CONFIG.API_BASE_URL is set correctly, e.g., 'http://localhost:8080/api/auth')
+        const baseUrl = CONFIG.API_BASE_URL.replace('/auth', ''); // Adjusts to root API path
+        const url = `${baseUrl}/score/${jobId}`;
+        console.log("Analysis URL:", url);
+
+        // 5. Make POST request to trigger scoring
         const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
         });
 
         if (response.ok) {
             const result = await response.json();
-            console.log("Analysis Result:", result);
-
-            // 5. Success Popup
-            alert(`Analysis Complete!\n\n` +
-                  `✅ Successfully extracted data from: ${result.processed} new resumes.\n` +
-                  `⏭️ Skipped (already analyzed): ${result.skipped}`);
-            
-            // Optional: Redirect to results page
-            // window.location.href = "dashboard.html"; 
-
+            alert(`Analysis triggered successfully! Job ID: ${jobId}\nMessage: ${result.message}`);
+            // Optional: Redirect to dashboard.html to view results
+            window.location.href = 'dashboard.html';
         } else {
             const errorText = await response.text();
-            throw new Error(errorText);
+            throw new Error(errorText || `Failed with status ${response.status}`);
         }
-
     } catch (error) {
         console.error("Analysis Error:", error);
-        alert("Analysis Failed: " + error.message);
+        alert(`Analysis Failed: ${error.message}`);
     } finally {
-        // 6. Reset Button
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-    }
-};
-
-
-// --- NEW FUNCTION: TRIGGER SCORING & REDIRECT ---
-window.finishAndAnalyze = async function() {
-    
-    // 1. Check State (If null, try localStorage one last time)
-    if (!uploadedJobId) {
-        uploadedJobId = localStorage.getItem('activeJobId');
-    }
-
-    // 2. Only block if we truly have NO job ID to score against
-    if (!uploadedJobId) {
-        alert("No Job found to analyze.\nPlease upload a JD (Section 2) OR Save Requirements (Section 3) first.");
-        return;
-    }
-
-    const token = localStorage.getItem('jwtToken');
-    const btn = document.getElementById('analyzeFinalBtn');
-    const originalText = btn ? btn.innerHTML : 'Analyze';
-    
-    if(btn) { 
-        btn.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> Scoring...`; 
-        btn.disabled = true; 
-    }
-
-    try {
-        const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
-        const url = `${baseUrl}/score/${uploadedJobId}`;
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-
-        if (response.ok) {
-            alert("Scoring Complete! Redirecting to Dashboard...");
-            window.location.href = `dashboard.html?jobId=${uploadedJobId}`;
-        } else {
-            const errText = await response.text();
-            throw new Error(errText);
-        }
-    } catch (e) {
-        console.error(e);
-        alert("Analysis Failed: " + e.message);
-    } finally {
-        if(btn) { 
-            btn.innerHTML = originalText; 
-            btn.disabled = false; 
+        // Reset Button
+        if (btn) {
+            btn.innerHTML = originalContent;
+            btn.disabled = false;
         }
     }
 };

@@ -14,7 +14,55 @@ public class CandidateScore {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Integer totalScore; // out of 100
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getTotalScore() {
+        return totalScore;
+    }
+
+    public void setTotalScore(Integer totalScore) {
+        this.totalScore = totalScore;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getScoredAt() {
+        return scoredAt;
+    }
+
+    public void setScoredAt(LocalDateTime scoredAt) {
+        this.scoredAt = scoredAt;
+    }
+
+    public Candidate getCandidate() {
+        return candidate;
+    }
+
+    public void setCandidate(Candidate candidate) {
+        this.candidate = candidate;
+    }
+
+    public JobPosting getJobPosting() {
+        return jobPosting;
+    }
+
+    public void setJobPosting(JobPosting jobPosting) {
+        this.jobPosting = jobPosting;
+    }
+
+    private Integer totalScore; // out of 30
 
     private String status; // e.g., "SHORTLISTED", "CONSIDER", "REJECTED"
 
