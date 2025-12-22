@@ -207,8 +207,8 @@
                                 <span>Shortlisted</span>
                             </label>
                             <label class="flex items-center space-x-2 text-sm text-gray-300 hover:text-white cursor-pointer transition">
-                                <input type="checkbox" name="statusFilter" value="consider" class="form-checkbox">
-                                <span>To Consider</span>
+                                <input type="checkbox" name="statusFilter" value="pending" class="form-checkbox">
+                                <span>Pending</span>
                             </label>
                             <label class="flex items-center space-x-2 text-sm text-gray-300 hover:text-white cursor-pointer transition">
                                 <input type="checkbox" name="statusFilter" value="rejected" class="form-checkbox">
@@ -318,8 +318,8 @@
             </div>
         </div>
     </div>
-   <template id="cardTemplate">
-  <div class="card bg-brand-card rounded-xl shadow-2xl p-6 flex flex-col h-full border-2 border-transparent hover:border-brand-primary/50 transition duration-300 cursor-pointer" onclick="showDetailModal(this.dataset.id)">
+<template id="cardTemplate">
+  <div class="card bg-brand-card rounded-xl shadow-2xl p-6 flex flex-col h-full border-2 border-transparent hover:border-brand-primary/50 transition duration-300">
     
     <div class="flex items-start justify-between">
         <div>
@@ -332,22 +332,18 @@
       </div>
     </div>
 
-    <div class="flex-grow">
-      </div>
+    <div class="flex-grow"></div>
 
     <div class="mt-4 flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <input type="checkbox" class="shortlistCheckbox form-checkbox h-5 w-5 text-green-500 border-gray-600 bg-brand-dark rounded focus:ring-green-500">
-        <span class="text-sm text-gray-400 font-medium">Shortlist</span>
+        <span class="text-sm font-medium text-gray-300">Status:</span>
+        <span class="status-text text-sm font-semibold"></span>
       </div>
-      <button class="view-btn text-brand-primary hover:text-brand-accent text-sm font-semibold transition flex items-center">
-        View Profile <i data-feather="arrow-right" class="w-4 h-4 inline ml-1"></i>
-      </button>
+      <!-- REMOVED VIEW PROFILE BUTTON COMPLETELY -->
     </div>
 
   </div>
 </template>
-
     <button id="scrollTopBtn" onclick="scrollToTop()" 
         class="fixed bottom-8 right-8 z-50 bg-brand-primary text-white p-4 rounded-full shadow-lg transition-all duration-300 transform translate-y-24 opacity-0 hover:bg-blue-600 hover:shadow-xl">
         <i class="fas fa-arrow-up text-xl"></i>
