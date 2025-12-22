@@ -387,7 +387,7 @@ async function loadDashboardStats() {
  */
 function applyFiltersAndSort() {
     const searchInput = document.getElementById('searchInput').value.toLowerCase();
-    const sortValue = sortSelect.value;
+   
     
     // Get checked values from the new checkbox groups
     const selectedPositions = getCheckedValues('positionFilter');
@@ -431,16 +431,7 @@ function applyFiltersAndSort() {
         return true;
     });
 
-    // 2. Sorting
-    candidates.sort((a, b) => {
-        switch (sortValue) {
-            case 'score_desc': return b.score - a.score;
-            case 'score_asc': return a.score - b.score;
-            case 'experience_desc': return b.experience - a.experience;
-            case 'experience_asc': return a.experience - b.experience;
-            default: return b.score - a.score;
-        }
-    });
+   
 
     // 3. Rendering
     renderCandidateCards(candidates);
@@ -664,7 +655,7 @@ filterSidebar.addEventListener('change', (e) => {
 document.getElementById('searchInput').addEventListener('input', applyFiltersAndSort);
 
 // Listener for sort dropdown (UNCHANGED)
-sortSelect.addEventListener('change', applyFiltersAndSort);
+
 
 // LIST OF ALL POTENTIAL POSITIONS FOR THE RANDOM GENERATOR (UPDATED)
 const allPositions = [
@@ -681,23 +672,7 @@ const allPositions = [
 
 
 // Add sample candidate (CLEANED UP - photo and aiSummary removed)
-document.getElementById('addCandidates').addEventListener('click', () => {
-  const nextId = rawCandidates.length ? Math.max(...rawCandidates.map(x => x.id)) + 1 : 1;
-  const sample = {
-    id: nextId,
-    name: `New Candidate ${nextId}`,
-    position: allPositions[Math.floor(Math.random() * allPositions.length)], // Use expanded list
-    experience: Math.floor(Math.random() * 7) + 1,
-    score: Math.floor(Math.random() * 30) + 60,
-    skillsMatch: `${Math.floor(Math.random() * 10) + 15}/30`,
-    status: "consider",
-    atsBreakdown: {keywords: Math.floor(Math.random() * 30) + 60, format: Math.floor(Math.random() * 30) + 60, length: Math.floor(Math.random() * 30) + 60}
-  };
-  rawCandidates.push(sample);
-  // Re-run the initial population/filter to include the new position/candidate
-  populatePositionFilter(); 
-  applyFiltersAndSort(); 
-});
+
 
 
 // ===== Scroll to Top Functionality (EXISTING) =====
