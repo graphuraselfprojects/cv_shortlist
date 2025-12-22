@@ -216,10 +216,7 @@ function updateFilterCounts() {
     });
 
     // Update static score counts
-    document.getElementById('count-90').textContent = scoreCounts['90+'];
-    document.getElementById('count-80-89').textContent = scoreCounts['80-89'];
-    document.getElementById('count-70-79').textContent = scoreCounts['70-79'];
-    document.getElementById('count-lt70').textContent = scoreCounts['<70'];
+    
 }
 
 
