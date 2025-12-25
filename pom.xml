@@ -113,13 +113,13 @@
 			<version>0.12.3</version>
 			<scope>runtime</scope>
 		</dependency>
-		<dependencies>
+
   		<dependency>
 			<groupId>com.google.genai</groupId>
 			<artifactId>google-genai</artifactId>
 			<version>1.0.0</version>
   		</dependency>
-</dependencies>
+
     
 		<!-- Test -->
 		<dependency>
