@@ -19,7 +19,8 @@
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     
     <script src="config.js"></script>
-    <script src="nav.js"></script> <script>
+    <script src="nav.js"></script>
+    <script>
         tailwind.config = {
             theme: {
                 extend: {
@@ -96,9 +97,9 @@
         <h2 class="text-lg md:text-xl font-semibold text-white">1. Upload Resumes</h2>
         <span id="uploadStatus" class="hidden text-xs font-semibold px-2 py-1 rounded bg-green-500/20 text-green-400">Uploaded</span>
     </div>
-    <p class="text-gray-400 text-sm mb-6">
-        Select up to <span class="font-semibold text-brand-accent">20</span> resumes (PDF, DOC, DOCX) for a single account.
-    </p>
+  <p class="text-gray-400 text-sm mb-6">
+    Select up to <span id="remainingCount" class="font-semibold text-brand-accent">20</span> resumes (PDF, DOC, DOCX) for a single account.
+</p>
 
     <div class="border-2 border-dashed border-brand-accent/40 rounded-xl p-6 md:p-10 text-center hover:bg-brand-dark/50 hover:border-brand-accent transition cursor-pointer group"
          onclick="document.getElementById('fileInput').click()">
@@ -304,7 +305,30 @@
         <button onclick="handleSignup()" class="w-full mt-6 bg-brand-primary hover:bg-blue-600 text-white font-bold py-3 rounded-lg transition-all shadow-lg hover:shadow-brand-primary/30 transform hover:-translate-y-0.5">Sign Up</button>
         <p class="text-center text-gray-400 text-sm mt-4">Already a member? <a href="#" onclick="openLogin(true); return false;" class="text-brand-primary hover:text-brand-accent hover:underline transition-colors">Login</a></p>
     </div> 
+<script>
 
+     const fileInput = document.getElementById('fileInput');
+const remainingCountSpan = document.getElementById('remainingCount');
+const maxLimit = 20;
+
+fileInput.addEventListener('change', function() {
+    // 1. Check karo kitni files select ki gayi hain
+    const selectedFilesCount = this.files.length;
+
+    // 2. Logic: 20 mein se selected files minus karo
+    let remaining = maxLimit - selectedFilesCount;
+
+    // 3. Agar user 20 se zyada select kare to use 0 dikhao ya alert do
+    if (remaining < 0) {
+        alert("You can only upload 20 resumes.");
+        this.value = ""; // Input clear kar do
+        remainingCountSpan.innerText = maxLimit;
+    } else {
+        // 4. Span ka text update karo
+        remainingCountSpan.innerText = remaining;
+    }
+});
+</script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="Recruiter.js"></script>
     <script src="nav.js"></script>
