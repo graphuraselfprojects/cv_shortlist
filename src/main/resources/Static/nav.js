@@ -7,6 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof AOS !== 'undefined') AOS.init();
 });
 
+// UI Logic: Show/Hide Secret Key field
+function toggleSecretField() {
+    const role = document.getElementById('signup-role').value;
+    const container = document.getElementById('secret-key-container');
+    if (role === 'HR') {
+        container.classList.remove('hidden');
+    } else {
+        container.classList.add('hidden');
+    }
+}
+
 async function includeHTML(url, elementId) {
     const placeholder = document.getElementById(elementId);
     if (!placeholder) return;
@@ -38,43 +49,45 @@ function updateNavbarUI() {
     }
 }
 
-function handleRecruiterClick() {
-    const token = localStorage.getItem('jwtToken');
-    if (token) {
-        window.location.href = "Recruiter.html";
-    } else {
-        alert("Please login first to access the Recruiter Dashboard.");
-        openLogin();
-    }
-}
-
 async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
+    // Assuming you add a role selector in login modal as well
+    const role = document.getElementById('login-role')?.value || 'User'; 
 
-    // VALIDATION [New Change]
     if (!email || !password) {
         alert("Please enter both email and password.");
         return;
     }
 
-    const requestBody = { email, password };
-    const loginUrl = `${CONFIG.API_BASE_URL}/login`;
+    // --- ADMIN HARDCODED CHECK ---
+    const ADMIN_EMAIL = "admin@graphura.com";
+    const ADMIN_PASS = "Admin2025!";
 
+    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
+        localStorage.setItem('jwtToken', 'admin-session-active');
+        localStorage.setItem('role', 'Admin');
+        localStorage.setItem('userName', 'System Admin');
+        alert("Admin Login Successful");
+        window.location.href = "admin-dashboard.html"; 
+        return;
+    }
+
+    // --- STANDARD USER/HR LOGIN ---
     try {
-        const response = await fetch(loginUrl, {
+        const response = await fetch(`${CONFIG.API_BASE_URL}/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestBody)
+            body: JSON.stringify({ email, password, role })
         });
 
         if (response.ok) {
             const data = await response.json();
             localStorage.setItem('jwtToken', data.token);
-            localStorage.setItem('userId', data.userId);
+            localStorage.setItem('role', role);
             localStorage.setItem('userName', data.name || email.split('@')[0]);
             
-            window.location.href = "profile.html";
+            window.location.href = role === "HR" ? "Recruiter.html" : "profile.html";
         } else {
             const errorMessage = await response.text();
             alert("Login Failed: " + errorMessage);
@@ -89,14 +102,22 @@ async function handleSignup() {
     const name = document.getElementById('signup-name').value.trim();
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value.trim();
+    const role = document.getElementById('signup-role').value;
+    const secretKey = document.getElementById('signup-secret-key').value.trim();
 
-    // VALIDATION [New Change]
     if (!name || !email || !password) {
         alert("Please complete all fields to sign up.");
         return;
     }
 
-    const requestBody = { name, email, password };
+    // --- SECRET KEY VALIDATION ---
+    const HR_SECRET_KEY = "SECRET123"; // Change this to your desired key
+    if (role === "HR" && secretKey !== HR_SECRET_KEY) {
+        alert("Invalid HR Secret Key. Access Denied.");
+        return;
+    }
+
+    const requestBody = { name, email, password, role };
     const apiUrl = `${CONFIG.API_BASE_URL}/register`;
 
     try {
@@ -116,7 +137,17 @@ async function handleSignup() {
         }
     } catch (error) {
         console.error('Network Error:', error);
-        alert('An unexpected network error occurred.');
+    }
+}
+
+function handleRecruiterClick() {
+    const token = localStorage.getItem('jwtToken');
+    const role = localStorage.getItem('role');
+    
+    if (token && (role === 'HR' || role === 'Admin')) {
+        window.location.href = "Recruiter.html";
+    } else {
+        alert("Access Denied: Only HR/Admin can access the Recruiter Dashboard.");
     }
 }
 
@@ -161,8 +192,9 @@ function openSignup(isSwitch) {
 // Global Exports
 window.handleRecruiterClick = handleRecruiterClick;
 window.handleLogin = handleLogin;
-window.handleSignup = handleSignup;
+window.handleSignup = handleSignup; 
 window.openLogin = openLogin;
 window.openSignup = openSignup;
 window.closePopup = closePopup;
 window.updateNavbarUI = updateNavbarUI;
+window.toggleSecretField = toggleSecretField;

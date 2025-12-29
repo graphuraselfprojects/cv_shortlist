@@ -25,6 +25,17 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
+// --- Toggle Secret Field for Admin ---
+function toggleSecretField() {
+  const role = document.getElementById('signup-role').value;
+  const secretSection = document.getElementById('admin-secret-section');
+  if (role === 'HR') {
+    secretSection.classList.remove('hidden');
+  } else {
+    secretSection.classList.add('hidden');
+  }
+}
+
 // --- Improved Modal Logic ---
 
 function hideModal(modalId) {
@@ -87,6 +98,7 @@ async function handleSignup() {
   const name = document.getElementById("signup-name").value.trim();
   const email = document.getElementById("signup-email").value.trim();
   const password = document.getElementById("signup-password").value.trim();
+  const role = document.getElementById("signup-role").value;
 
   // VALIDATION [New Change]
   if (!name || !email || !password) {
@@ -94,7 +106,17 @@ async function handleSignup() {
     return;
   }
 
-  const requestBody = { name, email, password };
+  // --- SECRET KEY VALIDATION ---
+  if (role === "HR") {
+    const secretKey = document.getElementById('signup-secret-key').value.trim();
+    const HR_SECRET_KEY = "SECRET123"; // Change this to your desired key
+    if (secretKey !== HR_SECRET_KEY) {
+      alert("Invalid HR Secret Key. Access Denied.");
+      return;
+    }
+  }
+
+  const requestBody = { name, email, password, role };
   const apiUrl = `${CONFIG.API_BASE_URL}/register`;
 
   try {
