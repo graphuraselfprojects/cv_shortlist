@@ -449,7 +449,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1. Initial Load
     loadDashboardStats();
 
-<<<<<<< HEAD
     // 2. Export Button
     const exportBtn = document.getElementById('exportBtn');
     if (exportBtn) {
@@ -485,44 +484,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-=======
-    // Get the job department/title from localStorage (same as in cards)
-    const jobDept = localStorage.getItem('activeJobDept') || 'Position Not Specified';
-
-    const headers = ["S.NO", "Name", "Position", "Total Score", "Status"];
-    const rows = rawCandidates.map((c, index) => [
-        index + 1,  // Serial number
-        c.candidateName || 'Unknown',
-        jobDept,  // Use the same job title for ALL rows
-        c.totalScore || '',
-        formatStatus(c.status)
-    ]);
-
-    let csv = headers.join(",") + "\n" + 
-              rows.map(r => r.map(f => `"${f}"`).join(",")).join("\n");
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `candidates_${new Date().toISOString().slice(0,10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(url); // Clean up
-});
-// Batch Resume placeholder
-// document.getElementById('downloadSelectedBtn').addEventListener('click', () => {
-//     if (rawCandidates.length === 0) {
-//         alert("No candidates to download.");
-//         return;
-//     }
-
-//     const confirmDownload = confirm(`Prepare batch summary for ${rawCandidates.length} candidates?`);
-    
-//     if (confirmDownload) {
-//         window.print(); // Opens print dialog with current candidate list
-//     }
-// });
->>>>>>> 2a7a3191464d0a639d0d8f19fd212c7faaa9aed8
 
     // 4. Search Input
     const searchInput = document.getElementById('searchInput');

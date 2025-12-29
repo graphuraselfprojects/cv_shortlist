@@ -86,6 +86,10 @@ async function handleLogin() {
             localStorage.setItem('jwtToken', data.token);
             localStorage.setItem('role', role);
             localStorage.setItem('userName', data.name || email.split('@')[0]);
+
+            if (data.userId) {
+                localStorage.setItem('userId', data.userId);
+            }
             
             window.location.href = role === "HR" ? "Recruiter.html" : "profile.html";
         } else {
