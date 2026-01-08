@@ -721,9 +721,7 @@ window.analyzeCandidates = async function() {
     }
 };
 
-function scrollToTop() {
-  window.scrollTo({ top: 0, behavior: "smooth" });
-}
+
 // Add this function to Recruiter.js
 
 // window.finishAndAnalyze = async function() {
