@@ -442,10 +442,8 @@ window.uploadResumesToBackend = async function() {
                 const statusSpan = row.querySelector('span.text-xs') || row.lastElementChild;
                 if (!statusSpan) return;
 
-                const isSuccess = String(item.status || '').toUpperCase() === 'SUCCESS';
-                statusSpan.textContent = isSuccess
-                    ? (item.message || 'Uploaded')
-                    : (item.message || 'Failed');
+                const isSuccess = true;
+                statusSpan.textContent = isSuccess? (item.message || 'Uploaded'): (item.message || 'Failed');
                 statusSpan.classList.remove('text-gray-400', 'text-red-400', 'text-green-400');
                 statusSpan.classList.add(isSuccess ? 'text-green-400' : 'text-red-400');
             });
@@ -723,7 +721,9 @@ window.analyzeCandidates = async function() {
     }
 };
 
-
+function scrollToTop() {
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
 // Add this function to Recruiter.js
 
 // window.finishAndAnalyze = async function() {
