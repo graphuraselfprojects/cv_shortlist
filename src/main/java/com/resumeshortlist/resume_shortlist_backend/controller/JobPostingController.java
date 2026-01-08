@@ -139,11 +139,10 @@ public class JobPostingController {
                     .orElseThrow(() -> new RuntimeException("User not found"));
             logger.info("User found: id={}, email={}", user.getId(), user.getEmail());
 
-            // CHANGE HERE: Use an absolute path outside the project
-            String uploadDir = "C:/uploads/job_descriptions/";  // <-- Change this to your preferred location
-            // Example alternatives:
-            // "D:/app_uploads/job_descriptions/"
-            // Or on another drive/machine if needed
+           // ✅ CORRECT UPLOAD DIRECTORY (project-root/uploads/job_descriptions)
+                String uploadDir = System.getProperty("user.dir")
+                + File.separator + "uploads"
+                + File.separator + "job_descriptions";
 
             File uploadFolder = new File(uploadDir);
             if (!uploadFolder.exists()) {
