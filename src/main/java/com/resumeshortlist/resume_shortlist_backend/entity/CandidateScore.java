@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "candidate_scores")
 @Data
@@ -72,10 +74,12 @@ public class CandidateScore {
 
     @ManyToOne
     @JoinColumn(name = "candidate_id", nullable = false)
+    @JsonIgnore
     private Candidate candidate;
 
     @ManyToOne
     @JoinColumn(name = "job_posting_id", nullable = false)
+    @JsonIgnore
     private JobPosting jobPosting;
 
     @OneToMany(mappedBy = "candidateScore", cascade = CascadeType.ALL, orphanRemoval = true)
