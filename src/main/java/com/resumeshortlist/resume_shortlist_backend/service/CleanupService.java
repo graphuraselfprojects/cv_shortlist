@@ -6,6 +6,7 @@ import com.resumeshortlist.resume_shortlist_backend.entity.User;
 import com.resumeshortlist.resume_shortlist_backend.repository.JobPostingRepository;
 import com.resumeshortlist.resume_shortlist_backend.repository.ResumeRepository;
 import com.resumeshortlist.resume_shortlist_backend.repository.UserRepository;
+// If you have a Score Repository, include it. If not, the Cascade in Step 1 handles it.
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -15,35 +16,24 @@ import java.util.List;
 @Service
 public class CleanupService {
 
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private JobPostingRepository jobPostingRepository;
-
-    @Autowired
-    private ResumeRepository resumeRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private JobPostingRepository jobPostingRepository;
+    @Autowired private ResumeRepository resumeRepository;
 
     @Transactional
     public void flushUserData(String userEmail) {
-        // 1. Find the logged-in User
+        // 1. Find User
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        // 2. Delete all Job Postings created by this user
+        // 2. Delete Job Postings
+        // (This automatically deletes RequiredSkills and linked Scores)
         List<JobPosting> jobs = jobPostingRepository.findByCreatedBy(user);
-        if (!jobs.isEmpty()) {
-            jobPostingRepository.deleteAll(jobs);
-        }
+        jobPostingRepository.deleteAll(jobs);
 
-        // 3. Delete all Resumes uploaded by this user
-        // Note: If you have a 'CandidateScore' or 'Education' table linked to Resume,
-        // JPA will cascade delete them automatically if configured correctly.
+        // 3. Delete Resumes
+        // (This automatically deletes Candidate -> Education, Projects, Scores, Breakdowns)
         List<Resume> resumes = resumeRepository.findByUploadedBy(user);
-        if (!resumes.isEmpty()) {
-            resumeRepository.deleteAll(resumes);
-        }
-        
-        // The User entity itself remains untouched.
+        resumeRepository.deleteAll(resumes);
     }
 }

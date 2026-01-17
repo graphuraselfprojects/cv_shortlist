@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+
 @Entity
 @Table(name = "resumes")
 @Data
@@ -28,4 +29,7 @@ public class Resume {
     @ManyToOne
     @JoinColumn(name = "uploaded_by", nullable = false)
     private User uploadedBy;
+
+    @OneToOne(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Candidate candidate;
 }

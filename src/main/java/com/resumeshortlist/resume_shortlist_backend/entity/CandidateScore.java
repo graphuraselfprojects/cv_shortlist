@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
+import java.util.List;
+
 @Entity
 @Table(name = "candidate_scores")
 @Data
@@ -75,4 +77,7 @@ public class CandidateScore {
     @ManyToOne
     @JoinColumn(name = "job_posting_id", nullable = false)
     private JobPosting jobPosting;
+
+    @OneToMany(mappedBy = "candidateScore", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ScoreBreakdown> scoreBreakdowns;
 }
