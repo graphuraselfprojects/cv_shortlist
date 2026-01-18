@@ -1,6 +1,6 @@
 package com.resumeshortlist.resume_shortlist_backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+// import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,6 +26,6 @@ public class ScoreBreakdown {
 
     @ManyToOne
     @JoinColumn(name = "candidate_score_id", nullable = false)
-    @JsonIgnore
+    // @JsonIgnore
     private CandidateScore candidateScore;
 }

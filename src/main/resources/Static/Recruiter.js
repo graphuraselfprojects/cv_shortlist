@@ -681,6 +681,10 @@ window.analyzeCandidates = async function() {
         return;
     }
 
+    
+
+    
+
     // 2. Button State Loading
     const btn = document.getElementById('analyzeBtn1');
     const originalText = btn.innerHTML;
@@ -695,8 +699,10 @@ window.analyzeCandidates = async function() {
         const response = await fetch(url, {
             method: 'POST',
             headers: {
+                'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
-            }
+            },
+            body: JSON.stringify(cleanIds)
         });
 
         if (response.ok) {

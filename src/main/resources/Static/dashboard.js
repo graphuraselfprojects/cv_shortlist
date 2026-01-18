@@ -444,36 +444,36 @@ async function loadDashboardStats() {
     }
 }
 
-async function confirmClearData() {
-    const isConfirmed = confirm("⚠️ DANGER ZONE: This will permanently delete ALL uploaded Resumes, Job Descriptions, and Analysis Data to free up your database storage.\n\nYour account login will remain safe.\n\nAre you sure you want to proceed?");
+// async function confirmClearData() {
+//     const isConfirmed = confirm("⚠️ DANGER ZONE: This will permanently delete ALL uploaded Resumes, Job Descriptions, and Analysis Data to free up your database storage.\n\nYour account login will remain safe.\n\nAre you sure you want to proceed?");
     
-    if (!isConfirmed) return;
+//     if (!isConfirmed) return;
 
-    try {
-        const token = localStorage.getItem('jwtToken');
-        // Dynamic URL construction based on your config
-        const BASE_URL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL.replace('/auth', '') : 'http://localhost:8080/api';
+//     try {
+//         const token = localStorage.getItem('jwtToken');
+//         // Dynamic URL construction based on your config
+//         const BASE_URL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL.replace('/auth', '') : 'http://localhost:8080/api';
         
-        const response = await fetch(`${BASE_URL}/cleanup/user-data`, {
-            method: 'DELETE',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
-            }
-        });
+//         const response = await fetch(`${BASE_URL}/cleanup/user-data`, {
+//             method: 'DELETE',
+//             headers: {
+//                 'Authorization': `Bearer ${token}`,
+//                 'Content-Type': 'application/json'
+//             }
+//         });
 
-        if (response.ok) {
-            alert("✅ Success: Database flushed! Your storage is now empty.");
-            window.location.reload(); 
-        } else {
-            const errorMsg = await response.text();
-            alert("❌ Failed to clear data: " + errorMsg);
-        }
-    } catch (error) {
-        console.error("Error clearing data:", error);
-        alert("Network error. Please try again.");
-    }
-}
+//         if (response.ok) {
+//             alert("✅ Success: Database flushed! Your storage is now empty.");
+//             window.location.reload(); 
+//         } else {
+//             const errorMsg = await response.text();
+//             alert("❌ Failed to clear data: " + errorMsg);
+//         }
+//     } catch (error) {
+//         console.error("Error clearing data:", error);
+//         alert("Network error. Please try again.");
+//     }
+// }
 
 
 // ===== Event Listeners with Safe Checks (Fixes the Error) =====

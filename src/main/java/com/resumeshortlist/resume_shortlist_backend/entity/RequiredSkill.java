@@ -1,6 +1,6 @@
 package com.resumeshortlist.resume_shortlist_backend.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+// import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -26,6 +26,6 @@ public class RequiredSkill {
 
     @ManyToOne
     @JoinColumn(name = "job_posting_id", nullable = false)
-    @JsonIgnore 
+    // @JsonIgnore 
     private JobPosting jobPosting;
 }
