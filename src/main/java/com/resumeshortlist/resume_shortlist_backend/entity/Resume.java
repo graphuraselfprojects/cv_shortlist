@@ -29,6 +29,6 @@ public class Resume {
     @JoinColumn(name = "uploaded_by", nullable = false)
     private User uploadedBy;
 
-    // @OneToOne(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private Candidate candidate;
+    @OneToOne(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Candidate candidate;
 }

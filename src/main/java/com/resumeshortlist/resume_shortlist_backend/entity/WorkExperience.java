@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
-// import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "work_experiences")
@@ -31,6 +31,6 @@ public class WorkExperience {
 
     @ManyToOne
     @JoinColumn(name = "candidate_id", nullable = false)
-    // @JsonIgnore
+    @JsonIgnore
     private Candidate candidate;
 }

@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
-// import java.util.List;
+import java.util.List;
 
 // import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -74,14 +74,14 @@ public class CandidateScore {
 
     @ManyToOne
     @JoinColumn(name = "candidate_id", nullable = false)
-    // @JsonIgnore
+
     private Candidate candidate;
 
     @ManyToOne
     @JoinColumn(name = "job_posting_id", nullable = false)
-    // @JsonIgnore
+
     private JobPosting jobPosting;
 
-    // @OneToMany(mappedBy = "candidateScore", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<ScoreBreakdown> scoreBreakdowns;
+    @OneToMany(mappedBy = "candidateScore", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ScoreBreakdown> scoreBreakdowns;
 }

@@ -672,54 +672,98 @@ window.saveRequirements = async function() {
 };
 
 window.analyzeCandidates = async function() {
+
     // 1. Auth Check
+
     const userId = localStorage.getItem('userId');
+
     const token = localStorage.getItem('jwtToken');
 
+
+
     if (!userId || !token) {
+
         alert("Please login first.");
+
         return;
+
     }
+
+
 
     // 2. Button State Loading
+
     const btn = document.getElementById('analyzeBtn1');
+
     const originalText = btn.innerHTML;
+
     btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Analyzing...`;
+
     btn.disabled = true;
 
+
+
     try {
+
         // 4. API Call
+
         const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
+
         const url = `${baseUrl}/resumes/analyze/all/${userId}`;
-        
+
+       
+
         const response = await fetch(url, {
+
             method: 'POST',
+
             headers: {
+
                 'Authorization': `Bearer ${token}`
+
             }
+
         });
 
+
+
         if (response.ok) {
+
             const result = await response.json();
+
             console.log("Analysis Result:", result);
+
             // 5. Success Popup
-            
+
+           
+
             // Optional: Redirect to results page
-            // window.location.href = "dashboard.html"; 
+
+            // window.location.href = "dashboard.html";
+
+
 
         } else {
+
             const errorText = await response.text();
+
             throw new Error(errorText);
+
         }
+
         } catch (error) {
+
         console.error("Analysis Error:", error);
+
         alert("Analysis Failed: " + error.message);
+
     } finally {
+
         // 6. Reset Button
+
         btn.innerHTML = originalText;
-        btn.disabled = false;
     }
-};
+}
 
 
 // Add this function to Recruiter.js
@@ -937,15 +981,28 @@ window.finishAndAnalyze = async function() {
             headers: { 'Authorization': `Bearer ${token}` } 
         });
         
-        const candidates = await res.json();
-        console.log("Found Candidates:", candidates); // Console mein check karein ye empty toh nahi?
+        const resumes = await res.json();
+        console.log("3. Raw Resumes Response from DB:", resumes); 
 
-        if (!candidates || candidates.length === 0) {
-            alert("Database mein koi candidate nahi mila. Pehle resumes upload karein!");
+        if (!resumes || resumes.length === 0) {
+            alert("Database mein koi resume nahi mila. Pehle resumes upload karein!");
             return;
         }
 
-        const candidateIds = candidates.map(c => c.id);
+
+       // --- DEBUGGING CRITICAL LOGIC ---
+        // Check if we are sending Resume IDs or Candidate IDs.
+        // Assuming your Resume entity has a nested 'candidate' object.
+        // If 'c.id' is Resume ID, but backend needs Candidate ID, this might be the issue.
+        const candidateIds = resumes.map(c => {
+             // Try to find the Candidate ID safely
+             if (c.candidate && c.candidate.id) return c.candidate.id;
+             return c.id; // Fallback to Resume ID if candidate object is missing
+        });
+
+        console.log("4. Extracted IDs to send (Count: " + candidateIds.length + "):", candidateIds);
+
+        console.log("5. Triggering Scoring API...");
 
         // Step B: Scoring Trigger
         const scoreRes = await fetch(`${baseUrl}/score/${jobId}`, {
@@ -964,6 +1021,8 @@ window.finishAndAnalyze = async function() {
             alert("Scoring Error: " + JSON.stringify(errorData));
         }
     } catch (error) {
-        console.error("Final Analysis Error:", error);
+        const errorData = await scoreRes.json();
+            console.error("7. Scoring API Failed:", errorData);
+            alert("Scoring Error: " + JSON.stringify(errorData));
     }
 };

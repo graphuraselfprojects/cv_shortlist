@@ -41,8 +41,13 @@ public class ResumeController {
     // 🎯 API #8 Get All Resumes Uploaded by Specific User
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Resume>> getResumesByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(FileUploadService.getAllResumesByUser(userId));
-    }
+    System.out.println("API HIT: getResumesByUser for UserID: " + userId);
+    
+    List<Resume> resumes = FileUploadService.getAllResumesByUser(userId);
+    
+    System.out.println("API RESULT: Found " + resumes.size() + " resumes.");
+    return ResponseEntity.ok(resumes);
+}
 
     @PostMapping("/analyze/all/{userId}")
     public ResponseEntity<?> analyzeAllResumes(@PathVariable Long userId) {

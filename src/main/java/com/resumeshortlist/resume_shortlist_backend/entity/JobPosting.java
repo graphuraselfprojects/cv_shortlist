@@ -38,10 +38,10 @@ public class JobPosting {
     @JoinColumn(name = "created_by", nullable = false)
     private User createdBy;
 
-    // @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<RequiredSkill> requiredSkills;
+    @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RequiredSkill> requiredSkills;
     
-    // // If scores are also linked to jobs, cascade them here too
-    // @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, orphanRemoval = true)
-    // private List<CandidateScore> candidateScores;
+    // If scores are also linked to jobs, cascade them here too
+    @OneToMany(mappedBy = "jobPosting", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CandidateScore> candidateScores;
 }

@@ -49,9 +49,16 @@ public class ScoringController {
     @PostMapping("/score/{jobId}")
 public ResponseEntity<?> triggerScoring(@PathVariable Long jobId, @RequestBody List<Long> candidateIds) { // @RequestBody add kiya
     try {
+
+        System.out.println("API HIT: triggerScoring for JobID: " + jobId);
+
         if (candidateIds == null || candidateIds.isEmpty()) {
+            System.err.println("API ERROR: Candidate IDs list is NULL or EMPTY");
             return ResponseEntity.badRequest().body(Map.of("error", "Candidate IDs ki list khali hai"));
         }
+
+        System.out.println("API DATA: Received " + candidateIds.size() + " IDs to score: " + candidateIds);
+
         // Ab hum service ko jobId aur sirf wahi IDs bhej rahe hain jo abhi upload huye hain
         scoringService.triggerScoring(jobId, candidateIds); 
         
@@ -61,6 +68,8 @@ public ResponseEntity<?> triggerScoring(@PathVariable Long jobId, @RequestBody L
                 "startedAt", java.time.LocalDateTime.now()
         ));
     } catch (Exception e) {
+        System.err.println("API EXCEPTION: " + e.getMessage());
+        e.printStackTrace(); // Print full stack trace to console
         return ResponseEntity.badRequest().body(Map.of(
                 "error", "Failed to trigger scoring: " + e.getMessage()
         ));

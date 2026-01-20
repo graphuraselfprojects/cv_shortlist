@@ -83,120 +83,121 @@ public class ScoringService {
 public void triggerScoring(Long jobId, List<Long> newCandidateIds) {
     // 1. Check karein ki Job exist karti hai ya nahi
     if (!jobPostingRepository.existsById(jobId)) {
-        throw new ResourceNotFoundException("Job ID " + jobId + " nahi mila");
+        throw new ResourceNotFoundException("Job ID " + jobId + " not found");
     }
 
     // 2. Loop chala kar har candidate ko score karein
     for (Long candId : newCandidateIds) {
-        // Validation: Candidate check karein
-        if (candidateRepository.existsById(candId)) {
-            // Aapka purana method call karein jo scoring karta hai
-            calculateAndSaveScore(candId, jobId);
-        } else {
-            // Agar koi ID galat hai toh console mein warning dikhaye, crash na kare
-            System.out.println("Warning: Candidate ID " + candId + " system mein nahi hai. Skipping...");
+       try {
+            // Check if candidate exists
+            if (candidateRepository.existsById(candId)) {
+                System.out.println("Processing Candidate ID: " + candId);
+                
+                // --- THE KEY CHANGE IS HERE ---
+                // We run the calculation inside this TRY block.
+                calculateAndSaveScore(candId, jobId);
+                
+                System.out.println("✅ Success: Candidate ID " + candId);
+            }
+        } catch (Exception e) {
+            // If Candidate A crashes, we catch the error here.
+            // The loop will NOT stop. It will proceed to Candidate B.
+            System.err.println("❌ Error processing Candidate ID " + candId + ": " + e.getMessage());
+            e.printStackTrace(); 
         }
     }
 }
 
-    public void calculateAndSaveScore(Long candidateId, Long jobPostingId) {
-        // 1. Fetch Entities
-        Candidate candidate = candidateRepository.findById(candidateId)
-                .orElseThrow(() -> new RuntimeException("Candidate not found"));
-        JobPosting jobPosting = jobPostingRepository.findById(jobPostingId)
-                .orElseThrow(() -> new RuntimeException("Job Posting not found"));
-
-        int totalScore = 0;
-
-        // --- 1️⃣ Education Degree Match (+2) ---
-        List<Education> educations = educationRepository.findByCandidateId(candidateId);
-        boolean hasDegree = educations.stream()
-                .anyMatch(e -> e.getDegree() != null && !e.getDegree().isBlank());
-        if (hasDegree) totalScore += 2;
-
-        // --- 2️⃣ Profile Link Check (+1) ---
-        boolean hasProfile = (candidate.getLinkedinUrl() != null && !candidate.getLinkedinUrl().isBlank()) ||
-                (candidate.getPortfolioUrl() != null && !candidate.getPortfolioUrl().isBlank()) ||
-                (candidate.getGithubUrl() != null && !candidate.getGithubUrl().isBlank());
-        if (hasProfile) totalScore += 1;
-
-        // --- 3️⃣ Skill Match with Job Posting (+3) ---
-        List<ExtractedSkill> candidateSkills = extractedSkillRepository.findByCandidateId(candidateId);
-        List<RequiredSkill> requiredSkills = requiredSkillRepository.findByJobPostingId(jobPostingId);
-
-        // Check karein ki candidate ka name null toh nahi
-if (candidate.getName() == null || candidate.getName().isEmpty()) {
-    System.out.println("Warning: Candidate ID " + candidateId + " has no name!");
+private boolean hasText(String str) {
+    return str != null && !str.trim().isEmpty();
 }
 
-        // Normalize strings for comparison (lowercase, trimmed)
+public void calculateAndSaveScore(Long candidateId, Long jobPostingId) {
+    Candidate candidate = candidateRepository.findById(candidateId)
+            .orElseThrow(() -> new RuntimeException("Candidate not found"));
+    JobPosting jobPosting = jobPostingRepository.findById(jobPostingId)
+            .orElseThrow(() -> new RuntimeException("Job Posting not found"));
+
+    int totalScore = 0;
+
+    // --- 1. Education (+2) ---
+    List<Education> educations = educationRepository.findByCandidateId(candidateId);
+    if (educations != null && educations.stream().anyMatch(e -> hasText(e.getDegree()))) {
+        totalScore += 2;
+    }
+
+    // --- 2. Profile Links (+1) ---
+    if (hasText(candidate.getLinkedinUrl()) || hasText(candidate.getPortfolioUrl()) || hasText(candidate.getGithubUrl())) {
+        totalScore += 1;
+    }
+
+    // --- 3. Skills (+3) ---
+    List<ExtractedSkill> candidateSkills = extractedSkillRepository.findByCandidateId(candidateId);
+    List<RequiredSkill> requiredSkills = requiredSkillRepository.findByJobPostingId(jobPostingId);
+
+    if (candidateSkills != null && requiredSkills != null) {
         Set<String> candSkillNames = candidateSkills.stream()
+                .filter(s -> hasText(s.getSkillName()))
                 .map(s -> s.getSkillName().toLowerCase().trim())
                 .collect(Collectors.toSet());
 
         long matchCount = requiredSkills.stream()
-                .filter(rs -> candSkillNames.contains(rs.getSkillName().toLowerCase().trim()))
+                .filter(rs -> hasText(rs.getSkillName()) && candSkillNames.contains(rs.getSkillName().toLowerCase().trim()))
                 .count();
 
         if (matchCount >= 2) totalScore += 3;
 
-        // --- 4️⃣ Technical + Tools Skill Combination (+3) ---
+        // --- 4. Tech + Tools (+3) ---
         boolean hasTech = candidateSkills.stream().anyMatch(s -> "TECHNICAL".equalsIgnoreCase(s.getCategory()));
         boolean hasTool = candidateSkills.stream().anyMatch(s -> "TOOL".equalsIgnoreCase(s.getCategory()));
-
         if (hasTech && hasTool) totalScore += 3;
+    }
 
-        // --- 5️⃣ Work Experience Check (+5) ---
-        List<WorkExperience> workExperiences = workExperienceRepository.findByCandidateId(candidateId);
-        boolean validExp = workExperiences.stream()
-                .anyMatch(w -> w.getJobTitle() != null && !w.getJobTitle().isBlank() &&
-                        w.getCompany() != null && !w.getCompany().isBlank());
-        if (validExp) totalScore += 5;
+    // --- 5. Work Experience (+5) ---
+    List<WorkExperience> workExperiences = workExperienceRepository.findByCandidateId(candidateId);
+    if (workExperiences != null && workExperiences.stream().anyMatch(w -> hasText(w.getJobTitle()))) {
+        totalScore += 5;
+    }
 
-        // --- 6️⃣ Certifications Check (+5) ---
-        List<Certification> certifications = certificationRepository.findByCandidateId(candidateId);
-        boolean hasCert = certifications.stream()
-                .anyMatch(c -> c.getName() != null && !c.getName().isBlank());
-        if (hasCert) totalScore += 5;
+    // --- 6. Certifications (+5) ---
+    List<Certification> certifications = certificationRepository.findByCandidateId(candidateId);
+    if (certifications != null && !certifications.isEmpty()) {
+        totalScore += 5;
+    }
 
-        // --- 7️⃣ Project Validation (+5) ---
-        List<Project> projects = projectRepository.findByCandidateId(candidateId);
-        if (projects.size() >= 2) totalScore += 5;
+    // --- 7. Projects (+5) ---
+    List<Project> projects = projectRepository.findByCandidateId(candidateId);
+    if (projects != null && projects.size() >= 2) {
+        totalScore += 5;
+    }
 
-        // --- 8️⃣ Education Extra Scoring (Max 6) ---
+    // --- 8. Education Bonus (Max 6) ---
+    if (educations != null) {
         int eduExtraScore = 0;
         for (Education edu : educations) {
             int currentEduScore = 0;
-            if (edu.getInstitution() != null && !edu.getInstitution().isBlank()) currentEduScore += 2;
+            if (hasText(edu.getInstitution())) currentEduScore += 2;
             if (edu.getEndYear() != null) currentEduScore += 2;
             if (edu.getGpa() != null) currentEduScore += 1;
-            if (edu.getFieldOfStudy() != null && !edu.getFieldOfStudy().isBlank()) currentEduScore += 1;
-
-            eduExtraScore = Math.max(eduExtraScore, currentEduScore); // Take best single education entry
+            if (hasText(edu.getFieldOfStudy())) currentEduScore += 1;
+            eduExtraScore = Math.max(eduExtraScore, currentEduScore);
         }
-        totalScore += Math.min(eduExtraScore, 6); // Cap at 6
-
-        // --- Determine Status ---
-        String status;
-        if (totalScore >= 18) {
-            status = "SHORTLISTED";
-        } else if (totalScore >= 15) {
-            status = "CONSIDER";
-        } else {
-            status = "REJECTED";
-        }
-
-        // --- Save/Update CandidateScore ---
-        // Check if score exists to update, else create new
-        Optional<CandidateScore> existing = candidateScoreRepository.findByCandidateAndJobPosting(candidate, jobPosting);
-
-        CandidateScore scoreEntity = existing.orElse(new CandidateScore());
-        scoreEntity.setCandidate(candidate);
-        scoreEntity.setJobPosting(jobPosting);
-        scoreEntity.setTotalScore(totalScore);
-        scoreEntity.setStatus(status);
-        scoreEntity.setScoredAt(LocalDateTime.now());
-
-        candidateScoreRepository.save(scoreEntity);
+        totalScore += Math.min(eduExtraScore, 6);
     }
+
+    // --- Status Calculation ---
+    String status = (totalScore >= 18) ? "SHORTLISTED" : (totalScore >= 15) ? "CONSIDER" : "REJECTED";
+
+    // --- Save Score ---
+    Optional<CandidateScore> existing = candidateScoreRepository.findByCandidateAndJobPosting(candidate, jobPosting);
+    CandidateScore scoreEntity = existing.orElse(new CandidateScore());
+    scoreEntity.setCandidate(candidate);
+    scoreEntity.setJobPosting(jobPosting);
+    scoreEntity.setTotalScore(totalScore);
+    scoreEntity.setStatus(status);
+    scoreEntity.setScoredAt(LocalDateTime.now());
+
+    candidateScoreRepository.save(scoreEntity);
+    System.out.println("✅ Saved Score: " + totalScore + " for Candidate: " + candidate.getName());
+}
 }

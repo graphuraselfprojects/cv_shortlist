@@ -1,10 +1,11 @@
 package com.resumeshortlist.resume_shortlist_backend.entity;
 
-// import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Table(name = "educations")
@@ -29,6 +30,6 @@ public class Education {
 
     @ManyToOne
     @JoinColumn(name = "candidate_id", nullable = false)
-    // @JsonIgnore
+    @JsonIgnore
     private Candidate candidate;
 }

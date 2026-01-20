@@ -44,6 +44,7 @@ public class SecurityConfig {
                         .requestMatchers("api/job-postings/upload/**").permitAll()
                         .requestMatchers("api/job-postings/save-requirements/**").permitAll()
                         .requestMatchers("/api/score/**").permitAll()
+                        .requestMatchers("/api/cleanup/**").permitAll()
                         .requestMatchers("/api/dashboard/**").permitAll()  // ← ADD THIS LINE
 //                        .requestMatchers("/api/**").authenticated()
 //                        .requestMatchers("/api/resumes/upload/**").authenticated()  // or .hasRole("RECRUITER")

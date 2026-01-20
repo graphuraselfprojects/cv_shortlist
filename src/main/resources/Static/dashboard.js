@@ -444,37 +444,47 @@ async function loadDashboardStats() {
     }
 }
 
-// async function confirmClearData() {
-//     const isConfirmed = confirm("⚠️ DANGER ZONE: This will permanently delete ALL uploaded Resumes, Job Descriptions, and Analysis Data to free up your database storage.\n\nYour account login will remain safe.\n\nAre you sure you want to proceed?");
-    
-//     if (!isConfirmed) return;
+async function confirmClearData() {
+    if (!confirm("⚠️ WARNING: This will permanently delete ALL Jobs, Resumes, and Scores.\n\nAre you sure?")) {
+        return;
+    }
 
-//     try {
-//         const token = localStorage.getItem('jwtToken');
-//         // Dynamic URL construction based on your config
-//         const BASE_URL = typeof CONFIG !== 'undefined' ? CONFIG.API_BASE_URL.replace('/auth', '') : 'http://localhost:8080/api';
+    const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('jwtToken');
+
+    // 1. Safety Check
+    if (!userId || !token) {
+        alert("Error: User ID not found. Please log in again.");
+        return;
+    }
+
+    try {
+        const baseUrl = CONFIG.API_BASE_URL.replace('/auth', '');
         
-//         const response = await fetch(`${BASE_URL}/cleanup/user-data`, {
-//             method: 'DELETE',
-//             headers: {
-//                 'Authorization': `Bearer ${token}`,
-//                 'Content-Type': 'application/json'
-//             }
-//         });
+        // 2. LOG THE URL (Check console to see if ID is attached)
+        const deleteUrl = `${baseUrl}/cleanup/user-data/${userId}`;
+        console.log("Attempting to delete data at:", deleteUrl);
 
-//         if (response.ok) {
-//             alert("✅ Success: Database flushed! Your storage is now empty.");
-//             window.location.reload(); 
-//         } else {
-//             const errorMsg = await response.text();
-//             alert("❌ Failed to clear data: " + errorMsg);
-//         }
-//     } catch (error) {
-//         console.error("Error clearing data:", error);
-//         alert("Network error. Please try again.");
-//     }
-// }
+        const response = await fetch(deleteUrl, {
+            method: 'DELETE', // Must be DELETE
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
 
+        if (response.ok) {
+            alert("✅ Database Flushed Successfully!");
+            window.location.reload();
+        } else {
+            const errorText = await response.text();
+            alert("Failed to clear data: " + errorText);
+        }
+    } catch (e) {
+        console.error("Network Error:", e);
+        alert("Network Error: Could not connect to server.");
+    }
+}
 
 // ===== Event Listeners with Safe Checks (Fixes the Error) =====
 document.addEventListener('DOMContentLoaded', () => {
