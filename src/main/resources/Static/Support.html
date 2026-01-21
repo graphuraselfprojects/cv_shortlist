@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Support - Graphura ResumeAI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              brand: {
+                dark: "#0f0f1a",
+                card: "#1a1f2d",
+                primary: "#4a6cf7",
+                accent: "#6dd3ff",
+              },
+            },
+            fontFamily: { sans: ["Poppins", "sans-serif"] },
+          },
+        },
+      };
+    </script>
+    <style>
+      .glass-nav { background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.3); }
+      .text-gradient { background: linear-gradient(135deg, #4a6cf7 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    </style>
+  </head>
+  <body class="bg-brand-dark text-gray-200 font-sans">
+    
+    <div id="nav-placeholder"></div>
+
+    <section class="min-h-[40vh] flex items-center justify-center pt-24 pb-12 relative overflow-hidden">
+        <div class="absolute top-0 left-1/4 w-64 h-64 bg-brand-primary/20 rounded-full blur-[100px]"></div>
+        <div class="text-center z-10" data-aos="fade-up">
+            <h1 class="text-4xl lg:text-5xl font-bold text-white mb-4">How can we <span class="text-gradient">help?</span></h1>
+            <p class="text-gray-400 max-w-xl mx-auto">Search our knowledge base or contact our support team below.</p>
+        </div>
+    </section>
+
+    <div class="max-w-7xl mx-auto px-4 pb-24 grid lg:grid-cols-2 gap-12">
+        
+        <div class="bg-brand-card p-8 rounded-2xl border border-gray-700 shadow-xl" data-aos="fade-right">
+            <h2 class="text-2xl font-bold text-white mb-6">Send us a message</h2>
+            <form onsubmit="event.preventDefault(); alert('Message sent! We will contact you shortly.');">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-gray-400 uppercase">First Name</label>
+                        <input type="text" class="w-full bg-brand-dark border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary focus:outline-none transition-colors" placeholder="John">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-gray-400 uppercase">Last Name</label>
+                        <input type="text" class="w-full bg-brand-dark border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary focus:outline-none transition-colors" placeholder="Doe">
+                    </div>
+                </div>
+                <div class="space-y-2 mb-4">
+                    <label class="text-xs font-bold text-gray-400 uppercase">Email</label>
+                    <input type="email" class="w-full bg-brand-dark border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary focus:outline-none transition-colors" placeholder="john@example.com">
+                </div>
+                <div class="space-y-2 mb-6">
+                    <label class="text-xs font-bold text-gray-400 uppercase">Message</label>
+                    <textarea rows="4" class="w-full bg-brand-dark border border-gray-700 rounded-xl p-3 text-white focus:border-brand-primary focus:outline-none transition-colors" placeholder="Describe your issue..."></textarea>
+                </div>
+                <button class="w-full bg-brand-primary hover:bg-blue-600 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-brand-primary/20 hover:-translate-y-1">
+                    Submit Request
+                </button>
+            </form>
+        </div>
+
+        <div class="space-y-8" data-aos="fade-left">
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-6">Frequently Asked Questions</h2>
+                <div class="space-y-4">
+                    <div class="bg-brand-card p-5 rounded-xl border border-gray-700 hover:border-brand-primary/30 transition-colors">
+                        <h3 class="font-bold text-white mb-2"><i class="fas fa-file-upload text-brand-primary mr-2"></i> How many resumes can I upload?</h3>
+                        <p class="text-sm text-gray-400">The system processes resumes one by one from your bulk upload. For the demo version, we recommend uploading up to 20 files at a time for optimal speed.</p>
+                    </div>
+                    <div class="bg-brand-card p-5 rounded-xl border border-gray-700 hover:border-brand-primary/30 transition-colors">
+                        <h3 class="font-bold text-white mb-2"><i class="fas fa-robot text-brand-primary mr-2"></i> Is the parsing accurate?</h3>
+                        <p class="text-sm text-gray-400">We target ≥85% parsing accuracy using advanced NLP libraries like Apache OpenNLP and PDFBox.</p>
+                    </div>
+                    <div class="bg-brand-card p-5 rounded-xl border border-gray-700 hover:border-brand-primary/30 transition-colors">
+                        <h3 class="font-bold text-white mb-2"><i class="fas fa-lock text-brand-primary mr-2"></i> Is my data secure?</h3>
+                        <p class="text-sm text-gray-400">Yes. We use JWT authentication and do not share candidate data with third parties.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 bg-brand-primary/10 rounded-xl border border-brand-primary/30">
+                <h3 class="font-bold text-white mb-2">Direct Contact</h3>
+                <p class="text-gray-400 text-sm mb-4">Need immediate assistance? Reach our team directly.</p>
+                <div class="flex flex-col space-y-2 text-sm">
+                    <a href="mailto:support@graphura.in" class="flex items-center text-brand-accent hover:underline"><i class="fas fa-envelope w-6"></i> support@graphura.in</a>
+                    <a href="tel:+917378021327" class="flex items-center text-brand-accent hover:underline"><i class="fas fa-phone w-6"></i> +91 73780 21327</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="glass-nav border-t border-gray-200 pt-16 pb-8 relative shadow-inner">
+        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+            <div data-aos="fade-up" data-aos-delay="0">
+                 <img src="images/graphuralogo.png" alt="Graphura" class="h-16 mb-4 rounded p-1 transition-colors">
+                 <p class="text-gray-600 text-sm leading-relaxed">Helping you shortlist top talent using AI — fast, fair and focused.</p>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="100">
+                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Quick Links</h3>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li><a href="index.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Home</a></li>
+                    <li><a href="Recruiter.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Recruiter Dashboard</a></li>
+                    
+                    <li><a href="dashboard.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Analytics</a></li>
+                    </ul>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="200">
+                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Resources</h3>
+                <ul class="space-y-3 text-sm text-gray-600">
+                    <li><a href="documentation.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Documentation</a></li>
+                    <li><a href="Support.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Support</a></li>
+                    <li><a href="Privacy.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div data-aos="fade-up" data-aos-delay="300">
+                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Contact</h3>
+                <p class="text-gray-600 text-sm mb-6">support@graphura.in<br>+91 73780 21327</p>
+                <div class="flex space-x-4">
+                    <a href="https://x.com/Graphura" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-twitter group-hover:rotate-12 transition-transform"></i></a>
+                    <a href="https://www.linkedin.com/company/graphura-india-private-limited/" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-linkedin-in group-hover:rotate-12 transition-transform"></i></a>
+                    <a href="https://www.instagram.com/graphura.in" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-facebook-f group-hover:rotate-12 transition-transform"></i></a>
+                </div>
+            </div>
+        </div>
+        
+    </footer>
+    <footer class="text-center text-gray-500 text-sm border-t border-gray-200 p-8 pt-8">
+       <div class="max-w-7xl mx-auto px-4 text-center text-gray-500 text-sm">
+           <p>© <span id="year"></span> Graphura India Private Limited.</p>
+       </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="config.js"></script>
+    <script src="nav.js"></script>
+    <script>
+        AOS.init();
+        document.getElementById('year').textContent = new Date().getFullYear();
+    </script>
+  </body>
+</html>

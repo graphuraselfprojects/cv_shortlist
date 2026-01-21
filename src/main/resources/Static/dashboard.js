@@ -497,12 +497,13 @@ document.addEventListener('DOMContentLoaded', () => {
         exportBtn.addEventListener('click', () => {
             if (rawCandidates.length === 0) return alert("No data to export");
             const jobDept = localStorage.getItem('activeJobDept') || 'Position Not Specified';
-            const headers = ["S.NO", "Name", "Position", "Total Score", "Status"];
+            const headers = ["S.NO", "Name", "Position", "Total Score", "email" ,"Status"];
             const rows = rawCandidates.map((c, index) => [
                 index + 1,
                 c.candidateName || 'Unknown',
                 jobDept,
                 c.totalScore || '',
+                c.email || '',
                 formatStatus(c.status)
             ]);
             let csv = headers.join(",") + "\n" + rows.map(r => r.map(f => `"${f}"`).join(",")).join("\n");
