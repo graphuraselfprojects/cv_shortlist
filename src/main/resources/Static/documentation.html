@@ -66,7 +66,6 @@
 
     <div id="nav-placeholder"></div>
 
-    <!-- MAIN LAYOUT -->
     <div class="max-w-7xl mx-auto px-4 lg:px-6 pt-24 flex flex-col lg:flex-row gap-8">
 
       <!-- SIDEBAR -->
@@ -89,203 +88,137 @@
       </aside>
 
       <!-- CONTENT -->
-        <main class="lg:w-3/4 lg:ml-auto pb-24">
-        
+      <main class="lg:w-3/4 lg:ml-auto pb-24">
+
         <section id="overview" class="mb-16" data-aos="fade-up">
-            <h1 class="text-4xl font-bold mb-6">System <span class="text-gradient">Documentation</span></h1>
-            <p class="text-gray-400 mb-4 leading-relaxed">
-                [cite_start]The AI-Powered Resume Shortlisting System is designed to automatically read, analyze, and rank resumes according to a company's specific job requirements[cite: 2, 3]. [cite_start]It extracts details from resumes (PDF/DOCX) and compares them against job descriptions to produce a ranked shortlist[cite: 4, 21].
+          <h1 class="text-4xl font-bold mb-6">
+            System <span class="text-gradient">Documentation</span>
+          </h1>
+          <p class="text-gray-400 mb-4 leading-relaxed">
+            The AI-Powered Resume Shortlisting System is designed to automatically read,
+            analyze, and rank resumes according to a company's specific job requirements.
+            It extracts details from resumes (PDF/DOCX) and compares them against job
+            descriptions to produce a ranked shortlist.
+          </p>
+          <div class="bg-brand-card p-6 rounded-xl border-l-4 border-brand-primary">
+            <h4 class="text-white font-bold mb-2">Primary Goal</h4>
+            <p class="text-sm text-gray-400">
+              To save recruiters time, increase accuracy, and make data-driven hiring
+              decisions by removing manual bias.
             </p>
-            <div class="bg-brand-card p-6 rounded-xl border-l-4 border-brand-primary">
-                <h4 class="text-white font-bold mb-2">Primary Goal</h4>
-                [cite_start]<p class="text-sm text-gray-400">To save recruiters time, increase accuracy, and make data-driven hiring decisions by removing manual bias[cite: 5, 8].</p>
-            </div>
+          </div>
         </section>
 
         <section id="architecture" class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">Technical Architecture</h2>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="bg-brand-card p-6 rounded-2xl border border-gray-700">
-                    <h3 class="text-brand-primary font-bold mb-4"><i class="fab fa-java mr-2"></i>Backend (Java)</h3>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        [cite_start]<li><strong>Framework:</strong> Spring Boot (Web, Validation, Security) [cite: 78, 79]</li>
-                        [cite_start]<li><strong>Database:</strong> MySQL or PostgreSQL [cite: 81]</li>
-                        [cite_start]<li><strong>PDF Parsing:</strong> Apache PDFBox, Apache Tika [cite: 83]</li>
-                        [cite_start]<li><strong>NLP:</strong> Apache OpenNLP, Stanford CoreNLP [cite: 85]</li>
-                        [cite_start]<li><strong>Auth:</strong> JWT with Spring Security [cite: 88]</li>
-                    </ul>
-                </div>
-                <div class="bg-brand-card p-6 rounded-2xl border border-gray-700">
-                    <h3 class="text-brand-primary font-bold mb-4"><i class="fab fa-js mr-2"></i>Frontend</h3>
-                    <ul class="space-y-2 text-sm text-gray-400">
-                        [cite_start]<li><strong>Core:</strong> HTML5, CSS3, JavaScript (Vanilla) [cite: 76]</li>
-                        [cite_start]<li><strong>Styling:</strong> Tailwind CSS [cite: 76]</li>
-                        <li><strong>Hosting:</strong> Vercel / Netlify</li>
-                    </ul>
-                </div>
+          <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">
+            Technical Architecture
+          </h2>
+          <div class="grid md:grid-cols-2 gap-6">
+            <div class="bg-brand-card p-6 rounded-2xl border border-gray-700">
+              <h3 class="text-brand-primary font-bold mb-4">
+                <i class="fab fa-java mr-2"></i>Backend (Java)
+              </h3>
+              <ul class="space-y-2 text-sm text-gray-400">
+                <li><strong>Framework:</strong> Spring Boot (Web, Validation, Security)</li>
+                <li><strong>Database:</strong> MySQL or PostgreSQL</li>
+                <li><strong>PDF Parsing:</strong> Apache PDFBox, Apache Tika</li>
+                <li><strong>NLP:</strong> Apache OpenNLP, Stanford CoreNLP</li>
+                <li><strong>Auth:</strong> JWT with Spring Security</li>
+              </ul>
             </div>
+
+            <div class="bg-brand-card p-6 rounded-2xl border border-gray-700">
+              <h3 class="text-brand-primary font-bold mb-4">
+                <i class="fab fa-js mr-2"></i>Frontend
+              </h3>
+              <ul class="space-y-2 text-sm text-gray-400">
+                <li><strong>Core:</strong> HTML5, CSS3, JavaScript (Vanilla)</li>
+                <li><strong>Styling:</strong> Tailwind CSS</li>
+                <li><strong>Hosting:</strong> Vercel / Netlify</li>
+              </ul>
+            </div>
+          </div>
         </section>
 
         <section id="workflow" class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">System Flow</h2>
-            <div class="relative">
-                <div class="absolute left-4 top-0 h-full w-0.5 bg-brand-primary/30"></div>
-                <div class="space-y-8 pl-12">
-                    <div class="relative">
-                        <div class="absolute -left-[42px] bg-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">1</div>
-                        <h4 class="text-white font-bold">Job Creation</h4>
-                        [cite_start]<p class="text-sm text-gray-400">Recruiter creates a job posting with specific requirements (Skills, Exp, Keywords)[cite: 90].</p>
-                    </div>
-                    <div class="relative">
-                        <div class="absolute -left-[42px] bg-brand-card border border-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-brand-primary">2</div>
-                        <h4 class="text-white font-bold">Resume Upload</h4>
-                        [cite_start]<p class="text-sm text-gray-400">Resumes are uploaded in bulk (PDF/DOCX)[cite: 92].</p>
-                    </div>
-                    <div class="relative">
-                        <div class="absolute -left-[42px] bg-brand-card border border-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-brand-primary">3</div>
-                        <h4 class="text-white font-bold">Analysis & Scoring</h4>
-                        [cite_start]<p class="text-sm text-gray-400">Backend extracts text, identifies skills, and runs the matching algorithm[cite: 93, 94].</p>
-                    </div>
-                    <div class="relative">
-                        <div class="absolute -left-[42px] bg-brand-card border border-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-brand-primary">4</div>
-                        <h4 class="text-white font-bold">Dashboard Ranking</h4>
-                        [cite_start]<p class="text-sm text-gray-400">Candidates are displayed on the dashboard ranked by score[cite: 95].</p>
-                    </div>
-                </div>
+          <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">
+            System Flow
+          </h2>
+          <div class="relative">
+            <div class="absolute left-4 top-0 h-full w-0.5 bg-brand-primary/30"></div>
+            <div class="space-y-8 pl-12">
+              <div class="relative">
+                <div class="absolute -left-[42px] bg-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                <h4 class="text-white font-bold">Job Creation</h4>
+                <p class="text-sm text-gray-400">
+                  Recruiter creates a job posting with specific requirements.
+                </p>
+              </div>
+
+              <div class="relative">
+                <div class="absolute -left-[42px] bg-brand-card border border-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-brand-primary">2</div>
+                <h4 class="text-white font-bold">Resume Upload</h4>
+                <p class="text-sm text-gray-400">
+                  Resumes are uploaded in bulk (PDF/DOCX).
+                </p>
+              </div>
+
+              <div class="relative">
+                <div class="absolute -left-[42px] bg-brand-card border border-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-brand-primary">3</div>
+                <h4 class="text-white font-bold">Analysis & Scoring</h4>
+                <p class="text-sm text-gray-400">
+                  Backend extracts text, identifies skills, and runs the matching algorithm.
+                </p>
+              </div>
+
+              <div class="relative">
+                <div class="absolute -left-[42px] bg-brand-card border border-brand-primary w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-brand-primary">4</div>
+                <h4 class="text-white font-bold">Dashboard Ranking</h4>
+                <p class="text-sm text-gray-400">
+                  Candidates are displayed on the dashboard ranked by score.
+                </p>
+              </div>
             </div>
-        </section>
-
-        <section id="scoring" class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">Scoring Breakdown (Total: 100 Points)</h2>
-            [cite_start]<p class="text-gray-400 mb-6">The system uses a weighted scoring mechanism to ensure fair evaluation[cite: 22, 61].</p>
-
-            <div class="space-y-6">
-                <div id="format" class="bg-brand-card rounded-xl overflow-hidden border border-gray-700">
-                    <div class="bg-brand-primary/10 p-4 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold text-brand-primary">1. Resume Format</h3>
-                        <span class="bg-brand-primary text-white text-xs px-2 py-1 rounded">15 Points</span>
-                    </div>
-                    <div class="p-4">
-                        <table class="w-full text-sm text-gray-400">
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Clean Layout & Structure</td><td class="text-right text-white">5 pts</td></tr>
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Proper Headings</td><td class="text-right text-white">3 pts</td></tr>
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Consistent Fonts/Spacing</td><td class="text-right text-white">3 pts</td></tr>
-                            <tr><td class="py-2">Professional Formatting</td><td class="text-right text-white">4 pts</td></tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="bg-brand-card rounded-xl overflow-hidden border border-gray-700">
-                    <div class="bg-brand-primary/10 p-4 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold text-brand-primary">2. Contact Info</h3>
-                        <span class="bg-brand-primary text-white text-xs px-2 py-1 rounded">5 Points</span>
-                    </div>
-                    <div class="p-4">
-                        <table class="w-full text-sm text-gray-400">
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Name, Phone, Email</td><td class="text-right text-white">3 pts</td></tr>
-                            <tr><td class="py-2">LinkedIn/GitHub Links</td><td class="text-right text-white">2 pts</td></tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="skills" class="bg-brand-card rounded-xl overflow-hidden border border-gray-700">
-                    <div class="bg-brand-primary/10 p-4 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold text-brand-primary">4. Skills Section</h3>
-                        <span class="bg-brand-primary text-white text-xs px-2 py-1 rounded">15 Points</span>
-                    </div>
-                    <div class="p-4">
-                        <table class="w-full text-sm text-gray-400">
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Relevant Technical Skills</td><td class="text-right text-white">7 pts</td></tr>
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Relevant Soft Skills</td><td class="text-right text-white">3 pts</td></tr>
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Categorized (Tech/Tools)</td><td class="text-right text-white">3 pts</td></tr>
-                            <tr><td class="py-2">No Spam Skills</td><td class="text-right text-white">2 pts</td></tr>
-                        </table>
-                    </div>
-                </div>
-
-                <div id="experience" class="bg-brand-card rounded-xl overflow-hidden border border-gray-700">
-                    <div class="bg-brand-primary/10 p-4 border-b border-gray-700 flex justify-between items-center">
-                        <h3 class="font-bold text-brand-primary">5. Experience</h3>
-                        <span class="bg-brand-primary text-white text-xs px-2 py-1 rounded">20 Points</span>
-                    </div>
-                    <div class="p-4">
-                        <table class="w-full text-sm text-gray-400">
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Job Titles + Company</td><td class="text-right text-white">5 pts</td></tr>
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Proper Timeline</td><td class="text-right text-white">3 pts</td></tr>
-                            <tr class="border-b border-gray-700/50"><td class="py-2">Quantifiable Achievements (Numbers)</td><td class="text-right text-white">5 pts</td></tr>
-                            <tr><td class="py-2">Job Relevance</td><td class="text-right text-white">2 pts</td></tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            
-            [cite_start]<p class="text-gray-500 text-xs mt-4"><em>*Remaining 45 points distributed across Projects (15), Education (10), Certs (5), Summary (10), etc [cite: 23-61].</em></p>
+          </div>
         </section>
 
         <section id="export" class="mb-16" data-aos="fade-up">
-            <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">Data Export</h2>
-            <div class="grid md:grid-cols-2 gap-4">
-                <div class="bg-brand-card p-4 rounded-xl border border-gray-700 flex items-center">
-                    <div class="w-10 h-10 rounded bg-green-500/10 flex items-center justify-center text-green-500 mr-4">
-                        <i class="fas fa-file-csv"></i>
-                    </div>
-                    <div>
-                        <h5 class="font-bold text-white">CSV Export</h5>
-                        [cite_start]<p class="text-xs text-gray-400">Detailed scoring & contact info[cite: 100].</p>
-                    </div>
-                </div>
-                <div class="bg-brand-card p-4 rounded-xl border border-gray-700 flex items-center">
-                    <div class="w-10 h-10 rounded bg-red-500/10 flex items-center justify-center text-red-500 mr-4">
-                        <i class="fas fa-file-pdf"></i>
-                    </div>
-                    <div>
-                        <h5 class="font-bold text-white">Top 10 PDF</h5>
-                        [cite_start]<p class="text-xs text-gray-400">Formatted for HR review[cite: 99].</p>
-                    </div>
-                </div>
+          <h2 class="text-2xl font-bold text-white mb-6 border-b border-gray-800 pb-2">
+            Data Export
+          </h2>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div class="bg-brand-card p-4 rounded-xl border border-gray-700 flex items-center">
+              <div class="w-10 h-10 rounded bg-green-500/10 flex items-center justify-center text-green-500 mr-4">
+                <i class="fas fa-file-csv"></i>
+              </div>
+              <div>
+                <h5 class="font-bold text-white">CSV Export</h5>
+                <p class="text-xs text-gray-400">
+                  Detailed scoring & contact information.
+                </p>
+              </div>
             </div>
+
+            <div class="bg-brand-card p-4 rounded-xl border border-gray-700 flex items-center">
+              <div class="w-10 h-10 rounded bg-red-500/10 flex items-center justify-center text-red-500 mr-4">
+                <i class="fas fa-file-pdf"></i>
+              </div>
+              <div>
+                <h5 class="font-bold text-white">Top 10 PDF</h5>
+                <p class="text-xs text-gray-400">
+                  Formatted report for HR review.
+                </p>
+              </div>
+            </div>
+          </div>
         </section>
 
       </main>
     </div>
-    <footer class="glass-nav border-t border-gray-200 pt-16 pb-8 relative shadow-inner">
-        <div class="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
-            <div data-aos="fade-up" data-aos-delay="0">
-                 <img src="images/graphuralogo.png" alt="Graphura" class="h-16 mb-4 rounded p-1 transition-colors">
-                 <p class="text-gray-600 text-sm leading-relaxed">Helping you shortlist top talent using AI — fast, fair and focused.</p>
-            </div>
-            <div data-aos="fade-up" data-aos-delay="100">
-                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Quick Links</h3>
-                <ul class="space-y-3 text-sm text-gray-600">
-                    <li><a href="index.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Home</a></li>
-                    <li><a href="Recruiter.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Recruiter Dashboard</a></li>
-                    
-                    <li><a href="dashboard.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Analytics</a></li>
-                    </ul>
-            </div>
-            <div data-aos="fade-up" data-aos-delay="200">
-                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Resources</h3>
-                <ul class="space-y-3 text-sm text-gray-600">
-                    <li><a href="documentation.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Documentation</a></li>
-                    <li><a href="Support.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Support</a></li>
-                    <li><a href="Privacy.html" class="hover:text-brand-primary hover:pl-2 transition-all duration-300 flex items-center"><i class="fas fa-chevron-right text-xs mr-2 opacity-0 hover:opacity-100"></i>Privacy Policy</a></li>
-                </ul>
-            </div>
-            <div data-aos="fade-up" data-aos-delay="300">
-                <h3 class="text-gray-900 font-bold mb-4 border-b border-brand-primary/50 inline-block pb-1">Contact</h3>
-                <p class="text-gray-600 text-sm mb-6">support@graphura.in<br>+91 73780 21327</p>
-                <div class="flex space-x-4">
-                    <a href="https://x.com/Graphura" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-twitter group-hover:rotate-12 transition-transform"></i></a>
-                    <a href="https://www.linkedin.com/company/graphura-india-private-limited/" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-linkedin-in group-hover:rotate-12 transition-transform"></i></a>
-                    <a href="https://www.instagram.com/graphura.in" class="group w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 hover:bg-brand-primary hover:text-white transition-all duration-300 transform hover:scale-110 hover:-translate-y-1"><i class="fab fa-facebook-f group-hover:rotate-12 transition-transform"></i></a>
-                </div>
-            </div>
-        </div>
-        
-    </footer>
-    <footer class="text-center text-gray-500 text-sm border-t border-gray-200 p-8 pt-8">
-      © <span id="year"></span> Graphura India Private Limited. See
-      <a href="index.html" class="text-brand-primary">Home</a>.
+
+    <footer class="bg-brand-card border-t border-gray-700 py-6 text-center text-sm text-gray-400">
+      © <span id="year"></span> Graphura India Private Limited.
+      See <a href="index.html" class="text-brand-primary">Home</a>.
     </footer>
 
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
