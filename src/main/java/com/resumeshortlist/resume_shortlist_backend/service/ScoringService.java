@@ -1,6 +1,7 @@
 package com.resumeshortlist.resume_shortlist_backend.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -8,196 +9,177 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.resumeshortlist.resume_shortlist_backend.entity.Candidate;
-import com.resumeshortlist.resume_shortlist_backend.entity.CandidateScore;
-import com.resumeshortlist.resume_shortlist_backend.entity.Certification;
-import com.resumeshortlist.resume_shortlist_backend.entity.Education;
-import com.resumeshortlist.resume_shortlist_backend.entity.ExtractedSkill;
-import com.resumeshortlist.resume_shortlist_backend.entity.JobPosting;
-import com.resumeshortlist.resume_shortlist_backend.entity.Project;
-import com.resumeshortlist.resume_shortlist_backend.entity.RequiredSkill;
-import com.resumeshortlist.resume_shortlist_backend.entity.WorkExperience;
+import com.resumeshortlist.resume_shortlist_backend.entity.*;
+import com.resumeshortlist.resume_shortlist_backend.repository.*;
 import com.resumeshortlist.resume_shortlist_backend.exception.ResourceNotFoundException;
-import com.resumeshortlist.resume_shortlist_backend.repository.CandidateRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.CandidateScoreRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.CertificationRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.EducationRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.ExtractedSkillRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.JobPostingRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.ProjectRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.RequiredSkillRepository;
-import com.resumeshortlist.resume_shortlist_backend.repository.WorkExperienceRepository;
-import com.resumeshortlist.resume_shortlist_backend.task.ScoringTask;
+
 @Service
 public class ScoringService {
 
     @Autowired private CandidateRepository candidateRepository;
     @Autowired private JobPostingRepository jobPostingRepository;
     @Autowired private CandidateScoreRepository candidateScoreRepository;
-
-    @Autowired
-    private EducationRepository educationRepository;
+    @Autowired private EducationRepository educationRepository;
     @Autowired private ExtractedSkillRepository extractedSkillRepository;
     @Autowired private RequiredSkillRepository requiredSkillRepository;
     @Autowired private WorkExperienceRepository workExperienceRepository;
     @Autowired private CertificationRepository certificationRepository;
     @Autowired private ProjectRepository projectRepository;
-    private final ScoringTask scoringTask;
 
-    public ScoringService(ScoringTask scoringTask) {
-        this.scoringTask = scoringTask;
+    private boolean hasText(String str) {
+        return str != null && !str.trim().isEmpty();
     }
 
-    // @Transactional
-    // public void triggerScoring(Long jobId) {
-    //     List<Candidate> allCandidates = candidateRepository.findAll();
-
-    //     for (Candidate candidate : allCandidates) {
-    //         calculateAndSaveScore(candidate.getId(), jobId);
-    //     }
-    // }
-
-//     @Transactional
-// public void triggerScoring(Long jobId, List<Long> newCandidateIds) { // Sirf naye IDs lein
-//     for (Long candId : newCandidateIds) {
-//         calculateAndSaveScore(candId, jobId);
-//     }
-// }
-
-// @Transactional
-// public void triggerScoring(Long jobId, List<Long> newCandidateIds) {
-//     // 1. Pehle purane scores delete karein taaki dashboard sirf naye results dikhaye
-//     // Note: Iske liye Repository mein deleteByJobPostingId method hona chahiye
-//     candidateScoreRepository.deleteByJobPostingId(jobId);
-
-//     // 2. Sirf naye candidates ko score karein
-//     for (Long candId : newCandidateIds) {
-//         calculateAndSaveScore(candId, jobId);
-//     }
-// }
-
-// ScoringService.java ke andar ye wala method rakhein jo List handle kare
-@Transactional
-public void triggerScoring(Long jobId, List<Long> newCandidateIds) {
-    // 1. Check karein ki Job exist karti hai ya nahi
-    if (!jobPostingRepository.existsById(jobId)) {
-        throw new ResourceNotFoundException("Job ID " + jobId + " not found");
-    }
-
-    // 2. Loop chala kar har candidate ko score karein
-    for (Long candId : newCandidateIds) {
-       try {
-            // Check if candidate exists
-            if (candidateRepository.existsById(candId)) {
-                System.out.println("Processing Candidate ID: " + candId);
-                
-                // --- THE KEY CHANGE IS HERE ---
-                // We run the calculation inside this TRY block.
-                calculateAndSaveScore(candId, jobId);
-                
-                System.out.println("✅ Success: Candidate ID " + candId);
+    @Transactional
+    public void triggerScoring(Long jobId, List<Long> newCandidateIds) {
+        if (!jobPostingRepository.existsById(jobId)) {
+            throw new ResourceNotFoundException("Job ID " + jobId + " not found");
+        }
+        for (Long candId : newCandidateIds) {
+            try {
+                if (candidateRepository.existsById(candId)) {
+                    System.out.println("Processing Candidate ID: " + candId);
+                    calculateAndSaveScore(candId, jobId);
+                    System.out.println("✅ Success: Candidate ID " + candId);
+                }
+            } catch (Exception e) {
+                System.err.println("❌ Error processing Candidate ID " + candId + ": " + e.getMessage());
+                e.printStackTrace();
             }
-        } catch (Exception e) {
-            // If Candidate A crashes, we catch the error here.
-            // The loop will NOT stop. It will proceed to Candidate B.
-            System.err.println("❌ Error processing Candidate ID " + candId + ": " + e.getMessage());
-            e.printStackTrace(); 
         }
     }
-}
 
-private boolean hasText(String str) {
-    return str != null && !str.trim().isEmpty();
-}
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void calculateAndSaveScore(Long candidateId, Long jobPostingId) {
+        Candidate candidate = candidateRepository.findById(candidateId).orElseThrow();
+        JobPosting jobPosting = jobPostingRepository.findById(jobPostingId).orElseThrow();
 
-public void calculateAndSaveScore(Long candidateId, Long jobPostingId) {
-    Candidate candidate = candidateRepository.findById(candidateId)
-            .orElseThrow(() -> new RuntimeException("Candidate not found"));
-    JobPosting jobPosting = jobPostingRepository.findById(jobPostingId)
-            .orElseThrow(() -> new RuntimeException("Job Posting not found"));
+        List<ScoreBreakdown> breakdowns = new ArrayList<>();
+        int totalScore = 0;
 
-    int totalScore = 0;
+        // Fetch Data
+        List<Education> educations = educationRepository.findByCandidateId(candidateId);
+        List<WorkExperience> workEx = workExperienceRepository.findByCandidateId(candidateId);
+        List<ExtractedSkill> skills = extractedSkillRepository.findByCandidateId(candidateId);
+        List<Project> projects = projectRepository.findByCandidateId(candidateId);
+        List<Certification> certs = certificationRepository.findByCandidateId(candidateId);
 
-    // --- 1. Education (+2) ---
-    List<Education> educations = educationRepository.findByCandidateId(candidateId);
-    if (educations != null && educations.stream().anyMatch(e -> hasText(e.getDegree()))) {
-        totalScore += 2;
-    }
+        // --- 1. Format (15 pts) ---
+        int formatScore = 0;
+        List<String> formatTips = new ArrayList<>();
+        if (!educations.isEmpty() && !workEx.isEmpty() && !skills.isEmpty()) formatScore += 5;
+        else formatTips.add("Missing core sections (Edu/Exp/Skills).");
+        
+        if (hasText(candidate.getName()) && hasText(candidate.getEmail())) formatScore += 3;
+        else formatTips.add("Header info missing.");
+        
+        if (!workEx.isEmpty() && workEx.stream().allMatch(w -> hasText(w.getCompany()))) formatScore += 3;
+        else formatTips.add("Inconsistent experience formatting.");
+        
+        if (!educations.isEmpty()) formatScore += 4;
+        
+        totalScore += formatScore;
+        breakdowns.add(new ScoreBreakdown("Format", formatScore, 15, formatScore == 15 ? "Excellent." : String.join(" ", formatTips)));
 
-    // --- 2. Profile Links (+1) ---
-    if (hasText(candidate.getLinkedinUrl()) || hasText(candidate.getPortfolioUrl()) || hasText(candidate.getGithubUrl())) {
-        totalScore += 1;
-    }
+        // --- 2. Contact (5 pts) ---
+        int contactScore = 0;
+        if (hasText(candidate.getPhone())) contactScore += 3;
+        if (hasText(candidate.getLinkedinUrl()) || hasText(candidate.getGithubUrl())) contactScore += 2;
+        totalScore += contactScore;
+        breakdowns.add(new ScoreBreakdown("Contact", contactScore, 5, contactScore == 5 ? "Complete." : "Add Phone/LinkedIn links."));
 
-    // --- 3. Skills (+3) ---
-    List<ExtractedSkill> candidateSkills = extractedSkillRepository.findByCandidateId(candidateId);
-    List<RequiredSkill> requiredSkills = requiredSkillRepository.findByJobPostingId(jobPostingId);
+        // --- 3. Summary (10 pts) ---
+        int summaryScore = (skills.size() > 3 && !workEx.isEmpty()) ? 10 : 5;
+        totalScore += summaryScore;
+        breakdowns.add(new ScoreBreakdown("Summary", summaryScore, 10, "Profile overview check."));
 
-    if (candidateSkills != null && requiredSkills != null) {
-        Set<String> candSkillNames = candidateSkills.stream()
-                .filter(s -> hasText(s.getSkillName()))
-                .map(s -> s.getSkillName().toLowerCase().trim())
-                .collect(Collectors.toSet());
+        // --- 4. Skills (15 pts) ---
+        int skillScore = 0;
+        List<String> skillTips = new ArrayList<>();
+        List<RequiredSkill> required = requiredSkillRepository.findByJobPostingId(jobPostingId);
+        
+        if (required != null && !required.isEmpty() && !skills.isEmpty()) {
+            Set<String> candSkills = skills.stream().map(s -> s.getSkillName().toLowerCase().trim()).collect(Collectors.toSet());
+            long matchCount = required.stream().filter(r -> candSkills.contains(r.getSkillName().toLowerCase().trim())).count();
+            double ratio = (double) matchCount / required.size();
 
-        long matchCount = requiredSkills.stream()
-                .filter(rs -> hasText(rs.getSkillName()) && candSkillNames.contains(rs.getSkillName().toLowerCase().trim()))
-                .count();
+            if (ratio >= 0.8) skillScore += 7;
+            else if (ratio >= 0.5) { skillScore += 4; skillTips.add("Add more matching JD skills."); }
+            else { skillScore += 2; skillTips.add("Low skill match. Tailor resume."); }
 
-        if (matchCount >= 2) totalScore += 3;
-
-        // --- 4. Tech + Tools (+3) ---
-        boolean hasTech = candidateSkills.stream().anyMatch(s -> "TECHNICAL".equalsIgnoreCase(s.getCategory()));
-        boolean hasTool = candidateSkills.stream().anyMatch(s -> "TOOL".equalsIgnoreCase(s.getCategory()));
-        if (hasTech && hasTool) totalScore += 3;
-    }
-
-    // --- 5. Work Experience (+5) ---
-    List<WorkExperience> workExperiences = workExperienceRepository.findByCandidateId(candidateId);
-    if (workExperiences != null && workExperiences.stream().anyMatch(w -> hasText(w.getJobTitle()))) {
-        totalScore += 5;
-    }
-
-    // --- 6. Certifications (+5) ---
-    List<Certification> certifications = certificationRepository.findByCandidateId(candidateId);
-    if (certifications != null && !certifications.isEmpty()) {
-        totalScore += 5;
-    }
-
-    // --- 7. Projects (+5) ---
-    List<Project> projects = projectRepository.findByCandidateId(candidateId);
-    if (projects != null && projects.size() >= 2) {
-        totalScore += 5;
-    }
-
-    // --- 8. Education Bonus (Max 6) ---
-    if (educations != null) {
-        int eduExtraScore = 0;
-        for (Education edu : educations) {
-            int currentEduScore = 0;
-            if (hasText(edu.getInstitution())) currentEduScore += 2;
-            if (edu.getEndYear() != null) currentEduScore += 2;
-            if (edu.getGpa() != null) currentEduScore += 1;
-            if (hasText(edu.getFieldOfStudy())) currentEduScore += 1;
-            eduExtraScore = Math.max(eduExtraScore, currentEduScore);
+            if (skills.stream().anyMatch(s -> "TECHNICAL".equalsIgnoreCase(s.getCategory()))) skillScore += 3;
+            else skillTips.add("Highlight technical hard skills.");
+            
+            if (matchCount > 0) skillScore += 5; // Bonus for relevance
+        } else {
+            skillTips.add("No skills extracted.");
         }
-        totalScore += Math.min(eduExtraScore, 6);
+        int finalSkillScore = Math.min(skillScore, 15);
+        totalScore += finalSkillScore;
+        breakdowns.add(new ScoreBreakdown("Skills", finalSkillScore, 15, finalSkillScore >= 14 ? "Strong match." : String.join(" ", skillTips)));
+
+        // --- 5. Experience (20 pts) ---
+        int expScore = 0;
+        List<String> expTips = new ArrayList<>();
+        if (!workEx.isEmpty()) {
+            expScore += 5; // Has experience
+            if (workEx.stream().anyMatch(w -> w.getDescription() != null && w.getDescription().length() > 50)) expScore += 5;
+            else expTips.add("Expand job descriptions.");
+            
+            if (workEx.stream().anyMatch(w -> w.getDescription() != null && w.getDescription().matches(".*\\d+.*"))) expScore += 10; // Numbers/Metrics
+            else expTips.add("Add quantified achievements (numbers/%) to boost score.");
+        } else {
+            expTips.add("No work experience found.");
+        }
+        totalScore += expScore;
+        breakdowns.add(new ScoreBreakdown("Experience", expScore, 20, expScore >= 18 ? "Strong." : String.join(" ", expTips)));
+
+        // --- 6. Projects (15 pts) ---
+        int projScore = 0;
+        if (!projects.isEmpty()) {
+            projScore += 10;
+            if (projects.size() >= 2) projScore += 5;
+        } 
+        totalScore += projScore;
+        breakdowns.add(new ScoreBreakdown("Projects", projScore, 15, projScore == 0 ? "Add technical projects." : "Good projects."));
+
+        // --- 7. Education (10 pts) ---
+        int eduScore = !educations.isEmpty() ? 10 : 0;
+        totalScore += eduScore;
+        breakdowns.add(new ScoreBreakdown("Education", eduScore, 10, eduScore == 0 ? "Add education." : "Verified."));
+
+        // --- 8. Certifications (5 pts) ---
+        int certScore = !certs.isEmpty() ? 5 : 0;
+        totalScore += certScore;
+        breakdowns.add(new ScoreBreakdown("Certifications", certScore, 5, certScore == 0 ? "Add certifications." : "Verified."));
+
+        // --- 9. Extras (5 pts) ---
+        totalScore += 5; // Baseline for grammar/tone
+        breakdowns.add(new ScoreBreakdown("Tone/Grammar", 5, 5, "Professional tone check."));
+
+        // --- SAVE ---
+        String status = (totalScore >= 75) ? "SHORTLISTED" : (totalScore >= 50) ? "CONSIDER" : "REJECTED";
+
+        Optional<CandidateScore> existing = candidateScoreRepository.findByCandidateAndJobPosting(candidate, jobPosting);
+        CandidateScore scoreEntity = existing.orElse(new CandidateScore());
+        scoreEntity.setCandidate(candidate);
+        scoreEntity.setJobPosting(jobPosting);
+        scoreEntity.setTotalScore(totalScore);
+        scoreEntity.setStatus(status);
+        scoreEntity.setScoredAt(LocalDateTime.now());
+
+        // Manage Breakdowns
+        if(scoreEntity.getScoreBreakdowns() == null) scoreEntity.setScoreBreakdowns(new ArrayList<>());
+        scoreEntity.getScoreBreakdowns().clear();
+        
+        for(ScoreBreakdown b : breakdowns) {
+            b.setCandidateScore(scoreEntity);
+            scoreEntity.getScoreBreakdowns().add(b);
+        }
+
+        candidateScoreRepository.save(scoreEntity);
     }
-
-    // --- Status Calculation ---
-    String status = (totalScore >= 18) ? "SHORTLISTED" : (totalScore >= 15) ? "CONSIDER" : "REJECTED";
-
-    // --- Save Score ---
-    Optional<CandidateScore> existing = candidateScoreRepository.findByCandidateAndJobPosting(candidate, jobPosting);
-    CandidateScore scoreEntity = existing.orElse(new CandidateScore());
-    scoreEntity.setCandidate(candidate);
-    scoreEntity.setJobPosting(jobPosting);
-    scoreEntity.setTotalScore(totalScore);
-    scoreEntity.setStatus(status);
-    scoreEntity.setScoredAt(LocalDateTime.now());
-
-    candidateScoreRepository.save(scoreEntity);
-    System.out.println("✅ Saved Score: " + totalScore + " for Candidate: " + candidate.getName());
-}
 }

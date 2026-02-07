@@ -2,7 +2,10 @@ package com.resumeshortlist.resume_shortlist_backend.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -30,5 +33,7 @@ public class Resume {
     private User uploadedBy;
 
     @OneToOne(mappedBy = "resume", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude             // <--- ADD THIS
+    @EqualsAndHashCode.Exclude
     private Candidate candidate;
 }

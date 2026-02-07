@@ -5,6 +5,7 @@
 package com.resumeshortlist.resume_shortlist_backend.controller;
 
 import com.resumeshortlist.resume_shortlist_backend.dto.DashboardResponse;
+import com.resumeshortlist.resume_shortlist_backend.entity.ScoreBreakdown;
 import com.resumeshortlist.resume_shortlist_backend.repository.CandidateScoreRepository;
 import com.resumeshortlist.resume_shortlist_backend.service.ScoringService;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +62,7 @@ public ResponseEntity<?> triggerScoring(@PathVariable Long jobId, @RequestBody L
 
         // Ab hum service ko jobId aur sirf wahi IDs bhej rahe hain jo abhi upload huye hain
         scoringService.triggerScoring(jobId, candidateIds); 
-        
+
         return ResponseEntity.accepted().body(Map.of(
                 "message", "Scoring started for " + candidateIds.size() + " candidates",
                 "jobId", jobId,
@@ -76,25 +77,42 @@ public ResponseEntity<?> triggerScoring(@PathVariable Long jobId, @RequestBody L
     }
 }
     // 2. Dashboard (Existing - no changes)
+
     @GetMapping("/dashboard/{jobId}")
     public ResponseEntity<List<DashboardResponse>> getDashboard(@PathVariable Long jobId) {
+        // 1. Fetch scores
         var scores = scoreRepo.findByJobPostingIdOrderByTotalScoreDesc(jobId);
 
         List<DashboardResponse> response = new ArrayList<>();
         int rank = 1;
+
         for (var s : scores) {
-            var c = s.getCandidate();
-            var r = c.getResume();
-            response.add(new DashboardResponse(
-                    c.getId(),
-                    c.getName(),
-                    c.getEmail(),
-                    r.getFileName(),
-                    s.getTotalScore(),
-                    rank++,
-                    s.getStatus(),
-                    s.getScoredAt()
-            ));
+            try {
+                var c = s.getCandidate();
+                // SAFETY CHECK: If candidate deleted but score exists
+                if (c == null) continue; 
+
+                var r = c.getResume();
+                String fileName = (r != null) ? r.getFileName() : "Unknown File";
+
+                // SAFETY CHECK: Handle null breakdowns
+                List<ScoreBreakdown> breakdowns = s.getScoreBreakdowns();
+                if(breakdowns == null) breakdowns = new ArrayList<>();
+
+                response.add(new DashboardResponse(
+                        c.getId(),
+                        c.getName() != null ? c.getName() : "Unknown Name",
+                        c.getEmail() != null ? c.getEmail() : "No Email",
+                        fileName,
+                        s.getTotalScore(),
+                        rank++,
+                        s.getStatus(),
+                        s.getScoredAt(),
+                        breakdowns // Passing the detailed list
+                ));
+            } catch (Exception e) {
+                System.err.println("Skipping corrupted record ID " + s.getId());
+            }
         }
         return ResponseEntity.ok(response);
     }
