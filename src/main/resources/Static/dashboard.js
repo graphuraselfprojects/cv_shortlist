@@ -83,27 +83,46 @@ function formatStatus(status) {
 
 function renderCandidates() {
     if (!candidateList || !cardTemplate) return;
+    
     candidateList.innerHTML = '';
     
+    // Check if we have data
     if (rawCandidates.length === 0) {
         if (noResults) noResults.classList.remove('hidden');
         return;
     }
     if (noResults) noResults.classList.add('hidden');
 
+    // Get Filter Inputs
     const searchInput = document.getElementById('searchInput');
     const search = searchInput ? searchInput.value.toLowerCase() : '';
-    const checkedStatuses = Array.from(document.querySelectorAll('input[name="statusFilter"]:checked')).map(cb => cb.value.toUpperCase());
+    
+    const checkedStatuses = Array.from(document.querySelectorAll('input[name="statusFilter"]:checked'))
+        .map(cb => cb.value.toUpperCase());
 
+    // --- FILTER LOGIC ---
     const filtered = rawCandidates.filter(c => {
+        // 1. Search Filter
         if (search && !(c.candidateName || '').toLowerCase().includes(search)) return false;
+
+        // 2. Status Filter (THE FIX)
         if (checkedStatuses.length > 0) {
-            const status = (c.status || 'PENDING').toUpperCase();
+            let status = (c.status || 'PENDING').toUpperCase();
+
+            // NORMALIZE STATUS:
+            // Backend sends "CONSIDER", Frontend filter says "PENDING"
+            // We treat 'CONSIDER', 'PENDING', and NULL as the same category for filtering
+            if (status === 'CONSIDER' || status === 'PENDING' || status === '') {
+                status = 'PENDING';
+            }
+
+            // If the normalized status isn't in the checked boxes, hide it
             if (!checkedStatuses.includes(status)) return false;
         }
         return true;
     });
 
+    // Render Cards
     filtered.forEach(candidate => {
         const clone = cardTemplate.content.cloneNode(true);
         
@@ -122,20 +141,25 @@ function renderCandidates() {
 
         const statusEl = clone.querySelector('.status-text');
         if (statusEl) {
-            const statusText = formatStatus(candidate.status);
-            const statusColor = candidate.status === 'SHORTLISTED' ? 'text-green-400' :
-                               candidate.status === 'REJECTED' ? 'text-red-400' : 'text-yellow-400';
-            statusEl.textContent = statusText;
+            // Visualize Status
+            const rawStatus = (candidate.status || 'Pending').toUpperCase();
+            // Map CONSIDER to Pending for display, or keep as Consider if you prefer
+            const displayStatus = rawStatus === 'SHORTLISTED' ? 'Shortlisted' : 
+                                  rawStatus === 'REJECTED' ? 'Rejected' : 'Pending';
+            
+            const statusColor = rawStatus === 'SHORTLISTED' ? 'text-green-400' :
+                               rawStatus === 'REJECTED' ? 'text-red-400' : 'text-yellow-400';
+            
+            statusEl.textContent = displayStatus;
             statusEl.className = `status-text text-sm font-semibold ${statusColor}`;
         }
 
-        // === INJECT ANALYSIS BUTTON ===
+        // Action Button
         const actionDiv = clone.querySelector('.actions'); 
         if (actionDiv) {
             const viewBtn = document.createElement('button');
             viewBtn.className = "text-xs bg-brand-primary/10 text-brand-primary hover:bg-brand-primary hover:text-white px-3 py-1 rounded-lg transition-colors ml-auto flex items-center";
             viewBtn.innerHTML = '<i data-feather="bar-chart-2" class="w-3 h-3 mr-1"></i> Analysis';
-            // Pass the FULL candidate object (which contains the breakdown list)
             viewBtn.onclick = () => openScoreModal(candidate);
             actionDiv.appendChild(viewBtn);
         }
@@ -145,7 +169,6 @@ function renderCandidates() {
     
     if(typeof feather !== 'undefined') feather.replace();
 }
-
 
 // Single, Consolidated Load Function
 async function loadDashboardStats() {
