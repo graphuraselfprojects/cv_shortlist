@@ -25,16 +25,7 @@ function scrollToTop() {
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// --- Toggle Secret Field for Admin ---
-function toggleSecretField() {
-  const role = document.getElementById('signup-role').value;
-  const secretSection = document.getElementById('admin-secret-section');
-  if (role === 'HR') {
-    secretSection.classList.remove('hidden');
-  } else {
-    secretSection.classList.add('hidden');
-  }
-}
+
 
 // --- Improved Modal Logic ---
 
@@ -94,86 +85,6 @@ function toggleMobileMenu() {
 
 // --- NEW API CALL LOGIC ---
 
-async function handleSignup() {
-  const name = document.getElementById("signup-name").value.trim();
-  const email = document.getElementById("signup-email").value.trim();
-  const password = document.getElementById("signup-password").value.trim();
-  const role = document.getElementById("signup-role").value;
-
-  // VALIDATION [New Change]
-  if (!name || !email || !password) {
-    alert("Please fill in all details to sign up.");
-    return;
-  }
-
-  // --- SECRET KEY VALIDATION ---
-  if (role === "HR") {
-    const secretKey = document.getElementById('signup-secret-key').value.trim();
-    const HR_SECRET_KEY = "SECRET123"; // Change this to your desired key
-    if (secretKey !== HR_SECRET_KEY) {
-      alert("Invalid HR Secret Key. Access Denied.");
-      return;
-    }
-  }
-
-  const requestBody = { name, email, password, role };
-  const apiUrl = `${CONFIG.API_BASE_URL}/register`;
-
-  try {
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody),
-    });
-    
-    if (response.ok) {
-      
-      closePopup();
-      openLogin();
-    } else {
-      const error = await response.text();
-      alert("Registration Failed: " + error);
-    }
-  } catch (error) {
-    console.error("Network Error:", error);
-    alert("An unexpected network error occurred.");
-  }
-}
-
-const loginUrl = `${CONFIG.API_BASE_URL}/login`;
-
-async function handleLogin() {
-  const email = document.getElementById("login-email").value.trim();
-  const password = document.getElementById("login-password").value.trim();
-
-  // VALIDATION [New Change]
-  if (!email || !password) {
-    alert("Please enter both email and password to login.");
-    return;
-  }
-
-  const requestBody = { email, password };
-
-  try {
-    const response = await fetch(loginUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      localStorage.setItem("jwtToken", data.token);
-      window.location.href = "index.html";
-    } else {
-      const errorMessage = await response.text();
-      alert("Login Failed: " + errorMessage);
-    }
-  } catch (error) {
-    console.error("Error:", error);
-    alert("Something went wrong.");
-  }
-}
 
 document.addEventListener('DOMContentLoaded', () => {
     const urlParams = new URLSearchParams(window.location.search);

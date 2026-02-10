@@ -7,16 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (typeof AOS !== 'undefined') AOS.init();
 });
 
-// UI Logic: Show/Hide Secret Key field
-function toggleSecretField() {
-    const role = document.getElementById('signup-role').value;
-    const container = document.getElementById('secret-key-container');
-    if (role === 'HR') {
-        container.classList.remove('hidden');
-    } else {
-        container.classList.add('hidden');
-    }
-}
 
 async function includeHTML(url, elementId) {
     const placeholder = document.getElementById(elementId);
@@ -53,25 +43,20 @@ async function handleLogin() {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value.trim();
     // Assuming you add a role selector in login modal as well
-    const role = document.getElementById('login-role')?.value || 'User'; 
+    const role = document.getElementById("login-role").value;
+    const secretKey = document.getElementById("login-secret-key").value.trim();
 
-    if (!email || !password) {
+    if (!email || !password || !secretKey) {
         alert("Please enter both email and password.");
         return;
     }
 
-    // --- ADMIN HARDCODED CHECK ---
-    const ADMIN_EMAIL = "admin@graphura.com";
-    const ADMIN_PASS = "Admin2025!";
-
-    if (email === ADMIN_EMAIL && password === ADMIN_PASS) {
-        localStorage.setItem('jwtToken', 'admin-session-active');
-        localStorage.setItem('role', 'Admin');
-        localStorage.setItem('userName', 'System Admin');
-        alert("Admin Login Successful");
-        window.location.href = "admin-dashboard.html"; 
+    const HR_SECRET_KEY = "SECRET123"; // Change this to your desired key
+    if (role === "HR" && secretKey !== HR_SECRET_KEY) {
+        alert("Invalid HR Secret Key. Access Denied.");
         return;
     }
+
 
     // --- STANDARD USER/HR LOGIN ---
     try {
@@ -107,7 +92,7 @@ async function handleSignup() {
     const email = document.getElementById('signup-email').value.trim();
     const password = document.getElementById('signup-password').value.trim();
     const role = document.getElementById('signup-role').value;
-    const secretKey = document.getElementById('signup-secret-key').value.trim();
+    const secretKey = document.getElementById("signup-secret-key").value.trim();
 
     if (!name || !email || !password) {
         alert("Please complete all fields to sign up.");
@@ -144,16 +129,7 @@ async function handleSignup() {
     }
 }
 
-// function handleRecruiterClick() {
-//     const token = localStorage.getItem('jwtToken');
-//     const role = localStorage.getItem('role');
-    
-//     if (token && (role === 'HR' || role === 'Admin')) {
-//         window.location.href = "Recruiter.html";
-//     } else {
-//         alert("Access Denied: Only HR/Admin can access the Recruiter Dashboard.");
-//     }
-// }
+
 
 function handleRecruiterClick() {
     const token = localStorage.getItem('jwtToken');
@@ -211,4 +187,3 @@ window.openLogin = openLogin;
 window.openSignup = openSignup;
 window.closePopup = closePopup;
 window.updateNavbarUI = updateNavbarUI;
-window.toggleSecretField = toggleSecretField;
